@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Flair Kitchen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar bg-base-100 shadow-sm fixed z-[9999]">
+    <div class="navbar-start">
+      <a class="btn btn-ghost text-xl text-red-950" href="homepage.html">Flair Kitchen</a>
+    </div>
+    <div class="navbar-center hidden lg:flex">
+      <ul class="menu menu-horizontal px-1">
+        <li class="hover:bg-red-950 hover:text-white rounded mx-3"><a href="homepage.html">Home</a></li>
+        <li class="hover:bg-red-950 hover:text-white rounded mx-3"><a href="about.html">About</a></li>
+        <li class="hover:bg-red-950 hover:text-white rounded mx-3"><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="navbar-end  gap-2 hidden lg:flex">
+      <button class="btn btn-soft btn-primary px-4 border-2 border-red-950 border-opacity-60 hover:bg-red-950 hover:text-white w-20">Login</button>
+      <button class="btn btn-soft btn-primary px-4 border-2 border-red-950 border-opacity-60 hover:bg-red-950 hover:text-white w-20">Register</button>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero min-h-screen bg-cover bg-center" style="background-image: url('/assets/res.jpg');">
+    <div class="absolute inset-0 top-16 bg-red-950/80 z-0"></div>
+    <div class="hero-content text-center z-10">
+      <div class="max-w-2xl text-white">
+        <h1 class="text-5xl font-bold">About Flair Kitchen</h1>
+        <p class="py-6">
+          At Flair Kitchen, we believe in creating memorable dining experiences. From sourcing the finest ingredients to crafting exquisite dishes, our passion for food drives everything we do. Our team of chefs and staff work together to ensure every visit is exceptional.
+        </p>
+        <p class="py-2">
+          We are committed to sustainability, supporting local farmers, and creating dishes that reflect both creativity and quality.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Section -->
+  <div class="bg-slate-200 py-16">
+    <div class="text-center mb-12">
+      <h2 class="text-5xl font-bold text-red-950">Meet Our Team</h2>
+      <p class="text-red-950 py-4">The people behind the magic in the kitchen</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-8">
+      <!-- Example team card -->
+      <div class="card w-80 bg-base-100 shadow-xl">
+        <figure><img src="/assets/chef1.png" alt="Chef John" class="h-full w-full object-cover rounded-t-lg"></figure>
+        <div class="card-body text-center">
+          <h2 class="card-title text-2xl justify-center">Chef John</h2>
+          <p>Head Chef specializing in fine dining and seasonal menus.</p>
+        </div>
+      </div>
+      <div class="card w-80 bg-base-100 shadow-xl">
+        <figure><img src="/assets/chef2.png" alt="Chef Maria" class="h-full w-full object-cover rounded-t-lg"></figure>
+        <div class="card-body text-center">
+          <h2 class="card-title text-2xl justify-center">Chef Maria</h2>
+          <p>Pastry Chef creating delicious desserts and pastries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

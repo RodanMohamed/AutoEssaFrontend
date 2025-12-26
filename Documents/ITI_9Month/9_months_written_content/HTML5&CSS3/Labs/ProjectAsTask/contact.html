@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Flair Kitchen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar bg-base-100 shadow-sm fixed z-[9999]">
+    <div class="navbar-start">
+      <a class="btn btn-ghost text-xl text-red-950" href="homepage.html">Flair Kitchen</a>
+    </div>
+    <div class="navbar-center hidden lg:flex">
+      <ul class="menu menu-horizontal px-1">
+        <li class="hover:bg-red-950 hover:text-white rounded mx-3"><a href="homepage.html">Home</a></li>
+        <li class="hover:bg-red-950 hover:text-white rounded mx-3"><a href="about.html">About</a></li>
+        <li class="hover:bg-red-950 hover:text-white rounded mx-3"><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="navbar-end gap-2 hidden lg:flex">
+      <button class="btn btn-soft btn-primary px-4 border-2 border-orange-950 border-opacity-60 hover:bg-red-950 hover:text-white w-20">Login</button>
+      <button class="btn btn-soft btn-primary px-4 border-2 border-orange-950 border-opacity-60 hover:bg-red-950 hover:text-white w-20">Register</button>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero min-h-screen bg-cover bg-center " style="background-image: url('/assets/intro.png');">
+    <div class="absolute inset-0 top-16 bg-red-950/80 z-0"></div>
+    <div class="hero-content text-center z-10">
+      <div class="max-w-2xl text-white">
+        <h1 class="text-5xl font-bold">Get in Touch</h1>
+        <p class="py-6">
+          We would love to hear from you! Whether you have a question about our menu, want to make a reservation, or just want to say hello, our team is ready to assist.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Form -->
+  <div class="bg-slate-200 py-16">
+    <div class="max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-lg">
+      <h2 class="text-4xl font-bold text-center text-RED-950 mb-6 ">Contact Us</h2>
+      <form class="space-y-4">
+        <div>
+          <label class="block text-red-950 font-semibold mb-2">Name</label>
+          <input type="text" placeholder="Your Name" class="input input-bordered w-full shadow-sm shadow-red-300" />
+        </div>
+        <div>
+          <label class="block text-red-950 font-semibold mb-2">Email</label>
+          <input type="email" placeholder="Your Email" class="input input-bordered w-full shadow-sm shadow-red-300" />
+        </div>
+        <div>
+          <label class="block text-red-950 font-semibold mb-2">Message</label>
+          <textarea placeholder="Your Message" class="textarea textarea-bordered w-full h-32 shadow-sm shadow-red-300"></textarea>
+        </div>
+        <div class="text-center">
+          <button class="btn btn-primary bg-red-950   text-white px-8 hover:bg-red-300 hover:text-red-950">Send Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
