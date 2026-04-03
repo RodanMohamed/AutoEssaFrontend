@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+@import 'tailwindcss';
+@plugin 'daisyui';
+
+@theme {
+	--font-sans: 'Cairo', sans-serif;
+	--font-serif: 'Playfair Display', serif;
+}
+
+html,
+body {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: var(--font-sans);
+}

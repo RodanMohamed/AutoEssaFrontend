@@ -1,0 +1,171 @@
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+
+import { CarCardComponent } from '../../../shared/ui/car-card.component';
+import { CarsApi } from '../data-access/cars.api';
+import { Car } from '../data-access/cars.interface';
+
+@Component({
+  selector: 'app-cars-listing-page',
+  imports: [CarCardComponent, ReactiveFormsModule],
+  template: `
+    <section class="space-y-6">
+      <h1 class="font-serif text-3xl">Cars Listing</h1>
+
+      <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="card border border-base-300 bg-base-100 shadow">
+        <div class="card-body grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <label class="form-control">
+            <span class="label-text">Search</span>
+            <input class="input input-bordered" type="text" formControlName="searchTerm" placeholder="Brand, model..." />
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Listing Type</span>
+            <select class="select select-bordered" formControlName="listingType">
+              <option value="all">All</option>
+              <option value="Rent">Rent</option>
+              <option value="Buy">Buy</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Fuel</span>
+            <select class="select select-bordered" formControlName="fuelType">
+              <option value="all">All</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Hybrid">Hybrid</option>
+              <option value="Electric">Electric</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Sort</span>
+            <select class="select select-bordered" formControlName="sortBy">
+              <option value="default">Default</option>
+              <option value="priceAsc">Price Low to High</option>
+              <option value="priceDesc">Price High to Low</option>
+              <option value="newest">Newest</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Car Type</span>
+            <input class="input input-bordered" type="text" formControlName="carType" placeholder="SUV, Sedan..." />
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Min Price</span>
+            <input class="input input-bordered" type="number" formControlName="minPrice" />
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Max Price</span>
+            <input class="input input-bordered" type="number" formControlName="maxPrice" />
+          </label>
+
+          <div class="flex items-end gap-2">
+            <button class="btn btn-primary" type="submit">Apply</button>
+            <button class="btn btn-outline" type="button" (click)="resetFilters()">Reset</button>
+          </div>
+        </div>
+      </form>
+
+      @if (status()) {
+        <p class="text-sm" [class.text-success]="!isError()" [class.text-error]="isError()">{{ status() }}</p>
+      }
+
+      <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        @for (car of filteredCars(); track car.id) {
+          <app-car-card [car]="car" />
+        }
+      </div>
+    </section>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export default class CarsListingPage {
+  private readonly carsApi = inject(CarsApi);
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly cars = signal<Car[]>([]);
+  protected readonly status = signal('');
+  protected readonly isError = signal(false);
+
+  protected readonly filtersForm = new FormGroup({
+    searchTerm: new FormControl('', { nonNullable: true }),
+    listingType: new FormControl('all', { nonNullable: true }),
+    fuelType: new FormControl('all', { nonNullable: true }),
+    sortBy: new FormControl('default', { nonNullable: true }),
+    carType: new FormControl('', { nonNullable: true }),
+    minPrice: new FormControl<number | null>(null),
+    maxPrice: new FormControl<number | null>(null)
+  });
+
+  protected readonly filteredCars = computed(() => {
+    const form = this.filtersForm.getRawValue();
+    return this.cars().filter((car) => {
+      const matchesType = form.listingType === 'all' || car.listingType === form.listingType;
+      const matchesFuel = form.fuelType === 'all' || car.fuelType === form.fuelType;
+      return matchesType && matchesFuel;
+    });
+  });
+
+  constructor() {
+    const resolvedCars = this.route.snapshot.data['cars'] as Car[] | undefined;
+    if (resolvedCars && resolvedCars.length > 0) {
+      this.cars.set(resolvedCars);
+      this.status.set(`${resolvedCars.length} cars loaded.`);
+      return;
+    }
+
+    this.loadCars();
+  }
+
+  protected applyFilters() {
+    this.loadCars();
+  }
+
+  protected resetFilters() {
+    this.filtersForm.reset({
+      searchTerm: '',
+      listingType: 'all',
+      fuelType: 'all',
+      sortBy: 'default',
+      carType: '',
+      minPrice: null,
+      maxPrice: null
+    });
+    this.loadCars();
+  }
+
+  private loadCars() {
+    this.status.set('');
+    this.isError.set(false);
+
+    const filters = this.filtersForm.getRawValue();
+    this.carsApi
+      .getCars({
+        searchTerm: filters.searchTerm,
+        listingType: filters.listingType,
+        fuelType: filters.fuelType,
+        sortBy: filters.sortBy,
+        carType: filters.carType,
+        minPrice: filters.minPrice ?? undefined,
+        maxPrice: filters.maxPrice ?? undefined,
+        pageNumber: 1,
+        pageSize: 24
+      })
+      .subscribe({
+        next: (cars) => {
+          this.cars.set(cars);
+          this.status.set(`${cars.length} cars loaded.`);
+        },
+        error: () => {
+          this.isError.set(true);
+          this.status.set('Could not load cars right now.');
+        }
+      });
+  }
+}
