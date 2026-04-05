@@ -16,42 +16,42 @@ import { LocaleService } from '../../../core/services/locale.service';
         <div class="card-body grid gap-4 md:grid-cols-2">
           <label class="form-control">
             <span class="label-text">{{ copy().fullNameLabel }}</span>
-            <input class="input input-bordered" formControlName="fullName" type="text" />
+            <input class="input input-bordered ml-2" formControlName="fullName" type="text" />
           </label>
 
           <label class="form-control">
             <span class="label-text">{{ copy().phoneLabel }}</span>
-            <input class="input input-bordered" formControlName="phoneNumber" type="text" />
+            <input class="input input-bordered ml-2" formControlName="phoneNumber" type="text" />
           </label>
 
           <label class="form-control">
             <span class="label-text">{{ copy().brandLabel }}</span>
-            <input class="input input-bordered" formControlName="desiredBrand" type="text" />
+            <input class="input input-bordered ml-2" formControlName="desiredBrand" type="text" />
           </label>
 
           <label class="form-control">
             <span class="label-text">{{ copy().modelLabel }}</span>
-            <input class="input input-bordered" formControlName="desiredModel" type="text" />
+            <input class="input input-bordered ml-2" formControlName="desiredModel" type="text" />
           </label>
 
           <label class="form-control">
             <span class="label-text">{{ copy().yearFromLabel }}</span>
-            <input class="input input-bordered" formControlName="desiredYearFrom" type="number" />
+            <input class="input input-bordered ml-2" formControlName="desiredYearFrom" type="number" />
           </label>
 
           <label class="form-control">
             <span class="label-text">{{ copy().yearToLabel }}</span>
-            <input class="input input-bordered" formControlName="desiredYearTo" type="number" />
+            <input class="input input-bordered ml-2" formControlName="desiredYearTo" type="number" />
           </label>
 
           <label class="form-control md:col-span-2">
             <span class="label-text">{{ copy().budgetLabel }}</span>
-            <input class="input input-bordered" formControlName="budget" type="number" />
+            <input class="input input-bordered ml-2" formControlName="budget" type="number" />
           </label>
 
           <label class="form-control md:col-span-2">
             <span class="label-text">{{ copy().notesLabel }}</span>
-            <textarea class="textarea textarea-bordered" formControlName="notes" rows="4"></textarea>
+            <textarea class="textarea textarea-bordered ml-2" formControlName="notes" rows="4"></textarea>
           </label>
 
           <div class="md:col-span-2">

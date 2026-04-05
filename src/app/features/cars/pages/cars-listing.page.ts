@@ -15,24 +15,24 @@ import { Car } from '../data-access/cars.interface';
       <h1 class="font-serif text-3xl">{{ copy().title }}</h1>
 
       <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="card border border-base-300 bg-base-100 shadow">
-        <div class="card-body grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <label class="form-control">
+        <div class="card-body grid gap-4 md:grid-cols-2 xl:grid-cols-4 listing-filters-grid">
+          <label class="form-control listing-filter-control">
             <span class="label-text">{{ copy().searchLabel }}</span>
-            <input class="input input-bordered" type="text" formControlName="searchTerm" [placeholder]="copy().searchPlaceholder" />
+            <input class="input input-bordered ml-2" type="text" formControlName="searchTerm" [placeholder]="copy().searchPlaceholder" />
           </label>
 
-          <label class="form-control">
+          <label class="form-control listing-filter-control">
             <span class="label-text">{{ copy().listingTypeLabel }}</span>
-            <select class="select select-bordered" formControlName="listingType">
+            <select class="select select-bordered ml-2" formControlName="listingType">
               <option value="all">{{ copy().allOption }}</option>
               <option value="Rent">{{ copy().rentOption }}</option>
               <option value="Buy">{{ copy().buyOption }}</option>
             </select>
           </label>
 
-          <label class="form-control">
+          <label class="form-control listing-filter-control">
             <span class="label-text">{{ copy().fuelLabel }}</span>
-            <select class="select select-bordered" formControlName="fuelType">
+            <select class="select select-bordered ml-2" formControlName="fuelType">
               <option value="all">{{ copy().allOption }}</option>
               <option value="Petrol">Petrol</option>
               <option value="Diesel">Diesel</option>
@@ -41,9 +41,9 @@ import { Car } from '../data-access/cars.interface';
             </select>
           </label>
 
-          <label class="form-control">
+          <label class="form-control listing-filter-control">
             <span class="label-text">{{ copy().sortLabel }}</span>
-            <select class="select select-bordered" formControlName="sortBy">
+            <select class="select select-bordered ml-2" formControlName="sortBy">
               <option value="default">{{ copy().defaultOption }}</option>
               <option value="priceAsc">{{ copy().priceAscOption }}</option>
               <option value="priceDesc">{{ copy().priceDescOption }}</option>
@@ -51,19 +51,19 @@ import { Car } from '../data-access/cars.interface';
             </select>
           </label>
 
-          <label class="form-control">
+          <label class="form-control listing-filter-control">
             <span class="label-text">{{ copy().carTypeLabel }}</span>
-            <input class="input input-bordered" type="text" formControlName="carType" [placeholder]="copy().carTypePlaceholder" />
+            <input class="input input-bordered ml-2" type="text" formControlName="carType" [placeholder]="copy().carTypePlaceholder" />
           </label>
 
-          <label class="form-control">
+          <label class="form-control listing-filter-control">
             <span class="label-text">{{ copy().minPriceLabel }}</span>
-            <input class="input input-bordered" type="number" formControlName="minPrice" />
+            <input class="input input-bordered ml-2" type="number" formControlName="minPrice" />
           </label>
 
-          <label class="form-control">
+          <label class="form-control listing-filter-control">
             <span class="label-text">{{ copy().maxPriceLabel }}</span>
-            <input class="input input-bordered" type="number" formControlName="maxPrice" />
+            <input class="input input-bordered ml-2" type="number" formControlName="maxPrice" />
           </label>
 
           <div class="flex items-end gap-2">
@@ -83,6 +83,11 @@ import { Car } from '../data-access/cars.interface';
         }
       </div>
     </section>
+  `,
+  styles: `
+    .listing-filter-control .label-text {
+      margin-bottom: 0.45rem;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })

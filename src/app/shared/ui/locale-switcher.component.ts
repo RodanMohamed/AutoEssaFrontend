@@ -5,10 +5,25 @@ import { LocaleService } from '../../core/services/locale.service';
 @Component({
   selector: 'app-locale-switcher',
   template: `
-    <div class="join border border-base-300 bg-base-100 shadow-sm">
-      <button class="btn btn-sm join-item" type="button" [class.btn-primary]="isEnglish()" (click)="setEnglish()">EN</button>
-      <button class="btn btn-sm join-item" type="button" [class.btn-primary]="isArabic()" (click)="setArabic()">AR</button>
+    <div class="locale-switcher join border border-base-300 bg-base-100 shadow-sm">
+      <button class="btn btn-xs join-item" type="button" [class.btn-primary]="isEnglish()" (click)="setEnglish()">EN</button>
+      <button class="btn btn-xs join-item" type="button" [class.btn-primary]="isArabic()" (click)="setArabic()">AR</button>
     </div>
+  `,
+  styles: `
+    .locale-switcher {
+      border-radius: 0.7rem;
+      overflow: hidden;
+    }
+
+    .locale-switcher .btn {
+      min-height: 2rem;
+      height: 2rem;
+      padding-inline: 0.55rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border-radius: 0;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })

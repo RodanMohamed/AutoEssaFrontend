@@ -12,11 +12,11 @@ import { LocaleService } from '../../../core/services/locale.service';
   selector: 'app-forgot-password-page',
   imports: [ReactiveFormsModule, RouterLink, MatInputModule, MatButtonModule],
   template: `
-    <h2 class="mb-4 text-center text-2xl font-semibold">{{ copy().title }}</h2>
-    <p class="mb-4 text-center text-sm text-base-content/80">{{ copy().description }}</p>
+    <h2 class="auth-title mb-3 text-center text-2xl font-semibold">{{ copy().title }}</h2>
+    <p class="auth-description mb-5 text-center text-sm">{{ copy().description }}</p>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
-      <mat-form-field appearance="outline" class="w-full">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+      <mat-form-field appearance="outline" class="auth-field w-full">
         <mat-label>{{ copy().emailLabel }}</mat-label>
         <input matInput formControlName="email" type="email" />
         @if (form.controls.email.hasError('required')) {
@@ -27,7 +27,7 @@ import { LocaleService } from '../../../core/services/locale.service';
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" class="auth-field w-full">
         <mat-label>{{ copy().newPasswordLabel }}</mat-label>
         <input matInput formControlName="newPassword" type="password" />
         @if (form.controls.newPassword.hasError('required')) {
@@ -38,7 +38,7 @@ import { LocaleService } from '../../../core/services/locale.service';
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" class="auth-field w-full">
         <mat-label>{{ copy().confirmPasswordLabel }}</mat-label>
         <input matInput formControlName="confirmPassword" type="password" />
         @if (form.controls.confirmPassword.hasError('required')) {
@@ -49,18 +49,104 @@ import { LocaleService } from '../../../core/services/locale.service';
         }
       </mat-form-field>
 
-      <button mat-flat-button color="primary" class="w-full" type="submit" [disabled]="isSubmitDisabled()">
+      <button mat-flat-button color="primary" class="auth-submit w-full" type="submit" [disabled]="isSubmitDisabled()">
         {{ copy().submitButton }}
       </button>
     </form>
 
     @if (status()) {
-      <p class="mt-3 text-sm" [class.text-success]="!isError()" [class.text-error]="isError()">{{ status() }}</p>
+      <p class="status-chip mt-4 text-sm" [class.status-success]="!isError()" [class.status-error]="isError()">{{ status() }}</p>
     }
 
-    <p class="mt-4 text-center text-sm">
-      {{ copy().backTo }} <a routerLink="/auth/login" class="link link-primary">{{ copy().login }}</a>
+    <p class="mt-5 text-center text-sm">
+      {{ copy().backTo }} <a routerLink="/auth/login" class="auth-link">{{ copy().login }}</a>
     </p>
+  `,
+  styles: `
+    .auth-title {
+      color: #5a3b22;
+      letter-spacing: 0.01em;
+    }
+
+    .auth-description {
+      color: #77583d;
+      line-height: 1.6;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .auth-field {
+      margin-bottom: 0.2rem;
+    }
+
+    .auth-submit {
+      margin-top: 0.45rem;
+      min-height: 2.9rem;
+      border-radius: 0.9rem;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+    }
+
+    .status-chip {
+      border-radius: 0.7rem;
+      padding: 0.55rem 0.75rem;
+    }
+
+    .status-success {
+      background: #edf7eb;
+      color: #2f6b2f;
+    }
+
+    .status-error {
+      background: #fbeae8;
+      color: #a33d33;
+    }
+
+    .auth-link {
+      color: #95653a;
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-color: rgba(149, 101, 58, 0.45);
+      text-underline-offset: 0.24rem;
+    }
+
+    :host ::ng-deep .auth-field .mat-mdc-text-field-wrapper {
+      border-radius: 0.85rem;
+      background: rgba(255, 248, 238, 0.82);
+    }
+
+    :host ::ng-deep .auth-field .mdc-notched-outline__leading,
+    :host ::ng-deep .auth-field .mdc-notched-outline__notch,
+    :host ::ng-deep .auth-field .mdc-notched-outline__trailing {
+      border-color: #ceb192;
+    }
+
+    :host ::ng-deep .auth-field.mat-focused .mdc-notched-outline__leading,
+    :host ::ng-deep .auth-field.mat-focused .mdc-notched-outline__notch,
+    :host ::ng-deep .auth-field.mat-focused .mdc-notched-outline__trailing {
+      border-color: #b68456;
+      border-width: 2px;
+    }
+
+    :host ::ng-deep .auth-field .mdc-floating-label,
+    :host ::ng-deep .auth-field .mat-mdc-input-element,
+    :host ::ng-deep .auth-field .mat-mdc-form-field-error {
+      color: #5f3f24;
+    }
+
+    :host ::ng-deep .auth-submit {
+      background: linear-gradient(135deg, #c89261 0%, #b57a4a 100%);
+      color: #fff8ef;
+      box-shadow: 0 12px 25px rgba(151, 97, 51, 0.28);
+    }
+
+    :host ::ng-deep .auth-submit:disabled {
+      opacity: 0.58;
+      box-shadow: none;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })

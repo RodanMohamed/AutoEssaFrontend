@@ -20,38 +20,6 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
         [ctaText]="homeContent().heroCtaText"
       />
 
-      <section class="relative overflow-hidden rounded-4xl border border-base-300 bg-base-100 shadow-xl">
-        <div class="absolute inset-0 bg-linear-to-br from-primary/10 via-base-100 to-secondary/10"></div>
-        <div class="relative grid gap-6 p-6 md:p-8 xl:grid-cols-[1fr_0.9fr] xl:items-center">
-          <div class="space-y-4">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="badge badge-primary badge-outline">{{ copy().searchBadge }}</span>
-              <span class="badge badge-outline">{{ copy().fastSearchBadge }}</span>
-            </div>
-            <div class="space-y-2">
-              <h2 class="font-serif text-3xl md:text-4xl">{{ copy().searchTitle }}</h2>
-              <p class="max-w-2xl text-base-content/75">{{ copy().searchDescription }}</p>
-            </div>
-            <div class="grid gap-3 sm:grid-cols-3">
-              <div class="rounded-2xl border border-base-300 bg-base-100/90 p-4">
-                <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().searchStatOneLabel }}</p>
-                <p class="mt-1 text-2xl font-semibold text-primary">{{ copy().searchStatOneValue }}</p>
-              </div>
-              <div class="rounded-2xl border border-base-300 bg-base-100/90 p-4">
-                <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().searchStatTwoLabel }}</p>
-                <p class="mt-1 text-2xl font-semibold text-primary">{{ copy().searchStatTwoValue }}</p>
-              </div>
-              <div class="rounded-2xl border border-base-300 bg-base-100/90 p-4">
-                <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().searchStatThreeLabel }}</p>
-                <p class="mt-1 text-2xl font-semibold text-primary">{{ copy().searchStatThreeValue }}</p>
-              </div>
-            </div>
-          </div>
-
-          <app-quick-search (searchChanged)="onSearch($event)" />
-        </div>
-      </section>
-
       <section class="grid gap-5 xl:grid-cols-[0.92fr_1.08fr]">
         <article class="rounded-4xl border border-base-300 bg-base-100 shadow-lg">
           <div class="space-y-5 p-6 md:p-8">
@@ -94,7 +62,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
             </div>
           </article>
 
-          <article class="rounded-4xl border border-base-300 bg-base-100 shadow-lg md:col-span-2 xl:col-span-1">
+          <article class="rounded-4xl border border-base-300 bg-base-100 shadow-lg">
             <div class="space-y-4 p-6 md:p-8">
               <div class="flex items-center justify-between gap-3">
                 <h3 class="font-serif text-2xl">{{ copy().testimonialsTitle }}</h3>
@@ -117,6 +85,10 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
             </div>
           </article>
         </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-3xl rounded-3xl border border-base-300 bg-base-100/85 p-4 shadow-lg md:p-6">
+        <app-quick-search (searchChanged)="onSearch($event)" />
       </section>
 
       <section id="featured" class="space-y-4">

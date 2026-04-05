@@ -6,25 +6,25 @@ import { LocaleService } from '../../../core/services/locale.service';
   selector: 'app-about-page',
   template: `
     <section class="space-y-6">
-      <article class="card overflow-hidden border border-base-300 bg-base-100 shadow-xl">
-        <div class="bg-linear-to-br from-primary/15 via-base-100 to-secondary/15 p-6 md:p-10">
+      <article class="about-hero card overflow-hidden border border-base-300 bg-base-100 shadow-xl">
+        <div class="about-hero-surface p-6 md:p-10">
           <div class="grid gap-8 xl:grid-cols-[1.2fr_0.8fr] xl:items-center">
             <div class="space-y-4">
-              <span class="badge badge-primary badge-outline">{{ copy().eyebrow }}</span>
-              <h1 class="font-serif text-4xl leading-tight md:text-5xl">{{ copy().title }}</h1>
-              <p class="max-w-2xl text-base-content/75">{{ copy().paragraphOne }}</p>
+              <span class="badge badge-primary badge-outline about-badge">{{ copy().eyebrow }}</span>
+              <h1 class="about-title font-serif text-4xl leading-tight md:text-5xl">{{ copy().title }}</h1>
+              <p class="about-body max-w-2xl text-base-content/75">{{ copy().paragraphOne }}</p>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-              <div class="rounded-2xl border border-base-300 bg-base-100/80 p-4">
+              <div class="about-stat rounded-2xl border border-base-300 bg-base-100/80 p-4">
                 <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">{{ copy().statOneLabel }}</p>
                 <p class="mt-1 text-2xl font-semibold text-primary">{{ copy().statOneValue }}</p>
               </div>
-              <div class="rounded-2xl border border-base-300 bg-base-100/80 p-4">
+              <div class="about-stat rounded-2xl border border-base-300 bg-base-100/80 p-4">
                 <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">{{ copy().statTwoLabel }}</p>
                 <p class="mt-1 text-2xl font-semibold text-primary">{{ copy().statTwoValue }}</p>
               </div>
-              <div class="rounded-2xl border border-base-300 bg-base-100/80 p-4">
+              <div class="about-stat rounded-2xl border border-base-300 bg-base-100/80 p-4">
                 <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">{{ copy().statThreeLabel }}</p>
                 <p class="mt-1 text-2xl font-semibold text-primary">{{ copy().statThreeValue }}</p>
               </div>
@@ -34,14 +34,14 @@ import { LocaleService } from '../../../core/services/locale.service';
       </article>
 
       <section class="grid gap-4 lg:grid-cols-2">
-        <article class="card border border-base-300 bg-base-100 shadow">
+        <article class="about-info card border border-base-300 bg-base-100 shadow">
           <div class="card-body space-y-3">
             <h2 class="card-title">{{ copy().missionTitle }}</h2>
             <p>{{ copy().paragraphTwo }}</p>
           </div>
         </article>
 
-        <article class="card border border-base-300 bg-base-100 shadow">
+        <article class="about-info card border border-base-300 bg-base-100 shadow">
           <div class="card-body space-y-3">
             <h2 class="card-title">{{ copy().trustTitle }}</h2>
             <ul class="space-y-2 text-sm text-base-content/80">
@@ -53,6 +53,44 @@ import { LocaleService } from '../../../core/services/locale.service';
         </article>
       </section>
     </section>
+  `,
+  styles: `
+    .about-hero {
+      border-color: #d4b28d;
+      box-shadow: 0 28px 58px rgba(124, 80, 45, 0.21);
+    }
+
+    .about-hero-surface {
+      background:
+        radial-gradient(circle at 14% 18%, rgba(255, 248, 238, 0.84), transparent 40%),
+        radial-gradient(circle at 86% 84%, rgba(199, 148, 97, 0.2), transparent 44%),
+        linear-gradient(150deg, rgba(252, 245, 235, 0.98) 0%, rgba(243, 225, 203, 0.98) 56%, rgba(233, 206, 176, 0.95) 100%);
+    }
+
+    .about-badge {
+      border-color: #c99d71;
+      color: #885f38;
+      background: rgba(255, 250, 242, 0.9);
+    }
+
+    .about-title {
+      color: #573720;
+    }
+
+    .about-body {
+      color: #6c4b30;
+      line-height: 1.75;
+    }
+
+    .about-stat {
+      border-color: #d8b792;
+      background: linear-gradient(180deg, rgba(255, 251, 245, 0.93) 0%, rgba(247, 234, 217, 0.93) 100%);
+    }
+
+    .about-info {
+      border-color: #d7b996;
+      background: linear-gradient(180deg, rgba(255, 251, 245, 0.96) 0%, rgba(247, 236, 222, 0.96) 100%);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })

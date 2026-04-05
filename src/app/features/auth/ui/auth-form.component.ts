@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { LocaleService } from '../../../core/services/locale.service';
 
 import {
+  AUTH_EMAIL_VALIDATORS,
   AUTH_EMAIL_STRICT_VALIDATORS,
   AUTH_PASSWORD_VALIDATORS,
   AUTH_PHONE_VALIDATORS,
@@ -27,9 +28,9 @@ export interface AuthFormValue {
   selector: 'app-auth-form',
   imports: [ReactiveFormsModule, MatInputModule, MatButtonModule],
   template: `
-    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
       @if (isRegisterMode()) {
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="auth-field w-full">
           <mat-label>{{ copy().usernameLabel }}</mat-label>
           <input matInput formControlName="username" type="text" />
           @if (form.controls.username.hasError('required')) {
@@ -42,7 +43,7 @@ export interface AuthFormValue {
       }
 
       @if (isRegisterMode()) {
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="auth-field w-full">
           <mat-label>{{ copy().fullNameLabel }}</mat-label>
           <input matInput formControlName="fullName" type="text" />
           @if (form.controls.fullName.hasError('required')) {
@@ -52,7 +53,7 @@ export interface AuthFormValue {
       }
 
       @if (isRegisterMode()) {
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="auth-field w-full">
           <mat-label>{{ copy().phoneLabel }}</mat-label>
           <input matInput formControlName="phoneNumber" type="text" placeholder="+2010xxxxxxx" />
           @if (form.controls.phoneNumber.hasError('required')) {
@@ -64,7 +65,7 @@ export interface AuthFormValue {
         </mat-form-field>
       }
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" class="auth-field w-full">
         <mat-label>{{ copy().emailLabel }}</mat-label>
         <input matInput formControlName="email" type="email" />
         @if (form.controls.email.hasError('required')) {
@@ -75,7 +76,7 @@ export interface AuthFormValue {
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" class="auth-field w-full">
         <mat-label>{{ copy().passwordLabel }}</mat-label>
         <input matInput formControlName="password" type="password" />
         @if (form.controls.password.hasError('required')) {
@@ -87,7 +88,7 @@ export interface AuthFormValue {
       </mat-form-field>
 
       @if (isRegisterMode()) {
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="auth-field w-full">
           <mat-label>{{ copy().confirmPasswordLabel }}</mat-label>
           <input matInput formControlName="confirmPassword" type="password" />
           @if (form.controls.confirmPassword.hasError('required')) {
@@ -99,10 +100,63 @@ export interface AuthFormValue {
         </mat-form-field>
       }
 
-      <button mat-flat-button color="primary" class="w-full" type="submit">
+      <button mat-flat-button color="primary" class="auth-submit w-full" type="submit" [disabled]="isSubmitDisabled()">
         {{ submitLabel() }}
       </button>
     </form>
+  `,
+  styles: `
+    .auth-form {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .auth-field {
+      margin-bottom: 0.2rem;
+    }
+
+    .auth-submit {
+      margin-top: 0.45rem;
+      min-height: 2.9rem;
+      border-radius: 0.9rem;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+    }
+
+    :host ::ng-deep .auth-field .mat-mdc-text-field-wrapper {
+      border-radius: 0.85rem;
+      background: rgba(255, 248, 238, 0.82);
+    }
+
+    :host ::ng-deep .auth-field .mdc-notched-outline__leading,
+    :host ::ng-deep .auth-field .mdc-notched-outline__notch,
+    :host ::ng-deep .auth-field .mdc-notched-outline__trailing {
+      border-color: #ceb192;
+    }
+
+    :host ::ng-deep .auth-field.mat-focused .mdc-notched-outline__leading,
+    :host ::ng-deep .auth-field.mat-focused .mdc-notched-outline__notch,
+    :host ::ng-deep .auth-field.mat-focused .mdc-notched-outline__trailing {
+      border-color: #b68456;
+      border-width: 2px;
+    }
+
+    :host ::ng-deep .auth-field .mdc-floating-label,
+    :host ::ng-deep .auth-field .mat-mdc-input-element,
+    :host ::ng-deep .auth-field .mat-mdc-form-field-error {
+      color: #5f3f24;
+    }
+
+    :host ::ng-deep .auth-submit {
+      background: linear-gradient(135deg, #c89261 0%, #b57a4a 100%);
+      color: #fff8ef;
+      box-shadow: 0 12px 25px rgba(151, 97, 51, 0.28);
+    }
+
+    :host ::ng-deep .auth-submit:disabled {
+      opacity: 0.58;
+      box-shadow: none;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -111,6 +165,12 @@ export class AuthFormComponent {
 
   mode = input.required<AuthFormMode>();
   readonly submitted = output<AuthFormValue>();
+
+  constructor() {
+    effect(() => {
+      this.applyModeValidators(this.mode());
+    });
+  }
 
   protected readonly copy = computed(() =>
     this.localeService.locale() === 'ar'
@@ -218,5 +278,43 @@ export class AuthFormComponent {
       password: value.password,
       confirmPassword: value.confirmPassword
     });
+  }
+
+  private applyModeValidators(mode: AuthFormMode) {
+    const usernameControl = this.form.controls.username;
+    const fullNameControl = this.form.controls.fullName;
+    const phoneControl = this.form.controls.phoneNumber;
+    const emailControl = this.form.controls.email;
+    const passwordControl = this.form.controls.password;
+    const confirmPasswordControl = this.form.controls.confirmPassword;
+
+    if (mode === 'register') {
+      usernameControl.enable({ emitEvent: false });
+      fullNameControl.enable({ emitEvent: false });
+      phoneControl.enable({ emitEvent: false });
+      confirmPasswordControl.enable({ emitEvent: false });
+
+      usernameControl.setValidators(AUTH_USERNAME_VALIDATORS);
+      fullNameControl.setValidators([Validators.required]);
+      phoneControl.setValidators(AUTH_PHONE_VALIDATORS);
+      emailControl.setValidators(AUTH_EMAIL_STRICT_VALIDATORS);
+      passwordControl.setValidators(AUTH_PASSWORD_VALIDATORS);
+      confirmPasswordControl.setValidators([Validators.required]);
+    } else {
+      usernameControl.disable({ emitEvent: false });
+      fullNameControl.disable({ emitEvent: false });
+      phoneControl.disable({ emitEvent: false });
+      confirmPasswordControl.disable({ emitEvent: false });
+
+      emailControl.setValidators(AUTH_EMAIL_VALIDATORS);
+      passwordControl.setValidators([Validators.required]);
+    }
+
+    usernameControl.updateValueAndValidity({ emitEvent: false });
+    fullNameControl.updateValueAndValidity({ emitEvent: false });
+    phoneControl.updateValueAndValidity({ emitEvent: false });
+    emailControl.updateValueAndValidity({ emitEvent: false });
+    passwordControl.updateValueAndValidity({ emitEvent: false });
+    confirmPasswordControl.updateValueAndValidity({ emitEvent: false });
   }
 }

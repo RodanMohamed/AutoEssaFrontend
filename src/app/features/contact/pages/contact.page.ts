@@ -40,7 +40,7 @@ import { BranchLocationsService } from '../../../core/services/branch-locations.
               <p class="font-medium">{{ contactInfo().workingHours }}</p>
             </div>
 
-            <a class="btn btn-success w-full" target="_blank" rel="noopener" [href]="whatsAppLink()">Chat On WhatsApp</a>
+            <a class="btn btn-success bg-green-900 text-white w-full" target="_blank" rel="noopener" [href]="whatsAppLink()">Chat On WhatsApp</a>
 
             <div class="space-y-2">
               <p class="text-sm text-base-content/65">Branches</p>
@@ -49,8 +49,8 @@ import { BranchLocationsService } from '../../../core/services/branch-locations.
                   <button
                     class="btn btn-sm"
                     type="button"
-                    [class.btn-primary]="branch.id === activeBranch().id"
-                    [class.btn-outline]="branch.id !== activeBranch().id"
+                    [class.btn-primary]="branch.id === activeBranchId()"
+                    [class.btn-outline]="branch.id !== activeBranchId()"
                     (click)="chooseBranch(branch.id)">
                     {{ branch.name }}
                   </button>
@@ -134,11 +134,8 @@ export default class ContactPage {
     workingHours: 'Daily 10:00 AM - 10:00 PM'
   });
   protected readonly branches = this.branchService.branches;
-  protected readonly activeBranchId = signal('');
-  protected readonly activeBranch = computed(() => {
-    const selected = this.branches().find((item) => item.id === this.activeBranchId());
-    return selected ?? this.branchService.getActiveBranch();
-  });
+  protected readonly activeBranch = computed(() => this.branchService.getActiveBranch());
+  protected readonly activeBranchId = computed(() => this.activeBranch().id);
 
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[A-Za-z\u0600-\u06FF\s]{2,60}$/)] }),
@@ -148,11 +145,10 @@ export default class ContactPage {
 
   constructor() {
     this.contactApi.getContactInfo().subscribe((value) => this.contactInfo.set(value));
-    this.activeBranchId.set(this.branchService.getActiveBranch().id);
   }
 
   protected chooseBranch(id: string) {
-    this.activeBranchId.set(id);
+    this.branchService.setActiveBranch(String(id));
   }
 
   protected whatsAppLink(): string {
