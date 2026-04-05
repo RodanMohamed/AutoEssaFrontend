@@ -86,6 +86,13 @@ export function extractApiErrorMessage(error: unknown, fallback: string): string
 		if (typeof payload === 'object' && payload !== null) {
 			const record = payload as Record<string, unknown>;
 			const validationErrors = record['errors'];
+			if (Array.isArray(validationErrors)) {
+				const first = validationErrors.find((item) => typeof item === 'string' && item.trim().length > 0);
+				if (typeof first === 'string') {
+					return first;
+				}
+			}
+
 			if (typeof validationErrors === 'object' && validationErrors !== null) {
 				const entries = Object.entries(validationErrors as Record<string, unknown>);
 				for (const [, value] of entries) {
