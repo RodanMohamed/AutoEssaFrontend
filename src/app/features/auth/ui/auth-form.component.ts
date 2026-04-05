@@ -193,8 +193,18 @@ export class AuthFormComponent {
     return this.form.controls.email.invalid || this.form.controls.password.invalid;
   });
 
+  private isLoginFormValid(): boolean {
+    return this.form.controls.email.valid && this.form.controls.password.valid;
+  }
+
+  private isRegisterFormValid(): boolean {
+    return this.form.valid && !this.hasPasswordMismatch();
+  }
+
   protected submit() {
-    if (this.form.invalid || this.hasPasswordMismatch()) {
+    const isValid = this.mode() === 'register' ? this.isRegisterFormValid() : this.isLoginFormValid();
+
+    if (!isValid) {
       this.form.markAllAsTouched();
       return;
     }

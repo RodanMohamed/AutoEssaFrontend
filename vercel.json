@@ -1,0 +1,17 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/autoessa-frontend/browser",
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "http://www.autoessabackend.somee.com/api/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/.*",
+      "dest": "/index.html"
+    }
+  ]
+}
