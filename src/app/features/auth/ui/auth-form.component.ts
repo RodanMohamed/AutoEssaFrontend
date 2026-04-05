@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+
+import { LocaleService } from '../../../core/services/locale.service';
 
 import {
   AUTH_EMAIL_STRICT_VALIDATORS,
@@ -28,76 +30,76 @@ export interface AuthFormValue {
     <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
       @if (isRegisterMode()) {
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Username</mat-label>
+          <mat-label>{{ copy().usernameLabel }}</mat-label>
           <input matInput formControlName="username" type="text" />
           @if (form.controls.username.hasError('required')) {
-            <mat-error>Username is required.</mat-error>
+            <mat-error>{{ copy().usernameRequired }}</mat-error>
           }
           @if (form.controls.username.hasError('pattern')) {
-            <mat-error>Username must contain letters or underscore only, no numbers.</mat-error>
+            <mat-error>{{ copy().usernamePattern }}</mat-error>
           }
         </mat-form-field>
       }
 
       @if (isRegisterMode()) {
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Full name</mat-label>
+          <mat-label>{{ copy().fullNameLabel }}</mat-label>
           <input matInput formControlName="fullName" type="text" />
           @if (form.controls.fullName.hasError('required')) {
-            <mat-error>Full name is required.</mat-error>
+            <mat-error>{{ copy().fullNameRequired }}</mat-error>
           }
         </mat-form-field>
       }
 
       @if (isRegisterMode()) {
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Phone number</mat-label>
+          <mat-label>{{ copy().phoneLabel }}</mat-label>
           <input matInput formControlName="phoneNumber" type="text" placeholder="+2010xxxxxxx" />
           @if (form.controls.phoneNumber.hasError('required')) {
-            <mat-error>Phone number is required.</mat-error>
+            <mat-error>{{ copy().phoneRequired }}</mat-error>
           }
           @if (form.controls.phoneNumber.hasError('pattern')) {
-            <mat-error>Please enter a valid Egyptian phone format.</mat-error>
+            <mat-error>{{ copy().phonePattern }}</mat-error>
           }
         </mat-form-field>
       }
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Email</mat-label>
+        <mat-label>{{ copy().emailLabel }}</mat-label>
         <input matInput formControlName="email" type="email" />
         @if (form.controls.email.hasError('required')) {
-          <mat-error>Email is required.</mat-error>
+          <mat-error>{{ copy().emailRequired }}</mat-error>
         }
         @if (form.controls.email.hasError('email') || form.controls.email.hasError('pattern')) {
-          <mat-error>Please enter a valid email format.</mat-error>
+          <mat-error>{{ copy().emailPattern }}</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Password</mat-label>
+        <mat-label>{{ copy().passwordLabel }}</mat-label>
         <input matInput formControlName="password" type="password" />
         @if (form.controls.password.hasError('required')) {
-          <mat-error>Password is required.</mat-error>
+          <mat-error>{{ copy().passwordRequired }}</mat-error>
         }
         @if (form.controls.password.hasError('pattern')) {
-          <mat-error>Password must be at least 8 chars with upper, lower, number, and symbol.</mat-error>
+          <mat-error>{{ copy().passwordPattern }}</mat-error>
         }
       </mat-form-field>
 
       @if (isRegisterMode()) {
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Confirm password</mat-label>
+          <mat-label>{{ copy().confirmPasswordLabel }}</mat-label>
           <input matInput formControlName="confirmPassword" type="password" />
           @if (form.controls.confirmPassword.hasError('required')) {
-            <mat-error>Confirm password is required.</mat-error>
+            <mat-error>{{ copy().confirmPasswordRequired }}</mat-error>
           }
           @if (hasPasswordMismatch()) {
-            <mat-error>Passwords do not match.</mat-error>
+            <mat-error>{{ copy().passwordMismatch }}</mat-error>
           }
         </mat-form-field>
       }
 
-      <button mat-flat-button color="primary" class="w-full" type="submit" [disabled]="isSubmitDisabled()">
+      <button mat-flat-button color="primary" class="w-full" type="submit">
         {{ submitLabel() }}
       </button>
     </form>
@@ -105,10 +107,58 @@ export interface AuthFormValue {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AuthFormComponent {
+  private readonly localeService = inject(LocaleService);
+
   mode = input.required<AuthFormMode>();
   readonly submitted = output<AuthFormValue>();
 
-  protected readonly submitLabel = computed(() => (this.mode() === 'register' ? 'Register' : 'Login'));
+  protected readonly copy = computed(() =>
+    this.localeService.locale() === 'ar'
+      ? {
+          usernameLabel: 'اسم المستخدم',
+          usernameRequired: 'اسم المستخدم مطلوب.',
+          usernamePattern: 'يجب أن يحتوي اسم المستخدم على حروف أو شرطة سفلية فقط بدون أرقام.',
+          fullNameLabel: 'الاسم الكامل',
+          fullNameRequired: 'الاسم الكامل مطلوب.',
+          phoneLabel: 'رقم الهاتف',
+          phoneRequired: 'رقم الهاتف مطلوب.',
+          phonePattern: 'يرجى إدخال رقم هاتف مصري صحيح.',
+          emailLabel: 'البريد الإلكتروني',
+          emailRequired: 'البريد الإلكتروني مطلوب.',
+          emailPattern: 'يرجى إدخال صيغة بريد إلكتروني صحيحة.',
+          passwordLabel: 'كلمة المرور',
+          passwordRequired: 'كلمة المرور مطلوبة.',
+          passwordPattern: 'يجب أن تكون كلمة المرور 8 أحرف على الأقل وتحتوي على حرف كبير وصغير ورقم ورمز.',
+          confirmPasswordLabel: 'تأكيد كلمة المرور',
+          confirmPasswordRequired: 'تأكيد كلمة المرور مطلوب.',
+          passwordMismatch: 'كلمتا المرور غير متطابقتين.',
+          login: 'تسجيل الدخول',
+          register: 'إنشاء حساب'
+        }
+      : {
+          usernameLabel: 'Username',
+          usernameRequired: 'Username is required.',
+          usernamePattern: 'Username must contain letters or underscore only, no numbers.',
+          fullNameLabel: 'Full name',
+          fullNameRequired: 'Full name is required.',
+          phoneLabel: 'Phone number',
+          phoneRequired: 'Phone number is required.',
+          phonePattern: 'Please enter a valid Egyptian phone format.',
+          emailLabel: 'Email',
+          emailRequired: 'Email is required.',
+          emailPattern: 'Please enter a valid email format.',
+          passwordLabel: 'Password',
+          passwordRequired: 'Password is required.',
+          passwordPattern: 'Password must be at least 8 chars with upper, lower, number, and symbol.',
+          confirmPasswordLabel: 'Confirm password',
+          confirmPasswordRequired: 'Confirm password is required.',
+          passwordMismatch: 'Passwords do not match.',
+          login: 'Login',
+          register: 'Register'
+        }
+  );
+
+  protected readonly submitLabel = computed(() => (this.mode() === 'register' ? this.copy().register : this.copy().login));
   protected readonly isRegisterMode = computed(() => this.mode() === 'register');
   protected readonly hasPasswordMismatch = computed(() => {
     if (this.mode() !== 'register') {
@@ -144,7 +194,8 @@ export class AuthFormComponent {
   });
 
   protected submit() {
-    if (this.isSubmitDisabled()) {
+    if (this.form.invalid || this.hasPasswordMismatch()) {
+      this.form.markAllAsTouched();
       return;
     }
 

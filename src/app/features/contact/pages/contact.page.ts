@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 
 import { ContactApi } from '../data-access/contact.api';
 import { ContactInfo } from '../data-access/contact.interface';
+import { LocaleService } from '../../../core/services/locale.service';
+import { BranchLocationsService } from '../../../core/services/branch-locations.service';
 
 @Component({
   selector: 'app-contact-page',
@@ -15,9 +17,7 @@ import { ContactInfo } from '../data-access/contact.interface';
         <div class="card border border-base-300 bg-base-100 shadow">
           <div class="card-body">
             <h1 class="font-serif text-3xl">Contact Us</h1>
-            <p class="text-base-content/75">
-              We answer quickly on WhatsApp and phone to help customers complete rent or buy requests.
-            </p>
+            <p class="text-base-content/75">{{ introText() }}</p>
 
             <div class="grid gap-3 sm:grid-cols-2">
               <div class="rounded-xl border border-base-300 p-3">
@@ -32,7 +32,7 @@ import { ContactInfo } from '../data-access/contact.interface';
 
             <div class="rounded-xl border border-base-300 p-3">
               <p class="text-sm text-base-content/65">Address</p>
-              <p class="font-medium">{{ contactInfo().address }}</p>
+              <p class="font-medium">{{ activeBranch().address }}</p>
             </div>
 
             <div class="rounded-xl border border-base-300 p-3">
@@ -41,6 +41,22 @@ import { ContactInfo } from '../data-access/contact.interface';
             </div>
 
             <a class="btn btn-success w-full" target="_blank" rel="noopener" [href]="whatsAppLink()">Chat On WhatsApp</a>
+
+            <div class="space-y-2">
+              <p class="text-sm text-base-content/65">Branches</p>
+              <div class="flex flex-wrap gap-2">
+                @for (branch of branches(); track branch.id) {
+                  <button
+                    class="btn btn-sm"
+                    type="button"
+                    [class.btn-primary]="branch.id === activeBranch().id"
+                    [class.btn-outline]="branch.id !== activeBranch().id"
+                    (click)="chooseBranch(branch.id)">
+                    {{ branch.name }}
+                  </button>
+                }
+              </div>
+            </div>
           </div>
         </div>
 
@@ -49,7 +65,7 @@ import { ContactInfo } from '../data-access/contact.interface';
           title="Auto Essa Location"
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
-          [src]="contactInfo().googleMapsUrl"
+          [src]="activeBranch().mapsUrl"
         ></iframe>
       </article>
 
@@ -100,15 +116,28 @@ import { ContactInfo } from '../data-access/contact.interface';
 })
 export default class ContactPage {
   private readonly contactApi = inject(ContactApi);
+  private readonly localeService = inject(LocaleService);
+  private readonly branchService = inject(BranchLocationsService);
 
   protected readonly status = signal('');
   protected readonly isError = signal(false);
+  protected readonly introText = computed(() =>
+    this.localeService.locale() === 'ar'
+      ? 'نرد بسرعة عبر واتساب والهاتف لمساعدة العملاء في إكمال طلبات الإيجار أو الشراء.'
+      : 'We answer quickly on WhatsApp and phone to help customers complete rent or buy requests.'
+  );
   protected readonly contactInfo = signal<ContactInfo>({
     phoneNumber: '+20 100 000 0000',
     whatsAppNumber: '+20 100 000 0000',
     address: 'Cairo, Egypt',
     googleMapsUrl: 'https://www.google.com/maps?q=Cairo&output=embed',
     workingHours: 'Daily 10:00 AM - 10:00 PM'
+  });
+  protected readonly branches = this.branchService.branches;
+  protected readonly activeBranchId = signal('');
+  protected readonly activeBranch = computed(() => {
+    const selected = this.branches().find((item) => item.id === this.activeBranchId());
+    return selected ?? this.branchService.getActiveBranch();
   });
 
   protected readonly form = new FormGroup({
@@ -119,6 +148,11 @@ export default class ContactPage {
 
   constructor() {
     this.contactApi.getContactInfo().subscribe((value) => this.contactInfo.set(value));
+    this.activeBranchId.set(this.branchService.getActiveBranch().id);
+  }
+
+  protected chooseBranch(id: string) {
+    this.activeBranchId.set(id);
   }
 
   protected whatsAppLink(): string {

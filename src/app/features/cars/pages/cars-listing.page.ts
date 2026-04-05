@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
+import { LocaleService } from '../../../core/services/locale.service';
 import { CarCardComponent } from '../../../shared/ui/car-card.component';
 import { CarsApi } from '../data-access/cars.api';
 import { Car } from '../data-access/cars.interface';
@@ -11,28 +12,28 @@ import { Car } from '../data-access/cars.interface';
   imports: [CarCardComponent, ReactiveFormsModule],
   template: `
     <section class="space-y-6">
-      <h1 class="font-serif text-3xl">Cars Listing</h1>
+      <h1 class="font-serif text-3xl">{{ copy().title }}</h1>
 
       <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="card border border-base-300 bg-base-100 shadow">
         <div class="card-body grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <label class="form-control">
-            <span class="label-text">Search</span>
-            <input class="input input-bordered" type="text" formControlName="searchTerm" placeholder="Brand, model..." />
+            <span class="label-text">{{ copy().searchLabel }}</span>
+            <input class="input input-bordered" type="text" formControlName="searchTerm" [placeholder]="copy().searchPlaceholder" />
           </label>
 
           <label class="form-control">
-            <span class="label-text">Listing Type</span>
+            <span class="label-text">{{ copy().listingTypeLabel }}</span>
             <select class="select select-bordered" formControlName="listingType">
-              <option value="all">All</option>
-              <option value="Rent">Rent</option>
-              <option value="Buy">Buy</option>
+              <option value="all">{{ copy().allOption }}</option>
+              <option value="Rent">{{ copy().rentOption }}</option>
+              <option value="Buy">{{ copy().buyOption }}</option>
             </select>
           </label>
 
           <label class="form-control">
-            <span class="label-text">Fuel</span>
+            <span class="label-text">{{ copy().fuelLabel }}</span>
             <select class="select select-bordered" formControlName="fuelType">
-              <option value="all">All</option>
+              <option value="all">{{ copy().allOption }}</option>
               <option value="Petrol">Petrol</option>
               <option value="Diesel">Diesel</option>
               <option value="Hybrid">Hybrid</option>
@@ -41,33 +42,33 @@ import { Car } from '../data-access/cars.interface';
           </label>
 
           <label class="form-control">
-            <span class="label-text">Sort</span>
+            <span class="label-text">{{ copy().sortLabel }}</span>
             <select class="select select-bordered" formControlName="sortBy">
-              <option value="default">Default</option>
-              <option value="priceAsc">Price Low to High</option>
-              <option value="priceDesc">Price High to Low</option>
-              <option value="newest">Newest</option>
+              <option value="default">{{ copy().defaultOption }}</option>
+              <option value="priceAsc">{{ copy().priceAscOption }}</option>
+              <option value="priceDesc">{{ copy().priceDescOption }}</option>
+              <option value="newest">{{ copy().newestOption }}</option>
             </select>
           </label>
 
           <label class="form-control">
-            <span class="label-text">Car Type</span>
-            <input class="input input-bordered" type="text" formControlName="carType" placeholder="SUV, Sedan..." />
+            <span class="label-text">{{ copy().carTypeLabel }}</span>
+            <input class="input input-bordered" type="text" formControlName="carType" [placeholder]="copy().carTypePlaceholder" />
           </label>
 
           <label class="form-control">
-            <span class="label-text">Min Price</span>
+            <span class="label-text">{{ copy().minPriceLabel }}</span>
             <input class="input input-bordered" type="number" formControlName="minPrice" />
           </label>
 
           <label class="form-control">
-            <span class="label-text">Max Price</span>
+            <span class="label-text">{{ copy().maxPriceLabel }}</span>
             <input class="input input-bordered" type="number" formControlName="maxPrice" />
           </label>
 
           <div class="flex items-end gap-2">
-            <button class="btn btn-primary" type="submit">Apply</button>
-            <button class="btn btn-outline" type="button" (click)="resetFilters()">Reset</button>
+            <button class="btn btn-primary" type="submit">{{ copy().applyButton }}</button>
+            <button class="btn btn-outline" type="button" (click)="resetFilters()">{{ copy().resetButton }}</button>
           </div>
         </div>
       </form>
@@ -87,11 +88,57 @@ import { Car } from '../data-access/cars.interface';
 })
 export default class CarsListingPage {
   private readonly carsApi = inject(CarsApi);
+  private readonly localeService = inject(LocaleService);
   private readonly route = inject(ActivatedRoute);
 
   protected readonly cars = signal<Car[]>([]);
   protected readonly status = signal('');
   protected readonly isError = signal(false);
+  protected readonly copy = computed(() =>
+    this.localeService.locale() === 'ar'
+      ? {
+          title: 'قائمة السيارات',
+          searchLabel: 'بحث',
+          searchPlaceholder: 'العلامة، الموديل...',
+          listingTypeLabel: 'نوع العرض',
+          allOption: 'الكل',
+          rentOption: 'إيجار',
+          buyOption: 'شراء',
+          fuelLabel: 'الوقود',
+          sortLabel: 'الترتيب',
+          defaultOption: 'الافتراضي',
+          priceAscOption: 'السعر من الأقل للأعلى',
+          priceDescOption: 'السعر من الأعلى للأقل',
+          newestOption: 'الأحدث',
+          carTypeLabel: 'نوع السيارة',
+          carTypePlaceholder: 'SUV، سيدان...',
+          minPriceLabel: 'أقل سعر',
+          maxPriceLabel: 'أعلى سعر',
+          applyButton: 'تطبيق',
+          resetButton: 'إعادة ضبط'
+        }
+      : {
+          title: 'Cars Listing',
+          searchLabel: 'Search',
+          searchPlaceholder: 'Brand, model...',
+          listingTypeLabel: 'Listing Type',
+          allOption: 'All',
+          rentOption: 'Rent',
+          buyOption: 'Buy',
+          fuelLabel: 'Fuel',
+          sortLabel: 'Sort',
+          defaultOption: 'Default',
+          priceAscOption: 'Price Low to High',
+          priceDescOption: 'Price High to Low',
+          newestOption: 'Newest',
+          carTypeLabel: 'Car Type',
+          carTypePlaceholder: 'SUV, Sedan...',
+          minPriceLabel: 'Min Price',
+          maxPriceLabel: 'Max Price',
+          applyButton: 'Apply',
+          resetButton: 'Reset'
+        }
+  );
 
   protected readonly filtersForm = new FormGroup({
     searchTerm: new FormControl('', { nonNullable: true }),

@@ -10,15 +10,30 @@ export class AuthApi {
 	private readonly http = inject(HttpClient);
 
 	login(payload: LoginRequest) {
-		return this.http.post<unknown>(`${API_BASE_URL}/api/Auth/login`, payload).pipe(
+		return this.http.post(`${API_BASE_URL}/api/Auth/login`, payload, { responseType: 'text' }).pipe(
+			map((response) => this.parseResponseBody(response)),
 			map((response) => this.toSession(response, payload.email, payload.email.split('@')[0] ?? 'user', payload.email.split('@')[0] ?? 'User'))
 		);
 	}
 
 	register(payload: RegisterRequest) {
-		return this.http.post<unknown>(`${API_BASE_URL}/api/Auth/register`, payload).pipe(
+		return this.http.post(`${API_BASE_URL}/api/Auth/register`, payload, { responseType: 'text' }).pipe(
+			map((response) => this.parseResponseBody(response)),
 			map((response) => this.toSession(response, payload.email, payload.email.split('@')[0] ?? 'user', payload.fullName))
 		);
+	}
+
+	private parseResponseBody(value: string): unknown {
+		const trimmed = value.trim();
+		if (trimmed.length === 0) {
+			return {};
+		}
+
+		try {
+			return JSON.parse(trimmed) as unknown;
+		} catch {
+			return { raw: value };
+		}
 	}
 
 	private toSession(response: unknown, email: string, username: string, fullName: string): AuthSession {

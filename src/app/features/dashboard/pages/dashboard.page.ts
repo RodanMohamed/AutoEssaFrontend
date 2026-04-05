@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { DashboardService } from '../data-access/dashboard.service';
 import { BookingRequestSummary, DashboardStats } from '../data-access/dashboard.interface';
@@ -6,10 +7,19 @@ import { StatsCardComponent } from '../ui/stats-card.component';
 
 @Component({
 	selector: 'app-dashboard-page',
-	imports: [StatsCardComponent],
+	imports: [StatsCardComponent, RouterLink],
 	template: `
 		<section class="space-y-6">
-			<h1 class="font-serif text-3xl">Admin Dashboard</h1>
+			<section class="flex flex-wrap items-center justify-between gap-3">
+				<h1 class="font-serif text-3xl">Admin Dashboard</h1>
+				<nav class="tabs tabs-boxed" aria-label="Dashboard sections">
+					<a class="tab tab-active" routerLink="/dashboard">Overview</a>
+					<a class="tab" routerLink="/dashboard/cars">Cars</a>
+					<a class="tab" routerLink="/dashboard/requests">Requests</a>
+					<a class="tab" routerLink="/dashboard/moderation">Moderation</a>
+					<a class="tab" routerLink="/dashboard/content">Content</a>
+				</nav>
+			</section>
 
 			<section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 				<app-stats-card label="Cars" [value]="stats().totalCars" />

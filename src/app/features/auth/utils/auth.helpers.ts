@@ -74,6 +74,10 @@ export function parseRegisteredAccounts(value: string | null): RegisteredAccount
 
 export function extractApiErrorMessage(error: unknown, fallback: string): string {
 	if (error instanceof HttpErrorResponse) {
+		if (error.status === 0) {
+			return 'Network error. Please check your connection and API availability.';
+		}
+
 		const payload = error.error;
 		if (typeof payload === 'string' && payload.trim().length > 0) {
 			return payload;
@@ -81,6 +85,19 @@ export function extractApiErrorMessage(error: unknown, fallback: string): string
 
 		if (typeof payload === 'object' && payload !== null) {
 			const record = payload as Record<string, unknown>;
+			const validationErrors = record['errors'];
+			if (typeof validationErrors === 'object' && validationErrors !== null) {
+				const entries = Object.entries(validationErrors as Record<string, unknown>);
+				for (const [, value] of entries) {
+					if (Array.isArray(value) && value.length > 0) {
+						const first = value.find((item) => typeof item === 'string');
+						if (typeof first === 'string' && first.trim().length > 0) {
+							return first;
+						}
+					}
+				}
+			}
+
 			if (typeof record['message'] === 'string') {
 				return record['message'];
 			}

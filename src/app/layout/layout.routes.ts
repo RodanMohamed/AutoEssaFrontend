@@ -40,6 +40,10 @@ export const LAYOUT_ROUTES: Routes = [
 				loadComponent: () => import('../features/cars/pages/car-details.page')
 			},
 			{
+				path: 'request-car',
+				loadComponent: () => import('../features/cars/pages/request-car.page')
+			},
+			{
 				path: 'about',
 				loadComponent: () => import('../features/about/pages/about.page')
 			},

@@ -13,7 +13,27 @@ body {
 	min-height: 100%;
 }
 
+html {
+	font-size: clamp(17px, 0.45vw + 15px, 19px);
+}
+
 body {
 	margin: 0;
 	font-family: var(--font-sans);
+	font-size: 1rem;
+	line-height: 1.65;
+	letter-spacing: 0.005em;
+}
+
+p,
+label,
+input,
+select,
+textarea,
+button,
+a,
+span,
+td,
+th {
+	font-size: 1rem;
 }
