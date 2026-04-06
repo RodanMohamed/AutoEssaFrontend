@@ -13,53 +13,53 @@ import { LocaleService } from '../../../core/services/locale.service';
       <p class="text-base-content/75">{{ copy().description }}</p>
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="card border border-base-300 bg-base-100 shadow">
-        <div class="card-body grid gap-4 md:grid-cols-2">
-          <label class="form-control">
-            <span class="label-text">{{ copy().fullNameLabel }}</span>
-            <input class="input input-bordered ml-2" formControlName="fullName" type="text" />
+        <div class="card-body space-y-4">
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().fullNameLabel }}</span>
+            <input class="input input-bordered flex-1" formControlName="fullName" type="text" />
           </label>
 
-          <label class="form-control">
-            <span class="label-text">{{ copy().phoneLabel }}</span>
-            <input class="input input-bordered ml-2" formControlName="phoneNumber" type="text" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().phoneLabel }}</span>
+            <input class="input input-bordered flex-1" formControlName="phoneNumber" type="text" />
           </label>
 
-          <label class="form-control">
-            <span class="label-text">{{ copy().brandLabel }}</span>
-            <input class="input input-bordered ml-2" formControlName="desiredBrand" type="text" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().brandLabel }}</span>
+            <input class="input input-bordered flex-1" formControlName="desiredBrand" type="text" />
           </label>
 
-          <label class="form-control">
-            <span class="label-text">{{ copy().modelLabel }}</span>
-            <input class="input input-bordered ml-2" formControlName="desiredModel" type="text" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().modelLabel }}</span>
+            <input class="input input-bordered flex-1" formControlName="desiredModel" type="text" />
           </label>
 
-          <label class="form-control">
-            <span class="label-text">{{ copy().yearFromLabel }}</span>
-            <input class="input input-bordered ml-2" formControlName="desiredYearFrom" type="number" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().yearFromLabel }}</span>
+            <input class="input input-bordered flex-1" formControlName="desiredYearFrom" type="number" />
           </label>
 
-          <label class="form-control">
-            <span class="label-text">{{ copy().yearToLabel }}</span>
-            <input class="input input-bordered ml-2" formControlName="desiredYearTo" type="number" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().yearToLabel }}</span>
+            <input class="input input-bordered flex-1" formControlName="desiredYearTo" type="number" />
           </label>
 
-          <label class="form-control md:col-span-2">
-            <span class="label-text">{{ copy().budgetLabel }}</span>
-            <input class="input input-bordered ml-2" formControlName="budget" type="number" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().budgetLabel }}</span>
+            <input class="input input-bordered flex-1" formControlName="budget" type="number" />
           </label>
 
-          <label class="form-control md:col-span-2">
-            <span class="label-text">{{ copy().notesLabel }}</span>
-            <textarea class="textarea textarea-bordered ml-2" formControlName="notes" rows="4"></textarea>
+          <label class="flex items-start gap-3">
+            <span class="label-text min-w-32 mt-2">{{ copy().notesLabel }}</span>
+            <textarea class="textarea textarea-bordered flex-1" formControlName="notes" rows="4"></textarea>
           </label>
 
-          <div class="md:col-span-2">
+          <div>
             <button class="btn btn-primary" type="submit" [disabled]="form.invalid">{{ copy().submitButton }}</button>
           </div>
 
           @if (status()) {
-            <p class="md:col-span-2 text-sm" [class.text-success]="!isError()" [class.text-error]="isError()">
+            <p class="text-sm" [class.text-success]="!isError()" [class.text-error]="isError()">
               {{ status() }}
             </p>
           }

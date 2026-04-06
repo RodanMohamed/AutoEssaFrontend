@@ -30,6 +30,7 @@ export const LAYOUT_ROUTES: Routes = [
 			},
 			{
 				path: 'cars',
+				canActivate: [authGuard],
 				resolve: {
 					cars: carsResolver
 				},
@@ -37,18 +38,22 @@ export const LAYOUT_ROUTES: Routes = [
 			},
 			{
 				path: 'cars/:id',
+				canActivate: [authGuard],
 				loadComponent: () => import('../features/cars/pages/car-details.page')
 			},
 			{
 				path: 'request-car',
+				canActivate: [authGuard],
 				loadComponent: () => import('../features/cars/pages/request-car.page')
 			},
 			{
 				path: 'about',
+				canActivate: [authGuard],
 				loadComponent: () => import('../features/about/pages/about.page')
 			},
 			{
 				path: 'contact',
+				canActivate: [authGuard],
 				loadComponent: () => import('../features/contact/pages/contact.page')
 			}
 		]

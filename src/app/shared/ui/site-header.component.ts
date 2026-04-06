@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,45 +13,81 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
   template: `
     <header class="site-header sticky top-0 z-40 border-b">
       <mat-toolbar class="site-toolbar">
-        <div class="mx-auto flex w-full max-w-330 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-2 py-1 md:px-4 lg:px-6">
-          <a routerLink="/" class="brand-link font-serif text-xl font-semibold tracking-wide">Auto Essa</a>
+        <div class="mx-auto flex w-full max-w-330 flex-col px-2 py-2 md:px-4 lg:px-6">
+          <!-- Top Row: Brand | Nav | Auth -->
+          <div class="flex items-center justify-between gap-2">
+            <a routerLink="/" class="brand-link font-serif text-xl font-semibold tracking-wide shrink-0">Auto Essa</a>
 
-          <nav class="hidden items-center gap-1 lg:flex" aria-label="Primary">
-            <a mat-button routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-            <a mat-button routerLink="/cars" routerLinkActive="is-active">Cars</a>
-            <a mat-button routerLink="/request-car" routerLinkActive="is-active">Request Car</a>
-            @if (isAuthenticated()) {
-              <a mat-button routerLink="/account" routerLinkActive="is-active">My Account</a>
-            }
-            @if (isAdmin()) {
-              <a mat-button routerLink="/dashboard" routerLinkActive="is-active">Dashboard</a>
-            }
-            <a mat-button routerLink="/about" routerLinkActive="is-active">About</a>
-            <a mat-button routerLink="/contact" routerLinkActive="is-active">Contact</a>
-          </nav>
+            <!-- Desktop Nav (center on large screens) -->
+            <nav class="hidden items-center gap-1 lg:flex flex-1 justify-center" aria-label="Primary">
+              <a mat-button routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+              @if (isAuthenticated()) {
+                <a mat-button routerLink="/cars" routerLinkActive="is-active">Cars</a>
+                <a mat-button routerLink="/request-car" routerLinkActive="is-active">Request Car</a>
+                <a mat-button routerLink="/account" routerLinkActive="is-active">My Account</a>
+                <a mat-button routerLink="/about" routerLinkActive="is-active">About</a>
+                <a mat-button routerLink="/contact" routerLinkActive="is-active">Contact</a>
+                @if (isAdmin()) {
+                  <a mat-button routerLink="/dashboard" routerLinkActive="is-active">Dashboard</a>
+                }
+              }
+            </nav>
 
-          <div class="flex items-center gap-2">
-            <app-locale-switcher />
-            @if (!isAuthenticated()) {
-              <a routerLink="/auth/login" class="btn btn-primary btn-sm header-cta">Login</a>
-            } @else {
-              <button type="button" class="btn btn-outline btn-sm header-cta" (click)="logout()">Logout</button>
-            }
+            <!-- Header Right: Locale always visible + responsive auth/menu -->
+            <div class="flex items-center gap-2 shrink-0">
+              <app-locale-switcher />
+
+              <button
+                type="button"
+                class="btn btn-ghost btn-xs lg:hidden"
+                (click)="toggleMenu()"
+                aria-label="Toggle menu">
+                @if (!isMenuOpen()) {
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                  </svg>
+                } @else {
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                }
+              </button>
+
+              <div class="hidden lg:flex items-center gap-2">
+              @if (!isAuthenticated()) {
+                <a routerLink="/auth/login" class="btn btn-primary btn-xs header-cta">Login</a>
+                <a routerLink="/auth/register" class="btn btn-outline btn-xs header-cta">Register</a>
+              } @else {
+                <button type="button" class="btn btn-outline btn-xs header-cta" (click)="logout()">Logout</button>
+              }
+              </div>
+            </div>
           </div>
 
-          <nav class="mobile-nav flex w-full items-center gap-2 overflow-x-auto py-1 lg:hidden" aria-label="Mobile primary">
-            <a class="chip-link" routerLink="/" routerLinkActive="chip-link-active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-            <a class="chip-link" routerLink="/cars" routerLinkActive="chip-link-active">Cars</a>
-            <a class="chip-link" routerLink="/request-car" routerLinkActive="chip-link-active">Request Car</a>
-            @if (isAuthenticated()) {
-              <a class="chip-link" routerLink="/account" routerLinkActive="chip-link-active">My Account</a>
-            }
-            @if (isAdmin()) {
-              <a class="chip-link" routerLink="/dashboard" routerLinkActive="chip-link-active">Dashboard</a>
-            }
-            <a class="chip-link" routerLink="/about" routerLinkActive="chip-link-active">About</a>
-            <a class="chip-link" routerLink="/contact" routerLinkActive="chip-link-active">Contact</a>
-          </nav>
+          <!-- Mobile Menu (dropdown below) -->
+          @if (isMenuOpen()) {
+            <nav class="mobile-menu flex flex-col gap-1 pt-2 lg:hidden border-t border-base-300 mt-2" aria-label="Mobile navigation">
+              <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
+              @if (isAuthenticated()) {
+                <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
+                <a class="mobile-link" routerLink="/request-car" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Request Car</a>
+                <a class="mobile-link" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()">My Account</a>
+                <a class="mobile-link" routerLink="/about" routerLinkActive="mobile-link-active" (click)="toggleMenu()">About</a>
+                <a class="mobile-link" routerLink="/contact" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Contact</a>
+                @if (isAdmin()) {
+                  <a class="mobile-link" routerLink="/dashboard" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Dashboard</a>
+                }
+              }
+
+              <!-- Auth in Menu -->
+              @if (!isAuthenticated()) {
+                <a routerLink="/auth/login" class="btn btn-primary btn-sm w-full" (click)="toggleMenu()">Login</a>
+                <a routerLink="/auth/register" class="btn btn-outline btn-sm w-full" (click)="toggleMenu()">Register</a>
+              } @else {
+                <button type="button" class="btn btn-outline btn-sm w-full" (click)="handleLogoutMobile()">Logout</button>
+              }
+            </nav>
+          }
         </div>
       </mat-toolbar>
     </header>
@@ -66,12 +102,14 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
     .site-toolbar {
       background: transparent;
       color: #5e3f24;
-      min-height: 72px;
+      min-height: auto;
+      padding: 0;
     }
 
     .brand-link {
       color: #5b3b21;
       text-decoration: none;
+      flex-shrink: 0;
     }
 
     :host ::ng-deep a[mat-button] {
@@ -87,30 +125,45 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
     }
 
     .header-cta {
-      min-width: 84px;
+      flex-shrink: 0;
     }
 
-    .mobile-nav {
-      scrollbar-width: thin;
-      scrollbar-color: #c9a179 transparent;
+    .mobile-menu {
+      animation: slideDown 200ms ease-out;
+      background: rgba(255, 249, 240, 0.98);
+      border: 1px solid #e0c6a7;
+      border-radius: 0.75rem;
+      padding: 0.6rem;
+      box-shadow: 0 10px 24px rgba(124, 80, 38, 0.12);
     }
 
-    .chip-link {
-      border: 1px solid #d4b190;
-      background: rgba(255, 250, 243, 0.92);
-      border-radius: 999px;
-      color: #7a5430;
-      font-size: 0.86rem;
-      font-weight: 600;
-      padding: 0.34rem 0.74rem;
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mobile-link {
+      color: #6e4b2d;
       text-decoration: none;
-      white-space: nowrap;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: background 150ms ease;
     }
 
-    .chip-link-active {
-      border-color: #b67d4d;
-      background: rgba(199, 143, 92, 0.2);
-      color: #8c5b30;
+    .mobile-link:hover {
+      background: rgba(200, 146, 97, 0.1);
+    }
+
+    .mobile-link-active {
+      background: rgba(200, 146, 97, 0.14);
+      color: #8f5f35;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -119,10 +172,21 @@ export class SiteHeaderComponent {
   private readonly authStore = inject(AuthStore);
   private readonly authService = inject(AuthService);
 
+  protected readonly isMenuOpen = signal(false);
   protected readonly isAuthenticated = computed(() => this.authStore.isAuthenticated());
   protected readonly isAdmin = computed(() => this.authStore.isAdmin());
 
+  protected toggleMenu() {
+    this.isMenuOpen.update(val => !val);
+  }
+
   protected logout() {
     this.authService.logout();
+
+  }
+
+  protected handleLogoutMobile() {
+    this.toggleMenu();
+    this.logout();
   }
 }

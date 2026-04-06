@@ -15,24 +15,24 @@ import { Car } from '../data-access/cars.interface';
       <h1 class="font-serif text-3xl">{{ copy().title }}</h1>
 
       <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="card border border-base-300 bg-base-100 shadow">
-        <div class="card-body grid gap-4 md:grid-cols-2 xl:grid-cols-4 listing-filters-grid">
-          <label class="form-control listing-filter-control">
-            <span class="label-text">{{ copy().searchLabel }}</span>
-            <input class="input input-bordered ml-2" type="text" formControlName="searchTerm" [placeholder]="copy().searchPlaceholder" />
+        <div class="card-body grid gap-4 md:grid-cols-2">
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().searchLabel }}</span>
+            <input class="input input-bordered flex-1" type="text" formControlName="searchTerm" [placeholder]="copy().searchPlaceholder" />
           </label>
 
-          <label class="form-control listing-filter-control">
-            <span class="label-text">{{ copy().listingTypeLabel }}</span>
-            <select class="select select-bordered ml-2" formControlName="listingType">
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().listingTypeLabel }}</span>
+            <select class="select select-bordered flex-1" formControlName="listingType">
               <option value="all">{{ copy().allOption }}</option>
               <option value="Rent">{{ copy().rentOption }}</option>
               <option value="Buy">{{ copy().buyOption }}</option>
             </select>
           </label>
 
-          <label class="form-control listing-filter-control">
-            <span class="label-text">{{ copy().fuelLabel }}</span>
-            <select class="select select-bordered ml-2" formControlName="fuelType">
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().fuelLabel }}</span>
+            <select class="select select-bordered flex-1" formControlName="fuelType">
               <option value="all">{{ copy().allOption }}</option>
               <option value="Petrol">Petrol</option>
               <option value="Diesel">Diesel</option>
@@ -41,9 +41,9 @@ import { Car } from '../data-access/cars.interface';
             </select>
           </label>
 
-          <label class="form-control listing-filter-control">
-            <span class="label-text">{{ copy().sortLabel }}</span>
-            <select class="select select-bordered ml-2" formControlName="sortBy">
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().sortLabel }}</span>
+            <select class="select select-bordered flex-1" formControlName="sortBy">
               <option value="default">{{ copy().defaultOption }}</option>
               <option value="priceAsc">{{ copy().priceAscOption }}</option>
               <option value="priceDesc">{{ copy().priceDescOption }}</option>
@@ -51,22 +51,22 @@ import { Car } from '../data-access/cars.interface';
             </select>
           </label>
 
-          <label class="form-control listing-filter-control">
-            <span class="label-text">{{ copy().carTypeLabel }}</span>
-            <input class="input input-bordered ml-2" type="text" formControlName="carType" [placeholder]="copy().carTypePlaceholder" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().carTypeLabel }}</span>
+            <input class="input input-bordered flex-1" type="text" formControlName="carType" [placeholder]="copy().carTypePlaceholder" />
           </label>
 
-          <label class="form-control listing-filter-control">
-            <span class="label-text">{{ copy().minPriceLabel }}</span>
-            <input class="input input-bordered ml-2" type="number" formControlName="minPrice" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().minPriceLabel }}</span>
+            <input class="input input-bordered flex-1" type="number" formControlName="minPrice" />
           </label>
 
-          <label class="form-control listing-filter-control">
-            <span class="label-text">{{ copy().maxPriceLabel }}</span>
-            <input class="input input-bordered ml-2" type="number" formControlName="maxPrice" />
+          <label class="flex items-center gap-3">
+            <span class="label-text min-w-32">{{ copy().maxPriceLabel }}</span>
+            <input class="input input-bordered flex-1" type="number" formControlName="maxPrice" />
           </label>
 
-          <div class="flex items-end gap-2">
+          <div class="flex items-center gap-2 md:col-span-2">
             <button class="btn btn-primary" type="submit">{{ copy().applyButton }}</button>
             <button class="btn btn-outline" type="button" (click)="resetFilters()">{{ copy().resetButton }}</button>
           </div>
