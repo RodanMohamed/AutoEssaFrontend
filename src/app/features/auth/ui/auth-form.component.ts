@@ -220,7 +220,16 @@ export class AuthFormComponent {
 
   protected readonly submitLabel = computed(() => (this.mode() === 'register' ? this.copy().register : this.copy().login));
   protected readonly isRegisterMode = computed(() => this.mode() === 'register');
-  protected readonly hasPasswordMismatch = computed(() => {
+  protected readonly form = new FormGroup({
+    username: new FormControl('', { nonNullable: true, validators: AUTH_USERNAME_VALIDATORS }),
+    fullName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    phoneNumber: new FormControl('', { nonNullable: true, validators: AUTH_PHONE_VALIDATORS }),
+    email: new FormControl('', { nonNullable: true, validators: AUTH_EMAIL_STRICT_VALIDATORS }),
+    password: new FormControl('', { nonNullable: true, validators: AUTH_PASSWORD_VALIDATORS }),
+    confirmPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] })
+  });
+
+  protected hasPasswordMismatch(): boolean {
     if (this.mode() !== 'register') {
       return false;
     }
@@ -232,18 +241,9 @@ export class AuthFormComponent {
     }
 
     return password !== confirmPassword;
-  });
+  }
 
-  protected readonly form = new FormGroup({
-    username: new FormControl('', { nonNullable: true, validators: AUTH_USERNAME_VALIDATORS }),
-    fullName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    phoneNumber: new FormControl('', { nonNullable: true, validators: AUTH_PHONE_VALIDATORS }),
-    email: new FormControl('', { nonNullable: true, validators: AUTH_EMAIL_STRICT_VALIDATORS }),
-    password: new FormControl('', { nonNullable: true, validators: AUTH_PASSWORD_VALIDATORS }),
-    confirmPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] })
-  });
-
-  protected readonly isSubmitDisabled = computed(() => {
+  protected isSubmitDisabled(): boolean {
     const currentMode = this.mode();
 
     if (currentMode === 'register') {
@@ -251,7 +251,7 @@ export class AuthFormComponent {
     }
 
     return this.form.controls.email.invalid || this.form.controls.password.invalid;
-  });
+  }
 
   private isLoginFormValid(): boolean {
     return this.form.controls.email.valid && this.form.controls.password.valid;
