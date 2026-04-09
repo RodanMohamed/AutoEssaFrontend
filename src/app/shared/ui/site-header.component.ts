@@ -84,7 +84,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
               }
 
               @if (isAuthenticated() && !isAdmin()) {
-                                <a class="mobile-link" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()">My Account</a>
+                <a class="mobile-link mt-7" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()">My Account</a>
                 <a class="mobile-link" routerLink="/request-car" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Request Car</a>
                 <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
                 <a class="mobile-link" routerLink="/about" routerLinkActive="mobile-link-active" (click)="toggleMenu()">About</a>
