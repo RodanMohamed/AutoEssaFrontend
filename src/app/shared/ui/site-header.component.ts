@@ -78,16 +78,17 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
                 <a class="mobile-link" routerLink="/dashboard/requests" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Requests</a>
                 <a class="mobile-link" routerLink="/dashboard/moderation" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Moderation</a>
                 <a class="mobile-link" routerLink="/dashboard/content" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Content</a>
-              } @else if (isAuthenticated() && !isAdmin()) {
-                <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
-                <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
-                <a class="mobile-link" routerLink="/request-car" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Request Car</a>
-                <a class="mobile-link" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()">My Account</a>
-                <a class="mobile-link" routerLink="/about" routerLinkActive="mobile-link-active" (click)="toggleMenu()">About</a>
-                <a class="mobile-link" routerLink="/contact" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Contact</a>
               } @else {
                 <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
-                <!-- <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a> -->
+
+              }
+
+              @if (isAuthenticated() && !isAdmin()) {
+                                <a class="mobile-link" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()">My Account</a>
+                <a class="mobile-link" routerLink="/request-car" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Request Car</a>
+                <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
+                <a class="mobile-link" routerLink="/about" routerLinkActive="mobile-link-active" (click)="toggleMenu()">About</a>
+                <a class="mobile-link" routerLink="/contact" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Contact</a>
               }
 
               <!-- Auth in Menu -->
