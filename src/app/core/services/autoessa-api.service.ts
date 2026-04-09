@@ -18,14 +18,6 @@ import {
 export class AutoessaApiService {
   private readonly http = inject(HttpClient);
 
-  private wrapRequestBody(payload: unknown): Record<string, unknown> {
-    if (typeof payload === 'object' && payload !== null) {
-      return { ...(payload as Record<string, unknown>), request: payload as Record<string, unknown> };
-    }
-
-    return { request: payload };
-  }
-
   // Auth
   register(payload: RegisterPayload) { return this.http.post(`${API_BASE_URL}/api/Auth/register`, payload); }
   login(payload: LoginPayload) { return this.http.post(`${API_BASE_URL}/api/Auth/login`, payload); }
@@ -71,8 +63,8 @@ export class AutoessaApiService {
   }
 
   // Admin cars and uploads
-  adminCreateCar(payload: unknown) { return this.http.post(`${API_BASE_URL}/api/admin/cars`, this.wrapRequestBody(payload)); }
-  adminUpdateCar(id: string, payload: unknown) { return this.http.put(`${API_BASE_URL}/api/admin/cars/${id}`, this.wrapRequestBody(payload)); }
+  adminCreateCar(payload: unknown) { return this.http.post(`${API_BASE_URL}/api/admin/cars`, payload); }
+  adminUpdateCar(id: string, payload: unknown) { return this.http.put(`${API_BASE_URL}/api/admin/cars/${id}`, payload); }
   adminDeleteCar(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/cars/${id}`); }
   adminUploadCarImages(formData: FormData) { return this.http.post(`${API_BASE_URL}/api/admin/uploads/car-images`, formData); }
   adminDeleteUploadedImage(payload: { imageUrl: string }) { return this.http.delete(`${API_BASE_URL}/api/admin/uploads/car-images`, { body: payload }); }

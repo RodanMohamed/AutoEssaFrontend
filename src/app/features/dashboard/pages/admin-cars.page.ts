@@ -256,24 +256,16 @@ export default class AdminCarsPage {
 
     this.isSaving.set(true);
     const finalizeSave = (imageUrl: string) => {
-      const payload = this.toCarPayload(imageUrl);
+      const stringPayload = this.toCarPayloadString(imageUrl);
+      const numericPayload = this.toCarPayloadNumeric(imageUrl);
+      const payloadCandidates: Record<string, unknown>[] = [
+        { request: stringPayload },
+        stringPayload,
+        { request: numericPayload },
+        numericPayload
+      ];
       const selectedId = this.selectedCarId();
-
-      const request$ = selectedId
-        ? this.api.adminUpdateCar(selectedId, payload)
-        : this.api.adminCreateCar(payload);
-
-      request$.subscribe({
-        next: () => {
-          this.isSaving.set(false);
-          this.resetForm();
-          this.loadCars();
-        },
-        error: (error: unknown) => {
-          this.isSaving.set(false);
-          this.formError.set(this.extractError(error));
-        }
-      });
+      this.executeSaveWithFallback(payloadCandidates, selectedId, 0, null);
     };
 
     const chosenFile = this.mainImageFile();
@@ -461,7 +453,28 @@ export default class AdminCarsPage {
     });
   }
 
-  private toCarPayload(imageUrl: string): Record<string, unknown> {
+  private toCarPayloadString(imageUrl: string): Record<string, unknown> {
+    const value = this.carForm.getRawValue();
+    return {
+      name: value.name,
+      brand: value.brand,
+      model: value.model,
+      year: Number(value.year),
+      price: Number(value.price),
+      carType: value.carType,
+      listingType: value.listingType,
+      fuelType: value.fuelType,
+      transmissionType: value.transmissionType,
+      mileage: Number(value.mileage),
+      location: value.location,
+      imageUrl,
+      coverImageUrl: imageUrl,
+      images: [imageUrl],
+      isAvailable: value.isAvailable
+    };
+  }
+
+  private toCarPayloadNumeric(imageUrl: string): Record<string, unknown> {
     const value = this.carForm.getRawValue();
     return {
       name: value.name,
@@ -480,6 +493,53 @@ export default class AdminCarsPage {
       images: [imageUrl],
       isAvailable: value.isAvailable
     };
+  }
+
+  private executeSaveWithFallback(
+    payloadCandidates: Record<string, unknown>[],
+    selectedId: string | null,
+    index: number,
+    lastError: unknown
+  ) {
+    if (index >= payloadCandidates.length) {
+      this.isSaving.set(false);
+      this.formError.set(this.extractError(lastError));
+      return;
+    }
+
+    const payload = payloadCandidates[index];
+    const request$ = selectedId
+      ? this.api.adminUpdateCar(selectedId, payload)
+      : this.api.adminCreateCar(payload);
+
+    request$.subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.resetForm();
+        this.loadCars();
+      },
+      error: (error: unknown) => {
+        if (this.shouldTryNextPayload(error)) {
+          this.executeSaveWithFallback(payloadCandidates, selectedId, index + 1, error);
+          return;
+        }
+
+        this.isSaving.set(false);
+        this.formError.set(this.extractError(error));
+      }
+    });
+  }
+
+  private shouldTryNextPayload(error: unknown): boolean {
+    const status = this.getHttpStatus(error);
+    if (status !== 400) {
+      return false;
+    }
+
+    const message = this.extractError(error).toLowerCase();
+    return message.includes('request field is required') ||
+      message.includes('could not be converted') ||
+      message.includes('validation');
   }
 
   private mapListingTypeToEnum(value: string): number {
@@ -744,6 +804,10 @@ export default class AdminCarsPage {
       if (label === 'Transmission') {
         return 'Transmission is invalid. Please choose Automatic or Manual.';
       }
+    }
+
+    if (label === 'Listing Type' && lower.includes('line') && lower.includes('bytepositioninline')) {
+      return 'Listing Type format is invalid for the server. Please choose a value from the dropdown and retry.';
     }
 
     return `${label}: ${normalizedMessage}`;
