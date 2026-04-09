@@ -73,25 +73,26 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
           @if (isMenuOpen()) {
             <nav class="mobile-menu flex flex-col gap-1 pt-2 lg:hidden border-t border-base-300 mt-2" aria-label="Mobile navigation">
               @if (isAuthenticated() && isAdmin()) {
-                <a class="mobile-link" routerLink="/dashboard" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Overview</a>
-                <a class="mobile-link" routerLink="/dashboard/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
-                <a class="mobile-link" routerLink="/dashboard/requests" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Requests</a>
-                <a class="mobile-link" routerLink="/dashboard/moderation" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Moderation</a>
-                <a class="mobile-link" routerLink="/dashboard/content" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Content</a>
-              } @else {
-                <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
+      <!-- Admin links -->
+      <a class="mobile-link" routerLink="/dashboard" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Overview</a>
+      <a class="mobile-link" routerLink="/dashboard/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
+      <a class="mobile-link" routerLink="/dashboard/requests" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Requests</a>
+      <a class="mobile-link" routerLink="/dashboard/moderation" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Moderation</a>
+      <a class="mobile-link" routerLink="/dashboard/content" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Content</a>
 
-              }
+    } @else if (isAuthenticated() && !isAdmin()) {
+      <!-- Authenticated user links -->
+      <a class="mobile-link" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()">My Account</a>
+      <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
+      <a class="mobile-link" routerLink="/request-car" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Request Car</a>
+      <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
+      <a class="mobile-link" routerLink="/about" routerLinkActive="mobile-link-active" (click)="toggleMenu()">About</a>
+      <a class="mobile-link" routerLink="/contact" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Contact</a>
 
-              @if (isAuthenticated() && !isAdmin()) {
-                <a class="mobile-link" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()" style="margin-top:12px;">My Account</a>
-                <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
-                <a class="mobile-link" routerLink="/request-car" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Request Car</a>
-                <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
-                <a class="mobile-link" routerLink="/about" routerLinkActive="mobile-link-active" (click)="toggleMenu()">About</a>
-                <a class="mobile-link" routerLink="/contact" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Contact</a>
-              }
-
+    } @else {
+      <!-- Guest links -->
+      <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
+    }
               <!-- Auth in Menu -->
               @if (!isAuthenticated()) {
                 <a routerLink="/auth/login" class="btn btn-primary " (click)="toggleMenu()">Login</a>
