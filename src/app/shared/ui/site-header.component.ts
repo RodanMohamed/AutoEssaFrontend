@@ -68,8 +68,11 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
           @if (isMenuOpen()) {
             <nav class="mobile-menu flex flex-col gap-1 pt-2 lg:hidden border-t border-base-300 mt-2" aria-label="Mobile navigation">
               <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
-              @if (isAuthenticated() && !isAdmin()) {
+              @if (!isAdmin()) {
                 <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
+              }
+
+              @if (isAuthenticated() && !isAdmin()) {
                 <a class="mobile-link" routerLink="/request-car" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Request Car</a>
                 <a class="mobile-link" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()">My Account</a>
                 <a class="mobile-link" routerLink="/about" routerLinkActive="mobile-link-active" (click)="toggleMenu()">About</a>

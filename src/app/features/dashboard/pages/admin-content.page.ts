@@ -52,24 +52,24 @@ interface LocalizationSettingItem {
           <div class="card-body gap-4">
             <h2 class="card-title">Contact Information</h2>
             <form [formGroup]="contactForm" (ngSubmit)="saveContactInfo()" class="grid gap-4">
-              <label class="form-control ">
-                <span class="label-text mr-2 ">Phone Number</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Phone Number</span>
                 <input class="input input-bordered" formControlName="phoneNumber" />
               </label>
-              <label class="form-control">
-                <span class="label-text mr-2">WhatsApp Number</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">WhatsApp Number</span>
                 <input class="input input-bordered" formControlName="whatsAppNumber" />
               </label>
-              <label class="form-control">
-                <span class="label-text mr-2">Address</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Address</span>
                 <input class="input input-bordered" formControlName="address" />
               </label>
-              <label class="form-control">
-                <span class="label-text mr-2">Google Maps URL</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Google Maps URL</span>
                 <input class="input input-bordered" formControlName="googleMapsUrl" />
               </label>
-              <label class="form-control">
-                <span class="label-text">Working Hours</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Working Hours</span>
                 <input class="input input-bordered" formControlName="workingHours" />
               </label>
               <button class="btn btn-primary" type="submit" [disabled]="contactForm.invalid || isSavingContact()">
@@ -138,20 +138,20 @@ interface LocalizationSettingItem {
             </div>
 
             <form [formGroup]="branchForm" (ngSubmit)="saveBranch()" class="grid gap-3">
-              <label class="form-control">
-                <span class="label-text">Branch ID</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Branch ID</span>
                 <input class="input input-bordered" formControlName="id" />
               </label>
-              <label class="form-control">
-                <span class="label-text">Branch Name</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Branch Name</span>
                 <input class="input input-bordered" formControlName="name" />
               </label>
-              <label class="form-control">
-                <span class="label-text">Address</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Address</span>
                 <input class="input input-bordered" formControlName="address" />
               </label>
-              <label class="form-control">
-                <span class="label-text">Google Maps Embed URL</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Google Maps Embed URL</span>
                 <input class="input input-bordered" formControlName="mapsUrl" />
               </label>
               <label class="label cursor-pointer justify-start gap-3">
@@ -175,20 +175,20 @@ interface LocalizationSettingItem {
               <button class="btn btn-sm" type="button" (click)="loadHomeContent()">Refresh</button>
             </section>
             <form [formGroup]="homeContentForm" (ngSubmit)="saveHomeContent()" class="grid gap-4">
-              <label class="form-control">
-                <span class="label-text mr-2">Hero Headline</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Hero Headline</span>
                 <input class="input input-bordered" formControlName="heroHeadline" />
               </label>
-              <label class="form-control">
-                <span class="label-text mr-2">Hero Sub Headline</span>
+              <label class="form-control content-form-row content-form-row-top">
+                <span class="label-text content-form-label">Hero Sub Headline</span>
                 <textarea class="textarea textarea-bordered" rows="3" formControlName="heroSubHeadline"></textarea>
               </label>
-              <label class="form-control">
-                <span class="label-text mr-2">Hero CTA Text</span>
+              <label class="form-control content-form-row">
+                <span class="label-text content-form-label">Hero CTA Text</span>
                 <input class="input input-bordered" formControlName="heroCtaText" />
               </label>
-              <label class="form-control ">
-                <span class="label-text mr-2">Why Choose Us Text</span>
+              <label class="form-control content-form-row content-form-row-top">
+                <span class="label-text content-form-label">Why Choose Us Text</span>
                 <textarea class="textarea textarea-bordered" rows="4" formControlName="whyChooseUsText"></textarea>
               </label>
               <button class="btn btn-primary" type="submit" [disabled]="homeContentForm.invalid || isSavingHome()">
@@ -248,16 +248,16 @@ interface LocalizationSettingItem {
           </section>
 
           <form [formGroup]="testimonialForm" (ngSubmit)="saveTestimonial()" class="grid gap-4 xl:grid-cols-4">
-            <label class="form-control xl:col-span-1">
-              <span class="label-text mr-2">Customer Name</span>
+            <label class="form-control content-form-row xl:col-span-1">
+              <span class="label-text content-form-label">Customer Name</span>
               <input class="input input-bordered" formControlName="customerName" />
             </label>
-            <label class="form-control xl:col-span-1">
-              <span class="label-text mr-2">Rating</span>
+            <label class="form-control content-form-row xl:col-span-1">
+              <span class="label-text content-form-label">Rating</span>
               <input class="input input-bordered" type="number" min="1" max="5" formControlName="rating" />
             </label>
-            <label class="form-control xl:col-span-2">
-              <span class="label-text mr-2">Comment</span>
+            <label class="form-control content-form-row xl:col-span-2">
+              <span class="label-text content-form-label">Comment</span>
               <input class="input input-bordered" formControlName="comment" />
             </label>
             <label class="label cursor-pointer justify-start gap-3 xl:col-span-4">
@@ -313,6 +313,41 @@ interface LocalizationSettingItem {
         </div>
       </article>
     </section>
+  `,
+  styles: `
+    .content-form-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .content-form-row-top {
+      align-items: flex-start;
+    }
+
+    .content-form-label {
+      min-width: 11rem;
+      margin-bottom: 0;
+    }
+
+    .content-form-row .input,
+    .content-form-row .textarea,
+    .content-form-row .select {
+      flex: 1;
+      width: 100%;
+    }
+
+    @media (max-width: 767px) {
+      .content-form-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+      }
+
+      .content-form-label {
+        min-width: 0;
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
