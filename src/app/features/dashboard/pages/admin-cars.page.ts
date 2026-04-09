@@ -294,6 +294,12 @@ export default class AdminCarsPage {
           finalizeSave(imageUrl);
         },
         error: (error: unknown) => {
+          if (this.isUnauthorized(error) || this.isForbidden(error)) {
+            this.isSaving.set(false);
+            this.formError.set(this.extractError(error));
+            return;
+          }
+
           const fallbackImage = this.mainImagePreview();
           if (fallbackImage) {
             finalizeSave(fallbackImage);
@@ -567,6 +573,14 @@ export default class AdminCarsPage {
   }
 
   private extractError(error: unknown): string {
+    const status = this.getHttpStatus(error);
+    if (status === 401) {
+      return 'Unauthorized (401): your session is missing or expired. Please login again as admin and retry.';
+    }
+    if (status === 403) {
+      return 'Forbidden (403): your account does not have permission for this admin action.';
+    }
+
     if (typeof error === 'object' && error !== null) {
       const source = error as Record<string, unknown>;
       const nested = source['error'];
@@ -588,5 +602,23 @@ export default class AdminCarsPage {
     }
 
     return 'Action failed. Please verify API permissions and payload format.';
+  }
+
+  private getHttpStatus(error: unknown): number | null {
+    if (typeof error !== 'object' || error === null) {
+      return null;
+    }
+
+    const source = error as Record<string, unknown>;
+    const status = source['status'];
+    return typeof status === 'number' ? status : null;
+  }
+
+  private isUnauthorized(error: unknown): boolean {
+    return this.getHttpStatus(error) === 401;
+  }
+
+  private isForbidden(error: unknown): boolean {
+    return this.getHttpStatus(error) === 403;
   }
 }
