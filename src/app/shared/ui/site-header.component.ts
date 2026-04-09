@@ -71,7 +71,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
 
           <!-- Mobile Menu (dropdown below) -->
           @if (isMenuOpen()) {
-            <nav class="mobile-menu flex flex-col gap-1 pt-2 lg:hidden border-t border-base-300 mt-2" aria-label="Mobile navigation">
+            <nav class="mobile-menu flex flex-col gap-1 pt-2 lg:hidden border-t border-base-300 mt-7" aria-label="Mobile navigation">
               @if (isAuthenticated() && isAdmin()) {
       <!-- Admin links -->
       <a class="mobile-link" routerLink="/dashboard" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Overview</a>
