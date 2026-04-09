@@ -12,17 +12,19 @@ import { LocaleService } from '../../core/services/locale.service';
   `,
   styles: `
     .locale-switcher {
-      border-radius: 0.7rem;
+      border-radius: 0rem;
       overflow: hidden;
+      margin-bottom: 18px;
     }
 
     .locale-switcher .btn {
-      min-height: 2rem;
-      height: 2rem;
-      padding-inline: 0.55rem;
-      font-size: 0.74rem;
-      font-weight: 700;
+      min-height: 0.8rem;
+      height: 0.8rem;
+      padding-inline: 0.5rem;
+      font-size: 0.66rem;
+      font-weight: 500;
       border-radius: 0;
+
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush

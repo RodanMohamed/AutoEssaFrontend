@@ -39,7 +39,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
 
               <button
                 type="button"
-                class="btn btn-ghost btn-xs lg:hidden"
+                class="btn btn-ghost btn-xs  lg:hidden "
                 (click)="toggleMenu()"
                 aria-label="Toggle menu">
                 @if (!isMenuOpen()) {
@@ -55,10 +55,9 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
 
               <div class="hidden lg:flex items-center gap-2">
               @if (!isAuthenticated()) {
-                <a routerLink="/auth/login" class="btn btn-primary btn-xs header-cta">Login</a>
-                <a routerLink="/auth/register" class="btn btn-outline btn-xs header-cta">Register</a>
+                <a routerLink="/auth/login" class="btn btn-primary w-14  header-cta py-3 h-5 text-sm " style="border-radius: 0">Login</a>
               } @else {
-                <button type="button" class="btn btn-outline btn-xs header-cta" (click)="logout()">Logout</button>
+                <button type="button" class="btn btn-outline w-14 header-cta py-3 h-5 text-sm" (click)="logout()">Logout</button>
               }
               </div>
             </div>
@@ -81,8 +80,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
 
               <!-- Auth in Menu -->
               @if (!isAuthenticated()) {
-                <a routerLink="/auth/login" class="btn btn-primary btn-sm w-full" (click)="toggleMenu()">Login</a>
-                <a routerLink="/auth/register" class="btn btn-outline btn-sm w-full" (click)="toggleMenu()">Register</a>
+                <a routerLink="/auth/login" class="btn btn-primary " (click)="toggleMenu()">Login</a>
               } @else {
                 <button type="button" class="btn btn-outline btn-sm w-full" (click)="handleLogoutMobile()">Logout</button>
               }

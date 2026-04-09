@@ -1,7 +1,7 @@
 {
   "/api": {
-    "target": "http://www.autoessabackend.somee.com",
-    "secure": false,
+    "target": "https://www.autoessabackend.somee.com",
+    "secure": true,
     "changeOrigin": true,
     "logLevel": "debug"
   }

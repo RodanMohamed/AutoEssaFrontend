@@ -1,17 +1,14 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist/autoessa-frontend/browser",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "http://www.autoessabackend.somee.com/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://www.autoessabackend.somee.com/api/:path*"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/.*",
-      "dest": "/index.html"
+      "source": "/:path*",
+      "destination": "/index.html"
     }
   ]
 }

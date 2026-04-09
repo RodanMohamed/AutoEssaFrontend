@@ -78,6 +78,10 @@ export function extractApiErrorMessage(error: unknown, fallback: string): string
 			return 'Network error. Please check your connection and API availability.';
 		}
 
+		if (error.status === 401) {
+			return 'Invalid email or password. If this is a new backend environment, register a new account first.';
+		}
+
 		const payload = error.error;
 		if (typeof payload === 'string' && payload.trim().length > 0) {
 			return payload;
