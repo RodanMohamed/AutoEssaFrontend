@@ -21,15 +21,16 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
             <!-- Desktop Nav (center on large screens) -->
             <nav class="hidden items-center gap-1 lg:flex flex-1 justify-center" aria-label="Primary">
               <a mat-button routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-              @if (isAuthenticated()) {
+              @if (isAuthenticated() && !isAdmin()) {
                 <a mat-button routerLink="/cars" routerLinkActive="is-active">Cars</a>
                 <a mat-button routerLink="/request-car" routerLinkActive="is-active">Request Car</a>
                 <a mat-button routerLink="/account" routerLinkActive="is-active">My Account</a>
                 <a mat-button routerLink="/about" routerLinkActive="is-active">About</a>
                 <a mat-button routerLink="/contact" routerLinkActive="is-active">Contact</a>
-                @if (isAdmin()) {
-                  <a mat-button routerLink="/dashboard" routerLinkActive="is-active">Dashboard</a>
-                }
+              }
+
+              @if (isAdmin()) {
+                <a mat-button routerLink="/dashboard" routerLinkActive="is-active">Dashboard</a>
               }
             </nav>
 
@@ -67,15 +68,16 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
           @if (isMenuOpen()) {
             <nav class="mobile-menu flex flex-col gap-1 pt-2 lg:hidden border-t border-base-300 mt-2" aria-label="Mobile navigation">
               <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
-              @if (isAuthenticated()) {
+              @if (isAuthenticated() && !isAdmin()) {
                 <a class="mobile-link" routerLink="/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
                 <a class="mobile-link" routerLink="/request-car" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Request Car</a>
                 <a class="mobile-link" routerLink="/account" routerLinkActive="mobile-link-active" (click)="toggleMenu()">My Account</a>
                 <a class="mobile-link" routerLink="/about" routerLinkActive="mobile-link-active" (click)="toggleMenu()">About</a>
                 <a class="mobile-link" routerLink="/contact" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Contact</a>
-                @if (isAdmin()) {
-                  <a class="mobile-link" routerLink="/dashboard" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Dashboard</a>
-                }
+              }
+
+              @if (isAdmin()) {
+                <a class="mobile-link" routerLink="/dashboard" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Dashboard</a>
               }
 
               <!-- Auth in Menu -->

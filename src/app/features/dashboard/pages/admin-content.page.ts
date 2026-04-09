@@ -52,20 +52,20 @@ interface LocalizationSettingItem {
           <div class="card-body gap-4">
             <h2 class="card-title">Contact Information</h2>
             <form [formGroup]="contactForm" (ngSubmit)="saveContactInfo()" class="grid gap-4">
-              <label class="form-control">
-                <span class="label-text">Phone Number</span>
+              <label class="form-control ">
+                <span class="label-text mr-2 ">Phone Number</span>
                 <input class="input input-bordered" formControlName="phoneNumber" />
               </label>
               <label class="form-control">
-                <span class="label-text">WhatsApp Number</span>
+                <span class="label-text mr-2">WhatsApp Number</span>
                 <input class="input input-bordered" formControlName="whatsAppNumber" />
               </label>
               <label class="form-control">
-                <span class="label-text">Address</span>
+                <span class="label-text mr-2">Address</span>
                 <input class="input input-bordered" formControlName="address" />
               </label>
               <label class="form-control">
-                <span class="label-text">Google Maps URL</span>
+                <span class="label-text mr-2">Google Maps URL</span>
                 <input class="input input-bordered" formControlName="googleMapsUrl" />
               </label>
               <label class="form-control">
@@ -79,7 +79,7 @@ interface LocalizationSettingItem {
           </div>
         </article>
 
-        <article class="card border border-base-300 bg-base-100 shadow">
+        <!-- <article class="card border border-base-300 bg-base-100 shadow">
           <div class="card-body gap-4">
             <section class="flex flex-wrap items-center justify-between gap-3">
               <h2 class="card-title">Localization Settings</h2>
@@ -94,7 +94,7 @@ interface LocalizationSettingItem {
               }
             </div>
           </div>
-        </article>
+        </article> -->
       </section>
 
       <article class="card border border-base-300 bg-base-100 shadow">
@@ -171,24 +171,24 @@ interface LocalizationSettingItem {
         <article class="card border border-base-300 bg-base-100 shadow">
           <div class="card-body gap-4">
             <section class="flex flex-wrap items-center justify-between gap-3">
-              <h2 class="card-title">Home Page Content</h2>
+              <h2 class="card-title " >Home Page Content</h2>
               <button class="btn btn-sm" type="button" (click)="loadHomeContent()">Refresh</button>
             </section>
             <form [formGroup]="homeContentForm" (ngSubmit)="saveHomeContent()" class="grid gap-4">
               <label class="form-control">
-                <span class="label-text">Hero Headline</span>
+                <span class="label-text mr-2">Hero Headline</span>
                 <input class="input input-bordered" formControlName="heroHeadline" />
               </label>
               <label class="form-control">
-                <span class="label-text">Hero Sub Headline</span>
+                <span class="label-text mr-2">Hero Sub Headline</span>
                 <textarea class="textarea textarea-bordered" rows="3" formControlName="heroSubHeadline"></textarea>
               </label>
               <label class="form-control">
-                <span class="label-text">Hero CTA Text</span>
+                <span class="label-text mr-2">Hero CTA Text</span>
                 <input class="input input-bordered" formControlName="heroCtaText" />
               </label>
-              <label class="form-control">
-                <span class="label-text">Why Choose Us Text</span>
+              <label class="form-control ">
+                <span class="label-text mr-2">Why Choose Us Text</span>
                 <textarea class="textarea textarea-bordered" rows="4" formControlName="whyChooseUsText"></textarea>
               </label>
               <button class="btn btn-primary" type="submit" [disabled]="homeContentForm.invalid || isSavingHome()">
@@ -249,20 +249,20 @@ interface LocalizationSettingItem {
 
           <form [formGroup]="testimonialForm" (ngSubmit)="saveTestimonial()" class="grid gap-4 xl:grid-cols-4">
             <label class="form-control xl:col-span-1">
-              <span class="label-text">Customer Name</span>
+              <span class="label-text mr-2">Customer Name</span>
               <input class="input input-bordered" formControlName="customerName" />
             </label>
             <label class="form-control xl:col-span-1">
-              <span class="label-text">Rating</span>
+              <span class="label-text mr-2">Rating</span>
               <input class="input input-bordered" type="number" min="1" max="5" formControlName="rating" />
             </label>
             <label class="form-control xl:col-span-2">
-              <span class="label-text">Comment</span>
+              <span class="label-text mr-2">Comment</span>
               <input class="input input-bordered" formControlName="comment" />
             </label>
             <label class="label cursor-pointer justify-start gap-3 xl:col-span-4">
               <input class="checkbox checkbox-primary" type="checkbox" formControlName="isPublished" />
-              <span class="label-text">Published</span>
+              <span class="label-text mr-2">Published</span>
             </label>
             <div class="flex flex-wrap gap-2 xl:col-span-4">
               <button class="btn btn-primary" type="submit" [disabled]="testimonialForm.invalid || isSavingTestimonial()">

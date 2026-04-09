@@ -8,6 +8,8 @@ import { CarsApi } from '../data-access/cars.api';
 import { Car } from '../data-access/cars.interface';
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
 import { LocaleService } from '../../../core/services/locale.service';
+import { AuthStore } from '../../auth/data-access/auth.store';
+import { FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-car-details-page',
@@ -77,7 +79,106 @@ import { LocaleService } from '../../../core/services/locale.service';
           </div>
         </article>
 
-       
+          @if (isAdmin() && car()) {
+            <article class="card border border-base-300 bg-base-100 shadow xl:col-span-2">
+              <div class="card-body">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 class="card-title">Edit Car Details</h2>
+                    <p class="text-sm text-base-content/70">Update the car information or replace the main photo.</p>
+                  </div>
+                </div>
+
+                <form [formGroup]="editForm" (ngSubmit)="saveCarChanges()" class="grid gap-3 md:grid-cols-2">
+                  <label class="form-control">
+                    <span class="label-text">Brand</span>
+                    <input class="input input-bordered ml-2" formControlName="brand" type="text" />
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Model</span>
+                    <input class="input input-bordered ml-2" formControlName="model" type="text" />
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Name</span>
+                    <input class="input input-bordered ml-2" formControlName="name" type="text" />
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Year</span>
+                    <input class="input input-bordered ml-2" formControlName="year" type="number" />
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Price</span>
+                    <input class="input input-bordered ml-2" formControlName="price" type="number" />
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Mileage</span>
+                    <input class="input input-bordered ml-2" formControlName="mileage" type="number" />
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Car Type</span>
+                    <input class="input input-bordered ml-2" formControlName="carType" type="text" />
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Listing Type</span>
+                    <select class="select select-bordered ml-2" formControlName="listingType">
+                      <option value="Rent">Rent</option>
+                      <option value="Buy">Buy</option>
+                    </select>
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Fuel Type</span>
+                    <input class="input input-bordered ml-2" formControlName="fuelType" type="text" />
+                  </label>
+
+                  <label class="form-control">
+                    <span class="label-text">Transmission</span>
+                    <input class="input input-bordered ml-2" formControlName="transmissionType" type="text" />
+                  </label>
+
+                  <label class="form-control md:col-span-2">
+                    <span class="label-text">Location</span>
+                    <input class="input input-bordered ml-2" formControlName="location" type="text" />
+                  </label>
+
+                  <label class="form-control md:col-span-2">
+                    <span class="label-text">Main Photo</span>
+                    <input class="file-input file-input-bordered w-full" type="file" accept="image/*" (change)="onAdminImageSelected($event)" />
+                    @if (mainImagePreview()) {
+                      <div class="mt-3 overflow-hidden rounded-xl border border-base-300">
+                        <img [src]="mainImagePreview()" alt="Selected car photo" class="h-44 w-full object-cover" />
+                      </div>
+                    }
+                  </label>
+
+                  <label class="label cursor-pointer justify-start gap-3 md:col-span-2">
+                    <input class="checkbox checkbox-primary" type="checkbox" formControlName="isAvailable" />
+                    <span class="label-text">Available for listing</span>
+                  </label>
+
+                  @if (editMessage()) {
+                    <p class="md:col-span-2 text-sm" [class.text-success]="!editError()" [class.text-error]="editError()">{{ editMessage() }}</p>
+                  }
+
+                  <div class="md:col-span-2 flex flex-wrap gap-2">
+                    <button class="btn btn-primary" type="submit" [disabled]="isSavingCar()">
+                      {{ isSavingCar() ? 'Saving...' : 'Save Changes' }}
+                    </button>
+                    <button class="btn btn-ghost" type="button" (click)="reloadCar()">Refresh</button>
+                  </div>
+                </form>
+              </div>
+            </article>
+          }
+
+
       </section>
     }
   `,
@@ -88,13 +189,21 @@ export default class CarDetailsPage {
   private readonly carsApi = inject(CarsApi);
   private readonly api = inject(AutoessaApiService);
   private readonly localeService = inject(LocaleService);
+  private readonly authStore = inject(AuthStore);
+  private readonly fb = inject(FormBuilder);
 
   protected readonly car = signal<Car | null>(null);
   protected readonly reviews = signal<Array<{ fullName: string; rating: number; comment: string }>>([]);
   protected readonly isFavorite = signal(false);
   protected readonly actionStatus = signal('');
   protected readonly isError = signal(false);
+  protected readonly editMessage = signal('');
+  protected readonly editError = signal(false);
   protected readonly waLink = signal('');
+  protected readonly isSavingCar = signal(false);
+  protected readonly mainImageFile = signal<File | null>(null);
+  protected readonly mainImagePreview = signal('');
+  protected readonly isAdmin = computed(() => this.authStore.isAdmin());
   protected readonly copy = computed(() =>
     this.localeService.locale() === 'ar'
       ? {
@@ -166,9 +275,31 @@ export default class CarDetailsPage {
     comment: new FormControl('', { nonNullable: true })
   });
 
+  protected readonly editForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    brand: ['', Validators.required],
+    model: ['', Validators.required],
+    year: [new Date().getFullYear(), [Validators.required, Validators.min(1990)]],
+    price: [0, [Validators.required, Validators.min(1)]],
+    carType: ['Sedan', Validators.required],
+    listingType: ['Rent', Validators.required],
+    fuelType: ['Petrol', Validators.required],
+    transmissionType: ['Automatic', Validators.required],
+    mileage: [0, [Validators.required, Validators.min(0)]],
+    location: ['Cairo', Validators.required],
+    isAvailable: [true]
+  });
+
   constructor() {
+    this.reloadCar();
+  }
+
+  protected reloadCar() {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
-    this.carsApi.getCarById(id).subscribe((car) => this.car.set(car));
+    this.carsApi.getCarById(id).subscribe((car) => {
+      this.car.set(car);
+      this.patchEditForm(car);
+    });
     this.loadFavoriteState(id);
     this.loadReviews(id);
     this.loadWhatsAppLink(id);
@@ -282,6 +413,83 @@ export default class CarDetailsPage {
       });
   }
 
+  protected saveCarChanges() {
+    const currentCar = this.car();
+    if (!currentCar || this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSavingCar.set(true);
+    this.editMessage.set('');
+    this.editError.set(false);
+
+    const completeSave = (imageUrl: string) => {
+      const value = this.editForm.getRawValue();
+      this.api
+        .adminUpdateCar(currentCar.id, {
+          name: value.name,
+          brand: value.brand,
+          model: value.model,
+          year: Number(value.year),
+          price: Number(value.price),
+          carType: value.carType,
+          listingType: value.listingType,
+          fuelType: value.fuelType,
+          transmissionType: value.transmissionType,
+          mileage: Number(value.mileage),
+          location: value.location,
+          imageUrl,
+          coverImageUrl: imageUrl,
+          images: [imageUrl],
+          isAvailable: value.isAvailable
+        })
+        .subscribe({
+          next: () => {
+            this.isSavingCar.set(false);
+            this.editMessage.set('Car updated successfully.');
+            this.editError.set(false);
+            this.reloadCar();
+          },
+          error: (error: unknown) => {
+            this.isSavingCar.set(false);
+            this.editError.set(true);
+            this.editMessage.set(error instanceof Error ? error.message : 'Unable to update car now.');
+          }
+        });
+    };
+
+    const selectedFile = this.mainImageFile();
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append('files', selectedFile, selectedFile.name);
+
+      this.api.adminUploadCarImages(formData).subscribe({
+        next: (response) => {
+          const urls = this.extractUploadedUrls(response);
+          const imageUrl = urls[0] ?? '';
+          if (!imageUrl) {
+            this.isSavingCar.set(false);
+            this.editError.set(true);
+            this.editMessage.set('Upload succeeded but no image URL was returned.');
+            return;
+          }
+
+          completeSave(imageUrl);
+        },
+        error: (error: unknown) => {
+          this.isSavingCar.set(false);
+          this.editError.set(true);
+          this.editMessage.set(error instanceof Error ? error.message : 'Unable to upload car image now.');
+        }
+      });
+      return;
+    }
+
+    const imageUrl = this.mainImagePreview().trim() || currentCar.imageUrl;
+    completeSave(imageUrl);
+  }
+
   private loadFavoriteState(carId: string) {
     this.api.getMyFavorites().subscribe({
       next: (payload: unknown) => {
@@ -344,5 +552,64 @@ export default class CarDetailsPage {
         }
       }
     });
+  }
+
+  private patchEditForm(car: Car) {
+    this.editForm.patchValue({
+      name: car.name,
+      brand: car.brand,
+      model: car.model,
+      year: car.year,
+      price: car.price,
+      carType: car.carType,
+      listingType: car.listingType,
+      fuelType: car.fuelType,
+      transmissionType: car.transmissionType,
+      mileage: car.mileage,
+      location: car.location,
+      isAvailable: true
+    });
+    this.mainImageFile.set(null);
+    this.mainImagePreview.set(car.imageUrl);
+  }
+
+  protected onAdminImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+    this.mainImageFile.set(file);
+
+    if (!file) {
+      this.mainImagePreview.set(this.car()?.imageUrl ?? '');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      this.mainImagePreview.set(typeof result === 'string' ? result : '');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private extractUploadedUrls(payload: unknown): string[] {
+    if (Array.isArray(payload)) {
+      return payload.filter((item): item is string => typeof item === 'string');
+    }
+
+    if (typeof payload === 'object' && payload !== null) {
+      const source = payload as Record<string, unknown>;
+      const candidates = [source['urls'], source['imageUrls'], source['data'], source['value']];
+      for (const candidate of candidates) {
+        if (Array.isArray(candidate)) {
+          return candidate.filter((item): item is string => typeof item === 'string');
+        }
+      }
+
+      if (typeof source['url'] === 'string') {
+        return [source['url']];
+      }
+    }
+
+    return [];
   }
 }

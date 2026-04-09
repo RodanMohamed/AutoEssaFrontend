@@ -39,138 +39,22 @@ interface AdminCar {
 
       <article class="card border border-base-300 bg-base-100 shadow">
         <div class="card-body gap-4">
-          <h2 class="card-title">{{ selectedCarId() ? 'Edit Car' : 'Add New Car' }}</h2>
-
-          <form [formGroup]="carForm" (ngSubmit)="saveCar()" class="grid gap-4 md:grid-cols-2">
-            <label class="form-control w-full">
-              <span class="label-text">Brand</span>
-              <input class="input input-bordered w-full" formControlName="brand" />
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Model</span>
-              <input class="input input-bordered w-full" formControlName="model" />
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Name</span>
-              <input class="input input-bordered w-full" formControlName="name" />
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Year</span>
-              <input class="input input-bordered w-full" type="number" formControlName="year" />
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Price</span>
-              <input class="input input-bordered w-full" type="number" formControlName="price" />
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Mileage</span>
-              <input class="input input-bordered w-full" type="number" formControlName="mileage" />
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Car Type</span>
-              <input class="input input-bordered w-full" formControlName="carType" />
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Listing Type</span>
-              <select class="select select-bordered w-full" formControlName="listingType">
-                <option value="Rent">Rent</option>
-                <option value="Buy">Buy</option>
-              </select>
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Fuel Type</span>
-              <input class="input input-bordered w-full" formControlName="fuelType" />
-            </label>
-
-            <label class="form-control w-full">
-              <span class="label-text">Transmission</span>
-              <input class="input input-bordered w-full" formControlName="transmissionType" />
-            </label>
-
-            <label class="form-control w-full md:col-span-2">
-              <span class="label-text">Location</span>
-              <input class="input input-bordered w-full" formControlName="location" />
-            </label>
-
-            <label class="form-control w-full md:col-span-2">
-              <span class="label-text">Main Image URL</span>
-              <input class="input input-bordered w-full" formControlName="imageUrl" />
-            </label>
-
-            <label class="label cursor-pointer justify-start gap-3 md:col-span-2">
-              <input class="checkbox checkbox-primary" type="checkbox" formControlName="isAvailable" />
-              <span class="label-text">Available for listing</span>
-            </label>
-
-            @if (formError()) {
-              <p class="md:col-span-2 text-sm text-error">{{ formError() }}</p>
-            }
-
-            <div class="md:col-span-2 flex flex-wrap gap-2">
-              <button class="btn btn-primary" type="submit" [disabled]="isSaving()">
-                {{ isSaving() ? 'Saving...' : (selectedCarId() ? 'Update Car' : 'Create Car') }}
-              </button>
-              @if (selectedCarId()) {
-                <button class="btn btn-ghost" type="button" (click)="resetForm()">Cancel Edit</button>
-              }
-            </div>
-          </form>
-        </div>
-      </article>
-
-      <article class="card border border-base-300 bg-base-100 shadow">
-        <div class="card-body gap-4">
           <section class="flex flex-wrap items-center justify-between gap-2">
-            <h2 class="card-title">Upload Car Images</h2>
-            <span class="text-sm opacity-70">Attach one or more photos for the active inventory.</span>
+            <div>
+              <h2 class="card-title">Uploaded Cars ({{ carsCount() }})</h2>
+              <p class="text-sm opacity-70">These are the cars that appear in the home page and listing page.</p>
+            </div>
           </section>
 
-          <input class="file-input file-input-bordered w-full" type="file" multiple (change)="onFilesSelected($event)" />
-
-          <div class="flex flex-wrap gap-2">
-            <button class="btn" type="button" (click)="uploadImages()" [disabled]="selectedFiles().length === 0 || isUploading()">
-              {{ isUploading() ? 'Uploading...' : 'Upload Selected Images' }}
-            </button>
-          </div>
-
-          @if (uploadedImages().length > 0) {
-            <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              @for (image of uploadedImages(); track image) {
-                <article class="rounded-xl border border-base-300 p-3">
-                  <img [src]="image" alt="Car upload" class="h-36 w-full rounded-lg object-cover" />
-                  <div class="mt-3 flex items-center justify-between gap-2">
-                    <button class="btn btn-xs" type="button" (click)="useImageAsMain(image)">Use as Main</button>
-                    <button class="btn btn-xs btn-error" type="button" (click)="deleteImage(image)">Delete</button>
-                  </div>
-                </article>
-              }
-            </section>
-          }
-
-          @if (uploadMessage()) {
-            <p class="text-sm" [class]="uploadError() ? 'text-error' : 'text-success'">{{ uploadMessage() }}</p>
-          }
-        </div>
-      </article>
-
-      <article class="card border border-base-300 bg-base-100 shadow">
-        <div class="card-body gap-4">
-          <h2 class="card-title">Cars Inventory ({{ carsCount() }})</h2>
           <div class="overflow-x-auto">
             <table class="table table-zebra">
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Type</th>
+                  <th>Brand / Model</th>
+                  <th>Year</th>
                   <th>Price</th>
+                  <th>Location</th>
                   <th>Availability</th>
                   <th>Actions</th>
                 </tr>
@@ -179,8 +63,10 @@ interface AdminCar {
                 @for (car of cars(); track car.id) {
                   <tr>
                     <td>{{ car.name }}</td>
-                    <td>{{ car.listingType }} · {{ car.carType }}</td>
+                    <td>{{ car.brand }} {{ car.model }}</td>
+                    <td>{{ car.year }}</td>
                     <td>{{ car.price }}</td>
+                    <td>{{ car.location }}</td>
                     <td>
                       <span class="badge" [class]="car.isAvailable ? 'badge-success' : 'badge-ghost'">
                         {{ car.isAvailable ? 'Available' : 'Not Available' }}
@@ -188,7 +74,7 @@ interface AdminCar {
                     </td>
                     <td>
                       <div class="flex flex-wrap gap-2">
-                        <button class="btn btn-xs" type="button" (click)="startEdit(car)">Edit</button>
+                        <a class="btn btn-xs" [routerLink]="['/cars', car.id]">Edit</a>
                         <button class="btn btn-xs btn-error" type="button" (click)="removeCar(car.id)">Delete</button>
                       </div>
                     </td>
@@ -217,6 +103,8 @@ export default class AdminCarsPage {
   protected readonly isUploading = signal(false);
   protected readonly uploadMessage = signal('');
   protected readonly uploadError = signal(false);
+  protected readonly mainImageFile = signal<File | null>(null);
+  protected readonly mainImagePreview = signal('');
 
   protected readonly carsCount = computed(() => this.cars().length);
 
@@ -232,7 +120,6 @@ export default class AdminCarsPage {
     transmissionType: ['Automatic', Validators.required],
     mileage: [0, [Validators.required, Validators.min(0)]],
     location: ['Cairo', Validators.required],
-    imageUrl: ['', Validators.required],
     isAvailable: [true]
   });
 
@@ -248,25 +135,59 @@ export default class AdminCarsPage {
       return;
     }
 
+    if (!this.selectedCarId() && !this.mainImageFile() && this.mainImagePreview().trim().length === 0) {
+      this.formError.set('Please choose a main photo before saving the car.');
+      return;
+    }
+
     this.isSaving.set(true);
-    const payload = this.toCarPayload();
-    const selectedId = this.selectedCarId();
+    const finalizeSave = (imageUrl: string) => {
+      const payload = this.toCarPayload(imageUrl);
+      const selectedId = this.selectedCarId();
 
-    const request$ = selectedId
-      ? this.api.adminUpdateCar(selectedId, payload)
-      : this.api.adminCreateCar(payload);
+      const request$ = selectedId
+        ? this.api.adminUpdateCar(selectedId, payload)
+        : this.api.adminCreateCar(payload);
 
-    request$.subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.resetForm();
-        this.loadCars();
-      },
-      error: (error: unknown) => {
-        this.isSaving.set(false);
-        this.formError.set(this.extractError(error));
-      }
-    });
+      request$.subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.resetForm();
+          this.loadCars();
+        },
+        error: (error: unknown) => {
+          this.isSaving.set(false);
+          this.formError.set(this.extractError(error));
+        }
+      });
+    };
+
+    const chosenFile = this.mainImageFile();
+    if (chosenFile) {
+      const formData = new FormData();
+      formData.append('files', chosenFile, chosenFile.name);
+
+      this.api.adminUploadCarImages(formData).subscribe({
+        next: (response) => {
+          const urls = this.extractUrls(response);
+          const imageUrl = urls[0] ?? '';
+          if (!imageUrl) {
+            this.isSaving.set(false);
+            this.formError.set('Upload succeeded but no image URL was returned.');
+            return;
+          }
+
+          finalizeSave(imageUrl);
+        },
+        error: (error: unknown) => {
+          this.isSaving.set(false);
+          this.formError.set(this.extractError(error));
+        }
+      });
+      return;
+    }
+
+    finalizeSave(this.mainImagePreview());
   }
 
   protected startEdit(car: AdminCar) {
@@ -283,9 +204,10 @@ export default class AdminCarsPage {
       transmissionType: car.transmissionType,
       mileage: car.mileage,
       location: car.location,
-      imageUrl: car.imageUrl,
       isAvailable: car.isAvailable
     });
+    this.mainImageFile.set(null);
+    this.mainImagePreview.set(car.imageUrl);
   }
 
   protected resetForm() {
@@ -302,10 +224,11 @@ export default class AdminCarsPage {
       transmissionType: 'Automatic',
       mileage: 0,
       location: 'Cairo',
-      imageUrl: '',
       isAvailable: true
     });
     this.formError.set('');
+    this.mainImageFile.set(null);
+    this.mainImagePreview.set('');
   }
 
   protected removeCar(id: string) {
@@ -379,7 +302,26 @@ export default class AdminCarsPage {
   }
 
   protected useImageAsMain(imageUrl: string) {
-    this.carForm.patchValue({ imageUrl });
+    this.mainImageFile.set(null);
+    this.mainImagePreview.set(imageUrl);
+  }
+
+  protected onMainImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+    this.mainImageFile.set(file);
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result;
+        this.mainImagePreview.set(typeof result === 'string' ? result : '');
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    this.mainImagePreview.set('');
   }
 
   private loadCars() {
@@ -393,7 +335,7 @@ export default class AdminCarsPage {
     });
   }
 
-  private toCarPayload(): Record<string, unknown> {
+  private toCarPayload(imageUrl: string): Record<string, unknown> {
     const value = this.carForm.getRawValue();
     return {
       name: value.name,
@@ -407,9 +349,9 @@ export default class AdminCarsPage {
       transmissionType: value.transmissionType,
       mileage: Number(value.mileage),
       location: value.location,
-      imageUrl: value.imageUrl,
-      coverImageUrl: value.imageUrl,
-      images: [value.imageUrl],
+      imageUrl,
+      coverImageUrl: imageUrl,
+      images: [imageUrl],
       isAvailable: value.isAvailable
     };
   }
