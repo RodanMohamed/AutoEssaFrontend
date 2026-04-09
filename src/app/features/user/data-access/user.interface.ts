@@ -14,3 +14,9 @@ export interface BookingRequestItem {
 	status: string;
 }
 
+export interface UserProfile {
+	name: string;
+	phone: string;
+	email: string;
+}
+

@@ -3,8 +3,9 @@ import { RouterLink } from '@angular/router';
 
 import { LocaleService } from '../../../core/services/locale.service';
 import { UserFormComponent } from '../ui/user-form.component';
-import { FavoriteCarItem } from '../data-access/user.interface';
+import { FavoriteCarItem, UserProfile } from '../data-access/user.interface';
 import { UserService } from '../data-access/user.service';
+import { AuthStore } from '../../auth/data-access/auth.store';
 
 @Component({
 	selector: 'app-user-list-page',
@@ -22,7 +23,7 @@ import { UserService } from '../data-access/user.service';
 			<article class="card border border-base-300 bg-base-100 shadow">
 				<div class="card-body">
 					<h2 class="card-title">{{ copy().profileTitle }}</h2>
-					<app-user-form (submitted)="onProfileSave($event)" />
+					<app-user-form [initialProfile]="profile()" (submitted)="onProfileSave($event)" />
 					@if (savedMessage()) {
 						<p class="text-sm text-success">{{ savedMessage() }}</p>
 					}
@@ -63,8 +64,10 @@ import { UserService } from '../data-access/user.service';
 export default class UserListPage {
 	private readonly userService = inject(UserService);
 	private readonly localeService = inject(LocaleService);
+	private readonly authStore = inject(AuthStore);
 
 	protected readonly favorites = signal<FavoriteCarItem[]>([]);
+	protected readonly profile = signal<UserProfile>({ name: '', phone: '', email: '' });
 	protected readonly savedMessage = signal('');
 	protected readonly copy = computed(() =>
 		this.localeService.locale() === 'ar'
@@ -89,10 +92,19 @@ export default class UserListPage {
 	);
 
 	constructor() {
+		this.loadProfile();
 		this.loadFavorites();
 	}
 
-	protected onProfileSave(value: { name: string; phone: string }) {
+	protected onProfileSave(value: UserProfile) {
+		const session = this.authStore.session();
+		if (!session) {
+			this.savedMessage.set('Please login again to update your profile.');
+			return;
+		}
+
+		this.userService.saveProfile(session.user.id, value);
+		this.profile.set(value);
 		this.savedMessage.set(`Profile saved for ${value.name}.`);
 	}
 
@@ -117,6 +129,22 @@ export default class UserListPage {
 				this.favorites.set([]);
 			}
 		});
+	}
+
+	private loadProfile() {
+		const session = this.authStore.session();
+		if (!session) {
+			this.profile.set({ name: '', phone: '', email: '' });
+			return;
+		}
+
+		const seededProfile: UserProfile = {
+			name: session.user.fullName,
+			phone: this.userService.getLocalRegisteredPhoneByEmail(session.user.email),
+			email: session.user.email
+		};
+
+		this.profile.set(this.userService.getProfile(session.user.id, seededProfile));
 	}
 }
 

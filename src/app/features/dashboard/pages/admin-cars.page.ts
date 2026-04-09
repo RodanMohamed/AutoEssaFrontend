@@ -408,6 +408,7 @@ export default class AdminCarsPage {
       mileage: Number(value.mileage),
       location: value.location,
       imageUrl: value.imageUrl,
+      coverImageUrl: value.imageUrl,
       images: [value.imageUrl],
       isAvailable: value.isAvailable
     };
@@ -455,6 +456,10 @@ export default class AdminCarsPage {
   private extractImageUrl(record: Record<string, unknown>): string {
     if (typeof record['imageUrl'] === 'string') {
       return record['imageUrl'];
+    }
+
+    if (typeof record['coverImageUrl'] === 'string') {
+      return record['coverImageUrl'];
     }
 
     const images = record['images'];

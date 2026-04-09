@@ -40,8 +40,11 @@ export class AuthApi {
 		const source = typeof response === 'object' && response !== null ? (response as Record<string, unknown>) : {};
 		const tokenValue = source['accessToken'] ?? source['token'] ?? source['jwtToken'];
 		const roleValue = source['role'];
+		const rolesValue = source['roles'];
 		const idValue = source['userId'] ?? source['id'];
 		const userNameValue = source['username'];
+		const isAdminFromRole = roleValue === 'Admin';
+		const isAdminFromRoles = Array.isArray(rolesValue) && rolesValue.some((item) => item === 'Admin');
 
 		return {
 			accessToken: typeof tokenValue === 'string' ? tokenValue : 'local-dev-session-token',
@@ -50,7 +53,7 @@ export class AuthApi {
 				username: typeof userNameValue === 'string' ? userNameValue : username,
 				fullName,
 				email,
-				role: roleValue === 'Admin' ? 'Admin' : 'User'
+				role: isAdminFromRole || isAdminFromRoles ? 'Admin' : 'User'
 			}
 		};
 	}

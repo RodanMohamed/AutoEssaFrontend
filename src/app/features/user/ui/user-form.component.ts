@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { UserProfile } from '../data-access/user.interface';
 
 @Component({
 	selector: 'app-user-form',
@@ -9,6 +11,10 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 			<label class="form-control">
 				<span class="label-text">Name</span>
 				<input class="input input-bordered" formControlName="name" type="text" />
+			</label>
+			<label class="form-control">
+				<span class="label-text">Email</span>
+				<input class="input input-bordered" formControlName="email" type="email" />
 			</label>
 			<label class="form-control">
 				<span class="label-text">Phone</span>
@@ -22,12 +28,29 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 	changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserFormComponent {
-	readonly submitted = output<{ name: string; phone: string }>();
+	readonly initialProfile = input<UserProfile | null>(null);
+	readonly submitted = output<UserProfile>();
 
 	protected readonly form = new FormGroup({
 		name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+		email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
 		phone: new FormControl('', { nonNullable: true, validators: [Validators.required] })
 	});
+
+	constructor() {
+		effect(() => {
+			const profile = this.initialProfile();
+			if (!profile) {
+				return;
+			}
+
+			this.form.patchValue({
+				name: profile.name,
+				email: profile.email,
+				phone: profile.phone
+			}, { emitEvent: false });
+		});
+	}
 
 	protected submit() {
 		if (this.form.invalid) {

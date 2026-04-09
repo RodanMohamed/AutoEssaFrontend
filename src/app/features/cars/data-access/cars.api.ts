@@ -122,6 +122,10 @@ export class CarsApi {
       return record['imageUrl'];
     }
 
+    if (typeof record['coverImageUrl'] === 'string') {
+      return record['coverImageUrl'];
+    }
+
     const images = record['images'];
     if (Array.isArray(images) && images.length > 0) {
       const first = images[0];
