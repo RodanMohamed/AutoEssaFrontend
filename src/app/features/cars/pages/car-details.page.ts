@@ -193,7 +193,6 @@ export default class CarDetailsPage {
   private readonly fb = inject(FormBuilder);
 
   protected readonly car = signal<Car | null>(null);
-  protected readonly reviews = signal<Array<{ fullName: string; rating: number; comment: string }>>([]);
   protected readonly isFavorite = signal(false);
   protected readonly actionStatus = signal('');
   protected readonly isError = signal(false);
@@ -222,12 +221,7 @@ export default class CarDetailsPage {
           endDateLabel: 'تاريخ النهاية',
           messageLabel: 'رسالة',
           sendRequestButton: 'إرسال الطلب',
-          availabilityButton: 'تحقق من التوفر',
-          reviewsTitle: 'التقييمات',
-          reviewNameLabel: 'الاسم',
-          ratingLabel: 'التقييم',
-          submitReviewButton: 'إرسال التقييم',
-          commentLabel: 'التعليق'
+          availabilityButton: 'تحقق من التوفر'
         }
       : {
           transmissionLabel: 'Transmission',
@@ -245,12 +239,7 @@ export default class CarDetailsPage {
           endDateLabel: 'End Date',
           messageLabel: 'Message',
           sendRequestButton: 'Send Request',
-          availabilityButton: 'Check Availability',
-          reviewsTitle: 'Reviews',
-          reviewNameLabel: 'Name',
-          ratingLabel: 'Rating',
-          submitReviewButton: 'Submit Review',
-          commentLabel: 'Comment'
+          availabilityButton: 'Check Availability'
         }
   );
   protected readonly listingTypeLabel = computed(() =>
@@ -267,12 +256,6 @@ export default class CarDetailsPage {
     message: new FormControl('', { nonNullable: true }),
     startDate: new FormControl<string | null>(null),
     endDate: new FormControl<string | null>(null)
-  });
-
-  protected readonly reviewForm = new FormGroup({
-    fullName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    rating: new FormControl(5, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(5)] }),
-    comment: new FormControl('', { nonNullable: true })
   });
 
   protected readonly editForm = this.fb.nonNullable.group({
@@ -301,7 +284,6 @@ export default class CarDetailsPage {
       this.patchEditForm(car);
     });
     this.loadFavoriteState(id);
-    this.loadReviews(id);
     this.loadWhatsAppLink(id);
   }
 
@@ -383,34 +365,6 @@ export default class CarDetailsPage {
         this.actionStatus.set('Could not verify availability now.');
       }
     });
-  }
-
-  protected submitReview() {
-    const carId = this.car()?.id;
-    if (!carId || this.reviewForm.invalid) {
-      return;
-    }
-
-    const value = this.reviewForm.getRawValue();
-    this.api
-      .createReview({
-        carId,
-        fullName: value.fullName,
-        rating: value.rating,
-        comment: value.comment || null
-      })
-      .subscribe({
-        next: () => {
-          this.isError.set(false);
-          this.actionStatus.set('Review submitted.');
-          this.reviewForm.reset({ fullName: '', rating: 5, comment: '' });
-          this.loadReviews(carId);
-        },
-        error: () => {
-          this.isError.set(true);
-          this.actionStatus.set('Unable to submit review now.');
-        }
-      });
   }
 
   protected saveCarChanges() {
@@ -510,28 +464,6 @@ export default class CarDetailsPage {
         this.isFavorite.set(isFav);
       },
       error: () => this.isFavorite.set(false)
-    });
-  }
-
-  private loadReviews(carId: string) {
-    this.api.getCarReviews(carId).subscribe({
-      next: (payload: unknown) => {
-        if (!Array.isArray(payload)) {
-          this.reviews.set([]);
-          return;
-        }
-
-        const mapped = payload.map((item) => {
-          const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
-          return {
-            fullName: typeof record['fullName'] === 'string' ? record['fullName'] : 'Customer',
-            rating: typeof record['rating'] === 'number' ? record['rating'] : 5,
-            comment: typeof record['comment'] === 'string' ? record['comment'] : ''
-          };
-        });
-        this.reviews.set(mapped);
-      },
-      error: () => this.reviews.set([])
     });
   }
 

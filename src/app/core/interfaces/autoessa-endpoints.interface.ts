@@ -26,14 +26,6 @@ export interface CreateContactMessagePayload {
   message: string;
 }
 
-export interface CreateReviewPayload {
-  carId: string;
-  userId?: string | null;
-  fullName: string;
-  rating: number;
-  comment?: string | null;
-}
-
 export interface LoginPayload {
   email: string;
   password: string;
@@ -52,20 +44,6 @@ export interface UpdateStatusPayload {
 
 export interface UpdateUserBlockPayload {
   isBlocked: boolean;
-}
-
-export interface UpdateReviewApprovalPayload {
-  isApproved: boolean;
-}
-
-export interface UpdateTestimonialPublishPayload {
-  isPublished: boolean;
-}
-
-export interface UpsertTestimonialPayload {
-  customerName: string;
-  comment: string;
-  rating: number;
 }
 
 export interface UpdateContactInfoPayload {

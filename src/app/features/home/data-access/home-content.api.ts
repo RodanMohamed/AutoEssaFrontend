@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, map, of } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/core.config';
-import { HomeContent, LocalizationSetting, Testimonial } from './home-content.interface';
+import { HomeContent, LocalizationSetting } from './home-content.interface';
 
 @Injectable({ providedIn: 'root' })
 export class HomeContentApi {
@@ -13,13 +13,6 @@ export class HomeContentApi {
     return this.http.get<unknown>(`${API_BASE_URL}/api/Content/homepage`).pipe(
       map((payload) => this.toHomeContent(payload)),
       catchError(() => of(this.defaultHomeContent()))
-    );
-  }
-
-  getTestimonials() {
-    return this.http.get<unknown>(`${API_BASE_URL}/api/Content/testimonials`).pipe(
-      map((payload) => this.toTestimonials(payload)),
-      catchError(() => of(this.defaultTestimonials()))
     );
   }
 
@@ -40,19 +33,6 @@ export class HomeContentApi {
     };
   }
 
-  private toTestimonials(payload: unknown): Testimonial[] {
-    const items = this.extractCollection(payload);
-    return items.map((item, index) => {
-      const source = this.toRecord(item);
-      return {
-        id: this.readString(source, 'id', `testimonial-${index + 1}`),
-        customerName: this.readString(source, 'customerName', 'Customer'),
-        comment: this.readString(source, 'comment', ''),
-        rating: this.readNumber(source, 'rating', 5)
-      };
-    });
-  }
-
   private toLocalization(payload: unknown): LocalizationSetting[] {
     const source = this.toRecord(payload);
     return Object.entries(source).map(([key, value]) => ({
@@ -68,13 +48,6 @@ export class HomeContentApi {
       heroCtaText: 'Browse Featured Cars',
       whyChooseUsText: 'Verified cars, transparent pricing, and responsive support.'
     };
-  }
-
-  private defaultTestimonials(): Testimonial[] {
-    return [
-      { id: 'testimonial-1', customerName: 'Amina', comment: 'Fast response and a clean process.', rating: 5 },
-      { id: 'testimonial-2', customerName: 'Omar', comment: 'Great car selection and honest pricing.', rating: 5 }
-    ];
   }
 
   private extractCollection(payload: unknown): unknown[] {

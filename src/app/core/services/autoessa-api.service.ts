@@ -6,16 +6,12 @@ import {
   CreateBookingRequestPayload,
   CreateCarRequestLeadPayload,
   CreateContactMessagePayload,
-  CreateReviewPayload,
   LoginPayload,
   RegisterPayload,
   UpdateContactInfoPayload,
   UpdateHomePageContentPayload,
-  UpdateReviewApprovalPayload,
   UpdateStatusPayload,
-  UpdateTestimonialPublishPayload,
-  UpdateUserBlockPayload,
-  UpsertTestimonialPayload
+  UpdateUserBlockPayload
 } from '../interfaces/autoessa-endpoints.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -42,15 +38,12 @@ export class AutoessaApiService {
   getMyFavorites() { return this.http.get(`${API_BASE_URL}/api/Favorites/me`); }
   addFavorite(carId: string) { return this.http.post(`${API_BASE_URL}/api/Favorites/${carId}`, {}); }
   removeFavorite(carId: string) { return this.http.delete(`${API_BASE_URL}/api/Favorites/${carId}`); }
-  getCarReviews(carId: string) { return this.http.get(`${API_BASE_URL}/api/Reviews/car/${carId}`); }
-  createReview(payload: CreateReviewPayload) { return this.http.post(`${API_BASE_URL}/api/Reviews`, payload); }
   getWhatsAppLink(carId: string) { return this.http.get(`${API_BASE_URL}/api/WhatsApp/car/${carId}`); }
 
   // Content and contact
   getContactInfo() { return this.http.get(`${API_BASE_URL}/api/Contact/info`); }
   createContactMessage(payload: CreateContactMessagePayload) { return this.http.post(`${API_BASE_URL}/api/Contact/messages`, payload); }
   getHomeContent() { return this.http.get(`${API_BASE_URL}/api/Content/homepage`); }
-  getTestimonials() { return this.http.get(`${API_BASE_URL}/api/Content/testimonials`); }
   getLocalizationSettings() { return this.http.get(`${API_BASE_URL}/api/Localization/settings`); }
 
   // Admin booking and car requests
@@ -86,22 +79,8 @@ export class AutoessaApiService {
     return this.http.patch(`${API_BASE_URL}/api/admin/contact/messages/${id}/status`, payload);
   }
   adminUpdateHomeContent(payload: UpdateHomePageContentPayload) { return this.http.put(`${API_BASE_URL}/api/admin/content/homepage`, payload); }
-  adminGetTestimonials() { return this.http.get(`${API_BASE_URL}/api/admin/content/testimonials`); }
-  adminCreateTestimonial(payload: UpsertTestimonialPayload) { return this.http.post(`${API_BASE_URL}/api/admin/content/testimonials`, payload); }
-  adminUpdateTestimonial(id: string, payload: UpsertTestimonialPayload) { return this.http.put(`${API_BASE_URL}/api/admin/content/testimonials/${id}`, payload); }
-  adminDeleteTestimonial(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/content/testimonials/${id}`); }
-  adminPublishTestimonial(id: string, payload: UpdateTestimonialPublishPayload) {
-    return this.http.patch(`${API_BASE_URL}/api/admin/content/testimonials/${id}/publish`, payload);
-  }
 
-  // Admin reviews and users
-  adminGetReviews(isApproved?: boolean) {
-    const params = typeof isApproved === 'boolean' ? new HttpParams().set('isApproved', String(isApproved)) : undefined;
-    return this.http.get(`${API_BASE_URL}/api/admin/reviews`, { params });
-  }
-  adminUpdateReviewApproval(id: string, payload: UpdateReviewApprovalPayload) {
-    return this.http.patch(`${API_BASE_URL}/api/admin/reviews/${id}/approval`, payload);
-  }
+  // Admin users
   adminGetUsers() { return this.http.get(`${API_BASE_URL}/api/admin/users`); }
   adminBlockUser(id: string, payload: UpdateUserBlockPayload) { return this.http.patch(`${API_BASE_URL}/api/admin/users/${id}/block`, payload); }
   adminDeleteUser(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/users/${id}`); }

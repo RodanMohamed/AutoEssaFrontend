@@ -11,15 +11,6 @@ interface AdminUser {
   isBlocked: boolean;
 }
 
-interface AdminReview {
-  id: string;
-  carName: string;
-  fullName: string;
-  rating: number;
-  comment: string;
-  isApproved: boolean;
-}
-
 @Component({
   selector: 'app-admin-moderation-page',
   template: `
@@ -79,49 +70,6 @@ interface AdminReview {
         </div>
       </article>
 
-      <article class="card border border-base-300 bg-base-100 shadow">
-        <div class="card-body gap-4">
-          <section class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="card-title">Reviews ({{ reviewsCount() }})</h2>
-            <button class="btn btn-sm" type="button" (click)="loadReviews()">Refresh Reviews</button>
-          </section>
-
-          <div class="overflow-x-auto">
-            <table class="table table-zebra">
-              <thead>
-                <tr>
-                  <th>Customer</th>
-                  <th>Car</th>
-                  <th>Rating</th>
-                  <th>Comment</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (review of reviews(); track review.id) {
-                  <tr>
-                    <td>{{ review.fullName }}</td>
-                    <td>{{ review.carName }}</td>
-                    <td>{{ review.rating }}</td>
-                    <td>{{ review.comment }}</td>
-                    <td>
-                      <span class="badge" [class]="review.isApproved ? 'badge-success' : 'badge-warning'">
-                        {{ review.isApproved ? 'Approved' : 'Pending' }}
-                      </span>
-                    </td>
-                    <td>
-                      <button class="btn btn-xs" type="button" (click)="toggleReviewApproval(review)">
-                        {{ review.isApproved ? 'Set Pending' : 'Approve' }}
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </article>
     </section>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -130,16 +78,13 @@ export default class AdminModerationPage {
   private readonly api = inject(AutoessaApiService);
 
   protected readonly users = signal<AdminUser[]>([]);
-  protected readonly reviews = signal<AdminReview[]>([]);
   protected readonly message = signal('');
   protected readonly isError = signal(false);
 
   protected readonly usersCount = computed(() => this.users().length);
-  protected readonly reviewsCount = computed(() => this.reviews().length);
 
   constructor() {
     this.loadUsers();
-    this.loadReviews();
   }
 
   protected loadUsers() {
@@ -149,17 +94,6 @@ export default class AdminModerationPage {
       },
       error: () => {
         this.users.set([]);
-      }
-    });
-  }
-
-  protected loadReviews() {
-    this.api.adminGetReviews().subscribe({
-      next: (response) => {
-        this.reviews.set(this.mapReviews(response));
-      },
-      error: () => {
-        this.reviews.set([]);
       }
     });
   }
@@ -192,20 +126,6 @@ export default class AdminModerationPage {
     });
   }
 
-  protected toggleReviewApproval(review: AdminReview) {
-    this.api.adminUpdateReviewApproval(review.id, { isApproved: !review.isApproved }).subscribe({
-      next: () => {
-        this.message.set(`Review ${review.isApproved ? 'set to pending' : 'approved'} successfully.`);
-        this.isError.set(false);
-        this.loadReviews();
-      },
-      error: (error: unknown) => {
-        this.message.set(this.extractError(error));
-        this.isError.set(true);
-      }
-    });
-  }
-
   private mapUsers(payload: unknown): AdminUser[] {
     return this.extractCollection(payload).map((item, index) => {
       const source = this.toRecord(item);
@@ -216,20 +136,6 @@ export default class AdminModerationPage {
         phoneNumber: this.readString(source, 'phoneNumber', '-'),
         role: this.readString(source, 'role', 'User'),
         isBlocked: this.readBoolean(source, 'isBlocked', false)
-      };
-    });
-  }
-
-  private mapReviews(payload: unknown): AdminReview[] {
-    return this.extractCollection(payload).map((item, index) => {
-      const source = this.toRecord(item);
-      return {
-        id: this.readString(source, 'id', `review-${index + 1}`),
-        carName: this.readString(source, 'carName', this.readString(source, 'carTitle', 'N/A')),
-        fullName: this.readString(source, 'fullName', this.readString(source, 'customerName', 'Unknown')),
-        rating: this.readNumber(source, 'rating', 0),
-        comment: this.readString(source, 'comment', '-'),
-        isApproved: this.readBoolean(source, 'isApproved', false)
       };
     });
   }

@@ -13,14 +13,6 @@ interface ContactMessageItem {
   statusLabel: string;
 }
 
-interface TestimonialItem {
-  id: string;
-  customerName: string;
-  comment: string;
-  rating: number;
-  isPublished: boolean;
-}
-
 interface LocalizationSettingItem {
   key: string;
   value: string;
@@ -232,78 +224,6 @@ interface LocalizationSettingItem {
         </article>
       </section>
 
-      <article class="card border border-base-300 bg-base-100 shadow">
-        <div class="card-body gap-4">
-          <section class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="card-title">Testimonials</h2>
-            <button class="btn btn-sm" type="button" (click)="loadTestimonials()">Refresh</button>
-          </section>
-
-          <form [formGroup]="testimonialForm" (ngSubmit)="saveTestimonial()" class="grid gap-4 xl:grid-cols-4">
-            <label class="form-control content-form-row xl:col-span-1">
-              <span class="label-text content-form-label">Customer Name</span>
-              <input class="input input-bordered" formControlName="customerName" />
-            </label>
-            <label class="form-control content-form-row xl:col-span-1">
-              <span class="label-text content-form-label">Rating</span>
-              <input class="input input-bordered" type="number" min="1" max="5" formControlName="rating" />
-            </label>
-            <label class="form-control content-form-row xl:col-span-2">
-              <span class="label-text content-form-label">Comment</span>
-              <input class="input input-bordered" formControlName="comment" />
-            </label>
-            <label class="label cursor-pointer justify-start gap-3 xl:col-span-4">
-              <input class="checkbox checkbox-primary" type="checkbox" formControlName="isPublished" />
-              <span class="label-text mr-2">Published</span>
-            </label>
-            <div class="flex flex-wrap gap-2 xl:col-span-4">
-              <button class="btn btn-primary" type="submit" [disabled]="testimonialForm.invalid || isSavingTestimonial()">
-                {{ isSavingTestimonial() ? 'Saving...' : (selectedTestimonialId() ? 'Update Testimonial' : 'Create Testimonial') }}
-              </button>
-              @if (selectedTestimonialId()) {
-                <button class="btn btn-ghost" type="button" (click)="resetTestimonialForm()">Cancel Edit</button>
-              }
-            </div>
-          </form>
-
-          <div class="overflow-x-auto">
-            <table class="table table-zebra">
-              <thead>
-                <tr>
-                  <th>Customer</th>
-                  <th>Comment</th>
-                  <th>Rating</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (testimonial of testimonials(); track testimonial.id) {
-                  <tr>
-                    <td>{{ testimonial.customerName }}</td>
-                    <td>{{ testimonial.comment }}</td>
-                    <td>{{ testimonial.rating }}</td>
-                    <td>
-                      <span class="badge" [class]="testimonial.isPublished ? 'badge-success' : 'badge-warning'">
-                        {{ testimonial.isPublished ? 'Published' : 'Hidden' }}
-                      </span>
-                    </td>
-                    <td>
-                      <div class="flex flex-wrap gap-2">
-                        <button class="btn btn-xs" type="button" (click)="editTestimonial(testimonial)">Edit</button>
-                        <button class="btn btn-xs btn-ghost" type="button" (click)="togglePublish(testimonial)">
-                          {{ testimonial.isPublished ? 'Unpublish' : 'Publish' }}
-                        </button>
-                        <button class="btn btn-xs btn-error" type="button" (click)="deleteTestimonial(testimonial.id)">Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </article>
     </section>
   `,
   styles: `
@@ -352,10 +272,7 @@ export default class AdminContentPage {
   protected readonly isError = signal(false);
   protected readonly isSavingContact = signal(false);
   protected readonly isSavingHome = signal(false);
-  protected readonly isSavingTestimonial = signal(false);
-  protected readonly selectedTestimonialId = signal<string | null>(null);
   protected readonly contactMessages = signal<ContactMessageItem[]>([]);
-  protected readonly testimonials = signal<TestimonialItem[]>([]);
   protected readonly localizationSettings = signal<LocalizationSettingItem[]>([]);
   protected readonly branches = this.branchService.branches;
 
@@ -374,13 +291,6 @@ export default class AdminContentPage {
     whyChooseUsText: ['', Validators.required]
   });
 
-  protected readonly testimonialForm = this.fb.nonNullable.group({
-    customerName: ['', Validators.required],
-    comment: ['', Validators.required],
-    rating: [5, [Validators.required, Validators.min(1), Validators.max(5)]],
-    isPublished: [true]
-  });
-
   protected readonly branchForm = this.fb.nonNullable.group({
     id: ['branch-1', Validators.required],
     name: ['Nasr City Branch', Validators.required],
@@ -390,7 +300,6 @@ export default class AdminContentPage {
   });
 
   protected readonly contactMessageCount = computed(() => this.contactMessages().length);
-  protected readonly testimonialCount = computed(() => this.testimonials().length);
 
   constructor() {
     this.loadAll();
@@ -400,7 +309,6 @@ export default class AdminContentPage {
   protected loadAll() {
     this.loadContactMessages();
     this.loadHomeContent();
-    this.loadTestimonials();
     this.loadLocalization();
   }
 
@@ -422,13 +330,6 @@ export default class AdminContentPage {
           whyChooseUsText: this.readString(value, 'whyChooseUsText', '')
         });
       }
-    });
-  }
-
-  protected loadTestimonials() {
-    this.api.adminGetTestimonials().subscribe({
-      next: (response) => this.testimonials.set(this.mapTestimonials(response)),
-      error: () => this.testimonials.set([])
     });
   }
 
@@ -502,85 +403,6 @@ export default class AdminContentPage {
     });
   }
 
-  protected saveTestimonial() {
-    if (this.testimonialForm.invalid) {
-      this.testimonialForm.markAllAsTouched();
-      return;
-    }
-
-    this.isSavingTestimonial.set(true);
-    this.message.set('');
-
-    const payload = this.testimonialForm.getRawValue();
-    const selectedId = this.selectedTestimonialId();
-    const request$ = selectedId
-      ? this.api.adminUpdateTestimonial(selectedId, payload)
-      : this.api.adminCreateTestimonial(payload);
-
-    request$.subscribe({
-      next: () => {
-        this.isSavingTestimonial.set(false);
-        this.resetTestimonialForm();
-        this.loadTestimonials();
-        this.message.set(selectedId ? 'Testimonial updated successfully.' : 'Testimonial created successfully.');
-        this.isError.set(false);
-      },
-      error: (error: unknown) => {
-        this.isSavingTestimonial.set(false);
-        this.message.set(this.extractError(error));
-        this.isError.set(true);
-      }
-    });
-  }
-
-  protected editTestimonial(item: TestimonialItem) {
-    this.selectedTestimonialId.set(item.id);
-    this.testimonialForm.patchValue({
-      customerName: item.customerName,
-      comment: item.comment,
-      rating: item.rating,
-      isPublished: item.isPublished
-    });
-  }
-
-  protected resetTestimonialForm() {
-    this.selectedTestimonialId.set(null);
-    this.testimonialForm.reset({
-      customerName: '',
-      comment: '',
-      rating: 5,
-      isPublished: true
-    });
-  }
-
-  protected togglePublish(item: TestimonialItem) {
-    this.api.adminPublishTestimonial(item.id, { isPublished: !item.isPublished }).subscribe({
-      next: () => {
-        this.message.set(`Testimonial ${item.isPublished ? 'hidden' : 'published'} successfully.`);
-        this.isError.set(false);
-        this.loadTestimonials();
-      },
-      error: (error: unknown) => {
-        this.message.set(this.extractError(error));
-        this.isError.set(true);
-      }
-    });
-  }
-
-  protected deleteTestimonial(id: string) {
-    this.api.adminDeleteTestimonial(id).subscribe({
-      next: () => {
-        this.message.set('Testimonial deleted successfully.');
-        this.isError.set(false);
-        this.loadTestimonials();
-      },
-      error: (error: unknown) => {
-        this.message.set(this.extractError(error));
-        this.isError.set(true);
-      }
-    });
-  }
-
   protected editBranch(branch: BranchLocation) {
     this.branchForm.reset({
       id: branch.id,
@@ -640,19 +462,6 @@ export default class AdminContentPage {
         message: this.readString(source, 'message', '-'),
         status,
         statusLabel: this.statusLabel(status)
-      };
-    });
-  }
-
-  private mapTestimonials(payload: unknown): TestimonialItem[] {
-    return this.extractCollection(payload).map((item, index) => {
-      const source = this.toRecord(item);
-      return {
-        id: this.readString(source, 'id', `testimonial-${index + 1}`),
-        customerName: this.readString(source, 'customerName', 'Unknown'),
-        comment: this.readString(source, 'comment', '-'),
-        rating: this.readNumber(source, 'rating', 0),
-        isPublished: this.readBoolean(source, 'isPublished', false)
       };
     });
   }

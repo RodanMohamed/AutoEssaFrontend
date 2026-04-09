@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CarsApi } from '../../cars/data-access/cars.api';
 import { Car } from '../../cars/data-access/cars.interface';
 import { HomeContentApi } from '../data-access/home-content.api';
-import { HomeContent, Testimonial } from '../data-access/home-content.interface';
+import { HomeContent } from '../data-access/home-content.interface';
 import { CarCardComponent } from '../../../shared/ui/car-card.component';
 import { HeroSectionComponent } from '../ui/hero-section.component';
 import { QuickSearchComponent } from '../ui/quick-search.component';
@@ -65,22 +65,19 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
           <article class="rounded-4xl border border-base-300 bg-base-100 shadow-lg">
             <div class="space-y-4 p-6 md:p-8">
               <div class="flex items-center justify-between gap-3">
-                <h3 class="font-serif text-2xl">{{ copy().testimonialsTitle }}</h3>
-                <span class="badge badge-outline">{{ testimonials().length }} {{ copy().testimonialCountLabel }}</span>
+                <h3 class="font-serif text-2xl">{{ copy().categoriesTitle }}</h3>
+                <span class="badge badge-outline">{{ copy().categoryBadge }}</span>
               </div>
+              <p class="text-base-content/75">{{ copy().categoriesBody }}</p>
               <div class="space-y-3">
-                @for (testimonial of testimonials(); track testimonial.id) {
-                  <article class="rounded-2xl border border-base-300 bg-base-200/40 p-4">
-                    <div class="flex items-start justify-between gap-3">
-                      <div>
-                        <p class="font-semibold">{{ testimonial.customerName }}</p>
-                        <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().reviewLabel }}</p>
-                      </div>
-                      <span class="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">{{ testimonial.rating }}/5</span>
-                    </div>
-                    <p class="mt-3 text-sm text-base-content/75">{{ testimonial.comment }}</p>
-                  </article>
-                }
+                <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
+                  <p class="font-semibold">{{ copy().rentCategoryTitle }}</p>
+                  <p class="text-sm text-base-content/70">{{ copy().rentCategoryBody }}</p>
+                </div>
+                <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
+                  <p class="font-semibold">{{ copy().buyCategoryTitle }}</p>
+                  <p class="text-sm text-base-content/70">{{ copy().buyCategoryBody }}</p>
+                </div>
               </div>
             </div>
           </article>
@@ -116,7 +113,6 @@ export default class LandingPage {
     heroCtaText: 'Browse Featured Cars',
     whyChooseUsText: 'Verified cars, transparent pricing, and responsive support.'
   });
-  protected readonly testimonials = signal<Testimonial[]>([]);
   private readonly query = signal('');
   private readonly listingType = signal('all');
   protected readonly copy = computed(() => ({
@@ -143,9 +139,6 @@ export default class LandingPage {
     rentCategoryBody: 'Ideal for short trips or day-to-day use.',
     buyCategoryTitle: 'Buy',
     buyCategoryBody: 'Curated listings for cars available to purchase.',
-    testimonialsTitle: 'Testimonials',
-    testimonialCountLabel: 'reviews',
-    reviewLabel: 'Trusted customer',
     featuredCarsTitle: 'Featured Cars'
   }));
 
@@ -168,7 +161,6 @@ export default class LandingPage {
 
     this.carsApi.getCars().subscribe((cars) => this.cars.set(cars));
     this.homeContentApi.getHomeContent().subscribe((content) => this.homeContent.set(content));
-    this.homeContentApi.getTestimonials().subscribe((items) => this.testimonials.set(items));
   }
 
   protected onSearch(value: { query: string; listingType: string }) {
