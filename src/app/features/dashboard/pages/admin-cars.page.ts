@@ -532,14 +532,9 @@ export default class AdminCarsPage {
 
   private shouldTryNextPayload(error: unknown): boolean {
     const status = this.getHttpStatus(error);
-    if (status !== 400) {
-      return false;
-    }
-
-    const message = this.extractError(error).toLowerCase();
-    return message.includes('request field is required') ||
-      message.includes('could not be converted') ||
-      message.includes('validation');
+    // Any 400 here means current payload shape is invalid for backend binding/validation,
+    // so try the next known request shape before surfacing the final error.
+    return status === 400;
   }
 
   private mapListingTypeToEnum(value: string): number {
