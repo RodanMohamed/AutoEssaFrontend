@@ -583,25 +583,65 @@ export default class AdminCarsPage {
 
     if (typeof error === 'object' && error !== null) {
       const source = error as Record<string, unknown>;
+      const topLevelValidation = this.extractValidationMessages(source['errors']);
+      if (topLevelValidation.length > 0) {
+        return topLevelValidation.join(' | ');
+      }
+
       const nested = source['error'];
       if (typeof nested === 'string' && nested.trim().length > 0) {
         return nested;
       }
       if (typeof nested === 'object' && nested !== null) {
         const nestedRecord = nested as Record<string, unknown>;
+        const nestedValidation = this.extractValidationMessages(nestedRecord['errors']);
+        if (nestedValidation.length > 0) {
+          return nestedValidation.join(' | ');
+        }
         if (typeof nestedRecord['message'] === 'string') {
           return nestedRecord['message'];
         }
         if (typeof nestedRecord['title'] === 'string') {
           return nestedRecord['title'];
         }
+        if (typeof nestedRecord['detail'] === 'string' && nestedRecord['detail'].trim().length > 0) {
+          return nestedRecord['detail'];
+        }
       }
       if (typeof source['message'] === 'string' && source['message'].trim().length > 0) {
         return source['message'];
       }
+      if (typeof source['statusText'] === 'string' && source['statusText'].trim().length > 0) {
+        return source['statusText'];
+      }
     }
 
     return 'Action failed. Please verify API permissions and payload format.';
+  }
+
+  private extractValidationMessages(errorsPayload: unknown): string[] {
+    if (typeof errorsPayload !== 'object' || errorsPayload === null) {
+      return [];
+    }
+
+    const errorsRecord = errorsPayload as Record<string, unknown>;
+    const messages: string[] = [];
+
+    for (const [field, value] of Object.entries(errorsRecord)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (typeof item === 'string' && item.trim().length > 0) {
+            const label = field.trim().length > 0 ? field : 'Validation';
+            messages.push(`${label}: ${item}`);
+          }
+        }
+      } else if (typeof value === 'string' && value.trim().length > 0) {
+        const label = field.trim().length > 0 ? field : 'Validation';
+        messages.push(`${label}: ${value}`);
+      }
+    }
+
+    return messages;
   }
 
   private getHttpStatus(error: unknown): number | null {
