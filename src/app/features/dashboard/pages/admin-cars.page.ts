@@ -28,13 +28,6 @@ interface AdminCar {
     <section class="space-y-6">
       <section class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="font-serif text-3xl">Cars Management</h1>
-        <nav class="tabs tabs-boxed" aria-label="Dashboard sections">
-          <a class="tab" routerLink="/dashboard">Overview</a>
-          <a class="tab tab-active" routerLink="/dashboard/cars">Cars</a>
-          <a class="tab" routerLink="/dashboard/requests">Requests</a>
-          <a class="tab" routerLink="/dashboard/moderation">Moderation</a>
-          <a class="tab" routerLink="/dashboard/content">Content</a>
-        </nav>
       </section>
 
       <article class="card border border-base-300 bg-base-100 shadow">

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 import { BranchLocation, BranchLocationsService } from '../../../core/services/branch-locations.service';
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
@@ -29,18 +28,11 @@ interface LocalizationSettingItem {
 
 @Component({
   selector: 'app-admin-content-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   template: `
     <section class="space-y-6">
       <section class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="font-serif text-3xl">Content Management</h1>
-        <nav class="tabs tabs-boxed" aria-label="Dashboard sections">
-          <a class="tab" routerLink="/dashboard">Overview</a>
-          <a class="tab" routerLink="/dashboard/cars">Cars</a>
-          <a class="tab" routerLink="/dashboard/requests">Requests</a>
-          <a class="tab" routerLink="/dashboard/moderation">Moderation</a>
-          <a class="tab tab-active" routerLink="/dashboard/content">Content</a>
-        </nav>
       </section>
 
       @if (message()) {

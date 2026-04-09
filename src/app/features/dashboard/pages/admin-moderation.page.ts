@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
 
@@ -23,18 +22,10 @@ interface AdminReview {
 
 @Component({
   selector: 'app-admin-moderation-page',
-  imports: [RouterLink],
   template: `
     <section class="space-y-6">
       <section class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="font-serif text-3xl">Moderation</h1>
-        <nav class="tabs tabs-boxed" aria-label="Dashboard sections">
-          <a class="tab" routerLink="/dashboard">Overview</a>
-          <a class="tab" routerLink="/dashboard/cars">Cars</a>
-          <a class="tab" routerLink="/dashboard/requests">Requests</a>
-          <a class="tab tab-active" routerLink="/dashboard/moderation">Moderation</a>
-          <a class="tab" routerLink="/dashboard/content">Content</a>
-        </nav>
       </section>
 
       @if (message()) {
