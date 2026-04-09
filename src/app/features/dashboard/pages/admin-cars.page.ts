@@ -34,6 +34,126 @@ interface AdminCar {
         <div class="card-body gap-4">
           <section class="flex flex-wrap items-center justify-between gap-2">
             <div>
+              <h2 class="card-title">{{ selectedCarId() ? 'Edit Car' : 'Add New Car' }}</h2>
+              <p class="text-sm opacity-70">Choose a main image file. The app creates the image URL payload automatically.</p>
+            </div>
+            @if (selectedCarId()) {
+              <button class="btn btn-sm btn-ghost" type="button" (click)="resetForm()">Cancel Edit</button>
+            }
+          </section>
+
+          <form class="flex w-full max-w-2xl flex-col" [formGroup]="carForm" (ngSubmit)="saveCar()">
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Name</span>
+              <input class="input input-bordered w-full" type="text" formControlName="name" />
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Brand</span>
+              <input class="input input-bordered w-full" type="text" formControlName="brand" />
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Model</span>
+              <input class="input input-bordered w-full" type="text" formControlName="model" />
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Year</span>
+              <input class="input input-bordered w-full" type="number" formControlName="year" />
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Price</span>
+              <input class="input input-bordered w-full" type="number" formControlName="price" />
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Mileage</span>
+              <input class="input input-bordered w-full" type="number" formControlName="mileage" />
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Location</span>
+              <input class="input input-bordered w-full" type="text" formControlName="location" />
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Car Type</span>
+              <select class="select select-bordered w-full" formControlName="carType">
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="Coupe">Coupe</option>
+                <option value="Pickup">Pickup</option>
+              </select>
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Listing Type</span>
+              <select class="select select-bordered w-full" formControlName="listingType">
+                <option value="Rent">Rent</option>
+                <option value="Sell">Sell</option>
+              </select>
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Fuel Type</span>
+              <select class="select select-bordered w-full" formControlName="fuelType">
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Electric">Electric</option>
+              </select>
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Transmission</span>
+              <select class="select select-bordered w-full" formControlName="transmissionType">
+                <option value="Automatic">Automatic</option>
+                <option value="Manual">Manual</option>
+              </select>
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Availability</span>
+              <select class="select select-bordered w-full" formControlName="isAvailable">
+                <option [ngValue]="true">Available</option>
+                <option [ngValue]="false">Not Available</option>
+              </select>
+            </label>
+
+            <label class="form-control mt-2 w-full">
+              <span class="label-text">Main Image File</span>
+              <input class="file-input file-input-bordered w-full" type="file" accept="image/*" (change)="onMainImageSelected($event)" />
+              <span class="label-text-alt opacity-70">No URL input needed. A URL payload is generated from upload response or file data.</span>
+            </label>
+
+            @if (mainImagePreview().length > 0) {
+              <section class="mt-2 rounded-lg border border-base-300 bg-base-200 p-3">
+                <p class="mb-2 text-sm font-semibold">Main image preview</p>
+                <img class="h-44 w-full rounded-lg object-cover" [src]="mainImagePreview()" alt="Main selected car image" />
+              </section>
+            }
+
+            @if (formError().length > 0) {
+              <p class="mt-2 text-sm text-error">{{ formError() }}</p>
+            }
+
+            <section class="mt-2 flex flex-wrap gap-2">
+              <button class="btn btn-primary" type="submit" [disabled]="isSaving()">
+                {{ isSaving() ? 'Saving...' : (selectedCarId() ? 'Update Car' : 'Add Car') }}
+              </button>
+              <button class="btn btn-ghost" type="button" (click)="resetForm()">Reset</button>
+            </section>
+          </form>
+        </div>
+      </article>
+
+      <article class="card border border-base-300 bg-base-100 shadow">
+        <div class="card-body gap-4">
+          <section class="flex flex-wrap items-center justify-between gap-2">
+            <div>
               <h2 class="card-title">Uploaded Cars ({{ carsCount() }})</h2>
               <p class="text-sm opacity-70">These are the cars that appear in the home page and listing page.</p>
             </div>
@@ -67,7 +187,8 @@ interface AdminCar {
                     </td>
                     <td>
                       <div class="flex flex-wrap gap-2">
-                        <a class="btn btn-xs" [routerLink]="['/cars', car.id]">Edit</a>
+                        <button class="btn btn-xs" type="button" (click)="startEdit(car)">Edit</button>
+                        <a class="btn btn-xs" [routerLink]="['/cars', car.id]">Open Details</a>
                         <button class="btn btn-xs btn-error" type="button" (click)="removeCar(car.id)">Delete</button>
                       </div>
                     </td>
@@ -163,7 +284,7 @@ export default class AdminCarsPage {
       this.api.adminUploadCarImages(formData).subscribe({
         next: (response) => {
           const urls = this.extractUrls(response);
-          const imageUrl = urls[0] ?? '';
+          const imageUrl = urls[0] ?? this.mainImagePreview();
           if (!imageUrl) {
             this.isSaving.set(false);
             this.formError.set('Upload succeeded but no image URL was returned.');
@@ -173,6 +294,12 @@ export default class AdminCarsPage {
           finalizeSave(imageUrl);
         },
         error: (error: unknown) => {
+          const fallbackImage = this.mainImagePreview();
+          if (fallbackImage) {
+            finalizeSave(fallbackImage);
+            return;
+          }
+
           this.isSaving.set(false);
           this.formError.set(this.extractError(error));
         }

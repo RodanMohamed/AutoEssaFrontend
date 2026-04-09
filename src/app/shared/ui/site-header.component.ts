@@ -146,7 +146,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
       background: rgba(255, 249, 240, 0.98);
       border: 1px solid #e0c6a7;
       border-radius: 0.75rem;
-      padding: 0.6rem;
+      padding-top: 3.6rem;
       box-shadow: 0 10px 24px rgba(124, 80, 38, 0.12);
     }
 
