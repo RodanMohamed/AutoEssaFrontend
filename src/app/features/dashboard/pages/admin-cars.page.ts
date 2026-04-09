@@ -469,10 +469,10 @@ export default class AdminCarsPage {
       model: value.model,
       year: Number(value.year),
       price: Number(value.price),
-      carType: value.carType,
-      listingType: value.listingType,
-      fuelType: value.fuelType,
-      transmissionType: value.transmissionType,
+      carType: this.mapCarTypeToEnum(value.carType),
+      listingType: this.mapListingTypeToEnum(value.listingType),
+      fuelType: this.mapFuelTypeToEnum(value.fuelType),
+      transmissionType: this.mapTransmissionTypeToEnum(value.transmissionType),
       mileage: Number(value.mileage),
       location: value.location,
       imageUrl,
@@ -480,6 +480,53 @@ export default class AdminCarsPage {
       images: [imageUrl],
       isAvailable: value.isAvailable
     };
+  }
+
+  private mapListingTypeToEnum(value: string): number {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'sell') {
+      return 1;
+    }
+    return 0;
+  }
+
+  private mapCarTypeToEnum(value: string): number {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'suv') {
+      return 1;
+    }
+    if (normalized === 'hatchback') {
+      return 2;
+    }
+    if (normalized === 'coupe') {
+      return 3;
+    }
+    if (normalized === 'pickup') {
+      return 4;
+    }
+    return 0;
+  }
+
+  private mapFuelTypeToEnum(value: string): number {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'diesel') {
+      return 1;
+    }
+    if (normalized === 'hybrid') {
+      return 2;
+    }
+    if (normalized === 'electric') {
+      return 3;
+    }
+    return 0;
+  }
+
+  private mapTransmissionTypeToEnum(value: string): number {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'manual') {
+      return 1;
+    }
+    return 0;
   }
 
   private mapCars(payload: unknown): AdminCar[] {
@@ -631,17 +678,75 @@ export default class AdminCarsPage {
       if (Array.isArray(value)) {
         for (const item of value) {
           if (typeof item === 'string' && item.trim().length > 0) {
-            const label = field.trim().length > 0 ? field : 'Validation';
-            messages.push(`${label}: ${item}`);
+            const label = this.normalizeFieldLabel(field);
+            messages.push(this.toFriendlyValidationMessage(label, item));
           }
         }
       } else if (typeof value === 'string' && value.trim().length > 0) {
-        const label = field.trim().length > 0 ? field : 'Validation';
-        messages.push(`${label}: ${value}`);
+        const label = this.normalizeFieldLabel(field);
+        messages.push(this.toFriendlyValidationMessage(label, value));
       }
     }
 
     return messages;
+  }
+
+  private normalizeFieldLabel(field: string): string {
+    const trimmed = field.trim();
+    if (!trimmed) {
+      return 'Validation';
+    }
+
+    const lower = trimmed.toLowerCase();
+    if (lower === 'request') {
+      return 'Car Data';
+    }
+    if (lower === '$.listingtype' || lower === 'listingtype') {
+      return 'Listing Type';
+    }
+    if (lower === '$.cartype' || lower === 'cartype') {
+      return 'Car Type';
+    }
+    if (lower === '$.fueltype' || lower === 'fueltype') {
+      return 'Fuel Type';
+    }
+    if (lower === '$.transmissiontype' || lower === 'transmissiontype') {
+      return 'Transmission';
+    }
+
+    if (trimmed.startsWith('$.')) {
+      const raw = trimmed.slice(2);
+      const spaced = raw.replace(/([a-z])([A-Z])/g, '$1 $2');
+      return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+    }
+
+    return trimmed;
+  }
+
+  private toFriendlyValidationMessage(label: string, message: string): string {
+    const normalizedMessage = message.trim();
+    const lower = normalizedMessage.toLowerCase();
+
+    if (label === 'Car Data' && lower.includes('required')) {
+      return 'Car data was not sent correctly. Please retry; if it continues, contact support.';
+    }
+
+    if (lower.includes('could not be converted')) {
+      if (label === 'Listing Type') {
+        return 'Listing Type is invalid. Please choose Rent or Sell.';
+      }
+      if (label === 'Car Type') {
+        return 'Car Type is invalid. Please choose one of the provided car types.';
+      }
+      if (label === 'Fuel Type') {
+        return 'Fuel Type is invalid. Please choose Petrol, Diesel, Hybrid, or Electric.';
+      }
+      if (label === 'Transmission') {
+        return 'Transmission is invalid. Please choose Automatic or Manual.';
+      }
+    }
+
+    return `${label}: ${normalizedMessage}`;
   }
 
   private getHttpStatus(error: unknown): number | null {
