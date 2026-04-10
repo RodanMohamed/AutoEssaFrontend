@@ -3,6 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
 import { LocaleService } from '../../../core/services/locale.service';
+import { AuthStore } from '../../auth/data-access/auth.store';
 
 @Component({
   selector: 'app-request-car-page',
@@ -72,6 +73,7 @@ import { LocaleService } from '../../../core/services/locale.service';
 export default class RequestCarPage {
   private readonly api = inject(AutoessaApiService);
   private readonly localeService = inject(LocaleService);
+  private readonly authStore = inject(AuthStore);
 
   protected readonly status = signal('');
   protected readonly isError = signal(false);
@@ -127,6 +129,7 @@ export default class RequestCarPage {
     const value = this.form.getRawValue();
     this.api
       .createCarLeadRequest({
+        userId: this.authStore.session()?.user.id ?? null,
         fullName: value.fullName,
         phoneNumber: value.phoneNumber,
         desiredBrand: value.desiredBrand,

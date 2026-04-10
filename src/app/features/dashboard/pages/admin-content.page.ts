@@ -5,15 +5,6 @@ import { BranchLocation, BranchLocationsService } from '../../../core/services/b
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
 import { LocaleService } from '../../../core/services/locale.service';
 
-interface ContactMessageItem {
-  id: string;
-  name: string;
-  phoneNumber: string;
-  message: string;
-  status: number;
-  statusLabel: string;
-}
-
 interface LocalizationSettingItem {
   key: string;
   value: string;
@@ -51,7 +42,6 @@ const EN_COPY = {
   heroCtaText: 'Hero CTA Text',
   whyChooseUsText: 'Why Choose Us Text',
   saveHomeContent: 'Save Home Content',
-  contactMessages: 'Contact Messages',
   name: 'Name',
   phone: 'Phone',
   message: 'Message',
@@ -101,7 +91,6 @@ const AR_COPY: typeof EN_COPY = {
   heroCtaText: 'نص زر الدعوة للإجراء',
   whyChooseUsText: 'نص لماذا تختارنا',
   saveHomeContent: 'حفظ محتوى الصفحة الرئيسية',
-  contactMessages: 'رسائل التواصل',
   name: 'الاسم',
   phone: 'الهاتف',
   message: 'الرسالة',
@@ -282,47 +271,6 @@ const AR_COPY: typeof EN_COPY = {
             </form>
           </div>
         </article>
-
-        <article class="card border border-base-300 bg-base-100 shadow">
-          <div class="card-body gap-4">
-            <section class="flex flex-wrap items-center justify-between gap-3">
-              <h2 class="card-title">{{ copy().contactMessages }}</h2>
-              <button class="btn btn-sm" type="button" (click)="loadContactMessages()">{{ copy().refresh }}</button>
-            </section>
-            <div class="overflow-x-auto">
-              <table class="table table-zebra">
-                <thead>
-                  <tr>
-                    <th>{{ copy().name }}</th>
-                    <th>{{ copy().phone }}</th>
-                    <th>{{ copy().message }}</th>
-                    <th>{{ copy().status }}</th>
-                    <th>{{ copy().action }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (item of contactMessages(); track item.id) {
-                    <tr>
-                      <td>{{ item.name }}</td>
-                      <td>{{ item.phoneNumber }}</td>
-                      <td>{{ item.message }}</td>
-                      <td><span class="badge badge-outline">{{ item.statusLabel }}</span></td>
-                      <td>
-                        <select class="select select-bordered select-sm"
-                          [value]="item.status"
-                          (change)="updateContactMessageStatus(item.id, $event)">
-                          <option value="0">{{ copy().new }}</option>
-                          <option value="1">{{ copy().contacted }}</option>
-                          <option value="2">{{ copy().closed }}</option>
-                        </select>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </article>
       </section>
 
     </section>
@@ -374,7 +322,6 @@ export default class AdminContentPage {
   protected readonly isError = signal(false);
   protected readonly isSavingContact = signal(false);
   protected readonly isSavingHome = signal(false);
-  protected readonly contactMessages = signal<ContactMessageItem[]>([]);
   protected readonly localizationSettings = signal<LocalizationSettingItem[]>([]);
   protected readonly branches = this.branchService.branches;
   protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
@@ -402,24 +349,14 @@ export default class AdminContentPage {
     isActive: [false]
   });
 
-  protected readonly contactMessageCount = computed(() => this.contactMessages().length);
-
   constructor() {
     this.loadAll();
     this.newBranchForm();
   }
 
   protected loadAll() {
-    this.loadContactMessages();
     this.loadHomeContent();
     this.loadLocalization();
-  }
-
-  protected loadContactMessages() {
-    this.api.adminGetContactMessages().subscribe({
-      next: (response) => this.contactMessages.set(this.mapContactMessages(response)),
-      error: () => this.contactMessages.set([])
-    });
   }
 
   protected loadHomeContent() {
@@ -489,23 +426,6 @@ export default class AdminContentPage {
     });
   }
 
-  protected updateContactMessageStatus(id: string, event: Event) {
-    const target = event.target as HTMLSelectElement | null;
-    const status = Number(target?.value ?? '0');
-
-    this.api.adminUpdateContactMessageStatus(id, { status }).subscribe({
-      next: () => {
-        this.message.set(this.copy().contactMessageUpdated);
-        this.isError.set(false);
-        this.loadContactMessages();
-      },
-      error: (error: unknown) => {
-        this.message.set(this.extractError(error));
-        this.isError.set(true);
-      }
-    });
-  }
-
   protected editBranch(branch: BranchLocation) {
     this.branchForm.reset({
       id: branch.id,
@@ -554,21 +474,6 @@ export default class AdminContentPage {
     this.isError.set(false);
   }
 
-  private mapContactMessages(payload: unknown): ContactMessageItem[] {
-    return this.extractCollection(payload).map((item, index) => {
-      const source = this.toRecord(item);
-      const status = this.readNumber(source, 'status', 0);
-      return {
-        id: this.readString(source, 'id', `contact-${index + 1}`),
-        name: this.readString(source, 'name', this.copy().unknown),
-        phoneNumber: this.readString(source, 'phoneNumber', '-'),
-        message: this.readString(source, 'message', '-'),
-        status,
-        statusLabel: this.statusLabel(status)
-      };
-    });
-  }
-
   private mapLocalization(payload: unknown): LocalizationSettingItem[] {
     const source = this.toRecord(payload);
     return Object.entries(source).map(([key, value]) => ({
@@ -612,16 +517,6 @@ export default class AdminContentPage {
   private readBoolean(source: Record<string, unknown>, key: string, fallback: boolean): boolean {
     const value = source[key];
     return typeof value === 'boolean' ? value : fallback;
-  }
-
-  private statusLabel(status: number): string {
-    if (status === 1) {
-      return this.copy().contacted;
-    }
-    if (status === 2) {
-      return this.copy().closed;
-    }
-    return this.copy().new;
   }
 
   private extractError(error: unknown): string {

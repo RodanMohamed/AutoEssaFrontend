@@ -24,10 +24,20 @@ interface AdminCarRequest {
   statusLabel: string;
 }
 
+interface AdminContactMessage {
+  id: string;
+  name: string;
+  phoneNumber: string;
+  message: string;
+  status: number;
+  statusLabel: string;
+}
+
 const EN_COPY = {
   title: 'Requests Management',
   bookingTitle: 'Booking Requests',
   carRequestsTitle: 'Requested Cars',
+  contactMessagesTitle: 'Contact Messages',
   refresh: 'Refresh',
   customer: 'Customer',
   phone: 'Phone',
@@ -37,11 +47,13 @@ const EN_COPY = {
   action: 'Action',
   desiredCar: 'Desired Car',
   budget: 'Budget',
+  message: 'Message',
   new: 'New',
   contacted: 'Contacted',
   closed: 'Closed',
   bookingStatusUpdated: 'Booking request status updated.',
   carStatusUpdated: 'Car request status updated.',
+  contactStatusUpdated: 'Contact message status updated.',
   fallbackError: 'Request failed. Please verify API role permissions.'
 };
 
@@ -49,6 +61,7 @@ const AR_COPY: typeof EN_COPY = {
   title: 'إدارة الطلبات',
   bookingTitle: 'طلبات الحجز',
   carRequestsTitle: 'طلبات السيارات',
+  contactMessagesTitle: 'رسائل التواصل',
   refresh: 'تحديث',
   customer: 'العميل',
   phone: 'الهاتف',
@@ -58,11 +71,13 @@ const AR_COPY: typeof EN_COPY = {
   action: 'الإجراء',
   desiredCar: 'السيارة المطلوبة',
   budget: 'الميزانية',
+  message: 'الرسالة',
   new: 'جديد',
   contacted: 'تم التواصل',
   closed: 'مغلق',
   bookingStatusUpdated: 'تم تحديث حالة طلب الحجز.',
   carStatusUpdated: 'تم تحديث حالة طلب السيارة.',
+  contactStatusUpdated: 'تم تحديث حالة رسالة التواصل.',
   fallbackError: 'فشل الطلب. يرجى التحقق من صلاحيات واجهة البرمجة.'
 };
 
@@ -161,6 +176,52 @@ const AR_COPY: typeof EN_COPY = {
           </div>
         </div>
       </article>
+
+      <article class="card border border-base-300 bg-base-100 shadow">
+        <div class="card-body gap-4">
+          <section class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="card-title">{{ copy().contactMessagesTitle }} ({{ contactMessageCount() }})</h2>
+            <button class="btn btn-sm" type="button" (click)="loadContactMessages()">{{ copy().refresh }}</button>
+          </section>
+
+          @if (message()) {
+            <p class="text-sm" [class]="isError() ? 'text-error' : 'text-success'">{{ message() }}</p>
+          }
+
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>{{ copy().customer }}</th>
+                  <th>{{ copy().phone }}</th>
+                  <th>{{ copy().message }}</th>
+                  <th>{{ copy().status }}</th>
+                  <th>{{ copy().action }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of contactMessages(); track item.id) {
+                  <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.phoneNumber }}</td>
+                    <td>{{ item.message }}</td>
+                    <td><span class="badge badge-outline">{{ item.statusLabel }}</span></td>
+                    <td>
+                      <select class="select select-bordered select-sm"
+                        [value]="item.status"
+                        (change)="updateContactMessageStatus(item.id, $event)">
+                        <option value="0">{{ copy().new }}</option>
+                        <option value="1">{{ copy().contacted }}</option>
+                        <option value="2">{{ copy().closed }}</option>
+                      </select>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </article>
     </section>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -171,12 +232,14 @@ export default class AdminRequestsPage {
 
   protected readonly bookingRequests = signal<AdminBookingRequest[]>([]);
   protected readonly carRequests = signal<AdminCarRequest[]>([]);
+  protected readonly contactMessages = signal<AdminContactMessage[]>([]);
   protected readonly message = signal('');
   protected readonly isError = signal(false);
   protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
   protected readonly bookingCount = computed(() => this.bookingRequests().length);
   protected readonly carRequestCount = computed(() => this.carRequests().length);
+  protected readonly contactMessageCount = computed(() => this.contactMessages().length);
 
   constructor() {
     this.refreshAll();
@@ -185,6 +248,7 @@ export default class AdminRequestsPage {
   protected refreshAll() {
     this.loadBookingRequests();
     this.loadCarRequests();
+    this.loadContactMessages();
   }
 
   protected updateBookingStatus(id: string, event: Event) {
@@ -243,6 +307,17 @@ export default class AdminRequestsPage {
     });
   }
 
+  protected loadContactMessages() {
+    this.api.adminGetContactMessages().subscribe({
+      next: (response) => {
+        this.contactMessages.set(this.mapContactMessages(response));
+      },
+      error: () => {
+        this.contactMessages.set([]);
+      }
+    });
+  }
+
   private mapBookingRequests(payload: unknown): AdminBookingRequest[] {
     const items = this.extractCollection(payload);
     return items.map((item, index) => {
@@ -274,6 +349,22 @@ export default class AdminRequestsPage {
         phoneNumber: this.readString(source, 'phoneNumber', this.readString(source, 'phone', '-')),
         desiredCar: `${desiredBrand} ${desiredModel}`.trim() || this.readString(source, 'desiredCar', 'N/A'),
         budget: this.readNumber(source, 'budget', 0),
+        status,
+        statusLabel: this.statusLabel(status)
+      };
+    });
+  }
+
+  private mapContactMessages(payload: unknown): AdminContactMessage[] {
+    const items = this.extractCollection(payload);
+    return items.map((item, index) => {
+      const source = this.toRecord(item);
+      const status = this.readNumber(source, 'status', 0);
+      return {
+        id: this.readString(source, 'id', `contact-${index + 1}`),
+        name: this.readString(source, 'name', this.readString(source, 'fullName', 'Unknown')),
+        phoneNumber: this.readString(source, 'phoneNumber', this.readString(source, 'phone', '-')),
+        message: this.readString(source, 'message', '-'),
         status,
         statusLabel: this.statusLabel(status)
       };
@@ -320,6 +411,23 @@ export default class AdminRequestsPage {
       return this.copy().closed;
     }
     return this.copy().new;
+  }
+
+  protected updateContactMessageStatus(id: string, event: Event) {
+    const target = event.target as HTMLSelectElement | null;
+    const status = Number(target?.value ?? '0');
+
+    this.api.adminUpdateContactMessageStatus(id, { status }).subscribe({
+      next: () => {
+        this.message.set(this.copy().contactStatusUpdated);
+        this.isError.set(false);
+        this.loadContactMessages();
+      },
+      error: (error: unknown) => {
+        this.message.set(this.extractError(error));
+        this.isError.set(true);
+      }
+    });
   }
 
   private extractError(error: unknown): string {
