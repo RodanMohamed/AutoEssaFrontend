@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
+import { LocaleService } from '../../../core/services/locale.service';
 
 interface AdminCar {
   id: string;
@@ -21,118 +22,238 @@ interface AdminCar {
   isAvailable: boolean;
 }
 
+const EN_COPY = {
+  pageTitle: 'Cars Management',
+  editCar: 'Edit Car',
+  addCar: 'Add New Car',
+  imageHint: 'Choose a main image file. The app creates the image URL payload automatically.',
+  cancelEdit: 'Cancel Edit',
+  name: 'Name',
+  brand: 'Brand',
+  model: 'Model',
+  year: 'Year',
+  price: 'Price',
+  mileage: 'Mileage',
+  location: 'Location',
+  carType: 'Car Type',
+  listingType: 'Listing Type',
+  fuelType: 'Fuel Type',
+  transmission: 'Transmission',
+  availability: 'Availability',
+  mainImageFile: 'Main Image File',
+  mainImageHint: 'No URL input needed. A URL payload is generated from upload response or file data.',
+  mainImagePreview: 'Main image preview',
+  mainImageAlt: 'Main selected car image',
+  saving: 'Saving...',
+  updateCar: 'Update Car',
+  addNewCar: 'Add Car',
+  reset: 'Reset',
+  uploadedCars: 'Uploaded Cars',
+  uploadedCarsHint: 'These are the cars that appear in the home page and listing page.',
+  brandModel: 'Brand / Model',
+  actions: 'Actions',
+  available: 'Available',
+  notAvailable: 'Not Available',
+  edit: 'Edit',
+  openDetails: 'Open Details',
+  delete: 'Delete',
+  sedan: 'Sedan',
+  suv: 'SUV',
+  hatchback: 'Hatchback',
+  coupe: 'Coupe',
+  pickup: 'Pickup',
+  rent: 'Rent',
+  sell: 'Sell',
+  petrol: 'Petrol',
+  diesel: 'Diesel',
+  hybrid: 'Hybrid',
+  electric: 'Electric',
+  automatic: 'Automatic',
+  manual: 'Manual',
+  fillRequiredError: 'Please complete all required fields correctly.',
+  chooseMainPhotoError: 'Please choose a main photo before saving the car.',
+  uploadNoUrlError: 'Upload succeeded but no image URL was returned.',
+  chooseAtLeastOneImageError: 'Choose at least one image before upload.',
+  uploadedNoImageUrlsError: 'Uploaded, but no image URLs were returned by the API.',
+  imagesUploadedSuccess: 'Images uploaded successfully.',
+  imageDeletedSuccess: 'Image deleted from storage.',
+  unauthorizedError: 'Unauthorized (401): your session is missing or expired. Please login again as admin and retry.',
+  forbiddenError: 'Forbidden (403): your account does not have permission for this admin action.',
+  genericActionFailedError: 'Action failed. Please verify API permissions and payload format.'
+};
+
+const AR_COPY: typeof EN_COPY = {
+  pageTitle: 'إدارة السيارات',
+  editCar: 'تعديل السيارة',
+  addCar: 'إضافة سيارة جديدة',
+  imageHint: 'اختر ملف الصورة الرئيسية. سيقوم التطبيق بإنشاء رابط الصورة تلقائيًا.',
+  cancelEdit: 'إلغاء التعديل',
+  name: 'الاسم',
+  brand: 'العلامة التجارية',
+  model: 'الموديل',
+  year: 'السنة',
+  price: 'السعر',
+  mileage: 'المسافة المقطوعة',
+  location: 'الموقع',
+  carType: 'نوع السيارة',
+  listingType: 'نوع العرض',
+  fuelType: 'نوع الوقود',
+  transmission: 'ناقل الحركة',
+  availability: 'التوفر',
+  mainImageFile: 'ملف الصورة الرئيسية',
+  mainImageHint: 'لا حاجة لإدخال رابط. يتم إنشاء الرابط من رفع الصورة أو من بيانات الملف.',
+  mainImagePreview: 'معاينة الصورة الرئيسية',
+  mainImageAlt: 'الصورة الرئيسية المحددة للسيارة',
+  saving: 'جارٍ الحفظ...',
+  updateCar: 'تحديث السيارة',
+  addNewCar: 'إضافة سيارة',
+  reset: 'إعادة تعيين',
+  uploadedCars: 'السيارات المرفوعة',
+  uploadedCarsHint: 'هذه السيارات تظهر في الصفحة الرئيسية وصفحة السيارات.',
+  brandModel: 'العلامة / الموديل',
+  actions: 'الإجراءات',
+  available: 'متاح',
+  notAvailable: 'غير متاح',
+  edit: 'تعديل',
+  openDetails: 'فتح التفاصيل',
+  delete: 'حذف',
+  sedan: 'سيدان',
+  suv: 'دفع رباعي',
+  hatchback: 'هاتشباك',
+  coupe: 'كوبيه',
+  pickup: 'بيك أب',
+  rent: 'إيجار',
+  sell: 'بيع',
+  petrol: 'بنزين',
+  diesel: 'ديزل',
+  hybrid: 'هجين',
+  electric: 'كهرباء',
+  automatic: 'أوتوماتيك',
+  manual: 'يدوي',
+  fillRequiredError: 'يرجى إكمال جميع الحقول المطلوبة بشكل صحيح.',
+  chooseMainPhotoError: 'يرجى اختيار صورة رئيسية قبل حفظ السيارة.',
+  uploadNoUrlError: 'تم الرفع لكن لم يتم إرجاع رابط صورة.',
+  chooseAtLeastOneImageError: 'اختر صورة واحدة على الأقل قبل الرفع.',
+  uploadedNoImageUrlsError: 'تم الرفع لكن لم تُرجع واجهة البرمجة روابط صور.',
+  imagesUploadedSuccess: 'تم رفع الصور بنجاح.',
+  imageDeletedSuccess: 'تم حذف الصورة من التخزين.',
+  unauthorizedError: 'غير مصرح (401): الجلسة مفقودة أو منتهية. يرجى تسجيل الدخول كمسؤول ثم المحاولة مرة أخرى.',
+  forbiddenError: 'ممنوع (403): حسابك لا يملك صلاحية لهذا الإجراء الإداري.',
+  genericActionFailedError: 'فشل الإجراء. يرجى التحقق من صلاحيات الواجهة وصيغة البيانات.'
+};
+
 @Component({
   selector: 'app-admin-cars-page',
   imports: [ReactiveFormsModule, RouterLink],
   template: `
     <section class="space-y-6">
       <section class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="font-serif text-3xl">Cars Management</h1>
+        <h1 class="font-serif text-3xl">{{ copy().pageTitle }}</h1>
       </section>
 
       <article class="card border border-base-300 bg-base-100 shadow">
         <div class="card-body gap-4">
           <section class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 class="card-title">{{ selectedCarId() ? 'Edit Car' : 'Add New Car' }}</h2>
-              <p class="text-sm opacity-70">Choose a main image file. The app creates the image URL payload automatically.</p>
+              <h2 class="card-title">{{ selectedCarId() ? copy().editCar : copy().addCar }}</h2>
+              <p class="text-sm opacity-70">{{ copy().imageHint }}</p>
             </div>
             @if (selectedCarId()) {
-              <button class="btn btn-sm btn-ghost" type="button" (click)="resetForm()">Cancel Edit</button>
+              <button class="btn btn-sm btn-ghost" type="button" (click)="resetForm()">{{ copy().cancelEdit }}</button>
             }
           </section>
 
           <form class="flex w-full max-w-2xl flex-col" [formGroup]="carForm" (ngSubmit)="saveCar()">
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Name</span>
+              <span class="label-text">{{ copy().name }}</span>
               <input class="input input-bordered w-full" type="text" formControlName="name" />
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Brand</span>
+              <span class="label-text">{{ copy().brand }}</span>
               <input class="input input-bordered w-full" type="text" formControlName="brand" />
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Model</span>
+              <span class="label-text">{{ copy().model }}</span>
               <input class="input input-bordered w-full" type="text" formControlName="model" />
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Year</span>
+              <span class="label-text">{{ copy().year }}</span>
               <input class="input input-bordered w-full" type="number" formControlName="year" />
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Price</span>
+              <span class="label-text">{{ copy().price }}</span>
               <input class="input input-bordered w-full" type="number" formControlName="price" />
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Mileage</span>
+              <span class="label-text">{{ copy().mileage }}</span>
               <input class="input input-bordered w-full" type="number" formControlName="mileage" />
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Location</span>
+              <span class="label-text">{{ copy().location }}</span>
               <input class="input input-bordered w-full" type="text" formControlName="location" />
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Car Type</span>
+              <span class="label-text">{{ copy().carType }}</span>
               <select class="select select-bordered w-full" formControlName="carType">
-                <option value="Sedan">Sedan</option>
-                <option value="SUV">SUV</option>
-                <option value="Hatchback">Hatchback</option>
-                <option value="Coupe">Coupe</option>
-                <option value="Pickup">Pickup</option>
+                <option value="Sedan">{{ copy().sedan }}</option>
+                <option value="SUV">{{ copy().suv }}</option>
+                <option value="Hatchback">{{ copy().hatchback }}</option>
+                <option value="Coupe">{{ copy().coupe }}</option>
+                <option value="Pickup">{{ copy().pickup }}</option>
               </select>
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Listing Type</span>
+              <span class="label-text">{{ copy().listingType }}</span>
               <select class="select select-bordered w-full" formControlName="listingType">
-                <option value="Rent">Rent</option>
-                <option value="Sell">Sell</option>
+                <option value="Rent">{{ copy().rent }}</option>
+                <option value="Sell">{{ copy().sell }}</option>
               </select>
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Fuel Type</span>
+              <span class="label-text">{{ copy().fuelType }}</span>
               <select class="select select-bordered w-full" formControlName="fuelType">
-                <option value="Petrol">Petrol</option>
-                <option value="Diesel">Diesel</option>
-                <option value="Hybrid">Hybrid</option>
-                <option value="Electric">Electric</option>
+                <option value="Petrol">{{ copy().petrol }}</option>
+                <option value="Diesel">{{ copy().diesel }}</option>
+                <option value="Hybrid">{{ copy().hybrid }}</option>
+                <option value="Electric">{{ copy().electric }}</option>
               </select>
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Transmission</span>
+              <span class="label-text">{{ copy().transmission }}</span>
               <select class="select select-bordered w-full" formControlName="transmissionType">
-                <option value="Automatic">Automatic</option>
-                <option value="Manual">Manual</option>
+                <option value="Automatic">{{ copy().automatic }}</option>
+                <option value="Manual">{{ copy().manual }}</option>
               </select>
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Availability</span>
+              <span class="label-text">{{ copy().availability }}</span>
               <select class="select select-bordered w-full" formControlName="isAvailable">
-                <option [ngValue]="true">Available</option>
-                <option [ngValue]="false">Not Available</option>
+                <option [ngValue]="true">{{ copy().available }}</option>
+                <option [ngValue]="false">{{ copy().notAvailable }}</option>
               </select>
             </label>
 
             <label class="form-control mt-2 w-full">
-              <span class="label-text">Main Image File</span>
+              <span class="label-text">{{ copy().mainImageFile }}</span>
               <input class="file-input file-input-bordered w-full" type="file" accept="image/*" (change)="onMainImageSelected($event)" />
-              <span class="label-text-alt opacity-70">No URL input needed. A URL payload is generated from upload response or file data.</span>
+              <span class="label-text-alt opacity-70">{{ copy().mainImageHint }}</span>
             </label>
 
             @if (mainImagePreview().length > 0) {
               <section class="mt-2 rounded-lg border border-base-300 bg-base-200 p-3">
-                <p class="mb-2 text-sm font-semibold">Main image preview</p>
-                <img class="h-44 w-full rounded-lg object-cover" [src]="mainImagePreview()" alt="Main selected car image" />
+                <p class="mb-2 text-sm font-semibold">{{ copy().mainImagePreview }}</p>
+                <img class="h-44 w-full rounded-lg object-cover" [src]="mainImagePreview()" [alt]="copy().mainImageAlt" />
               </section>
             }
 
@@ -142,9 +263,9 @@ interface AdminCar {
 
             <section class="mt-2 flex flex-wrap gap-2">
               <button class="btn btn-primary" type="submit" [disabled]="isSaving()">
-                {{ isSaving() ? 'Saving...' : (selectedCarId() ? 'Update Car' : 'Add Car') }}
+                {{ isSaving() ? copy().saving : (selectedCarId() ? copy().updateCar : copy().addNewCar) }}
               </button>
-              <button class="btn btn-ghost" type="button" (click)="resetForm()">Reset</button>
+              <button class="btn btn-ghost" type="button" (click)="resetForm()">{{ copy().reset }}</button>
             </section>
           </form>
         </div>
@@ -154,8 +275,8 @@ interface AdminCar {
         <div class="card-body gap-4">
           <section class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 class="card-title">Uploaded Cars ({{ carsCount() }})</h2>
-              <p class="text-sm opacity-70">These are the cars that appear in the home page and listing page.</p>
+              <h2 class="card-title">{{ copy().uploadedCars }} ({{ carsCount() }})</h2>
+              <p class="text-sm opacity-70">{{ copy().uploadedCarsHint }}</p>
             </div>
           </section>
 
@@ -163,13 +284,13 @@ interface AdminCar {
             <table class="table table-zebra">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Brand / Model</th>
-                  <th>Year</th>
-                  <th>Price</th>
-                  <th>Location</th>
-                  <th>Availability</th>
-                  <th>Actions</th>
+                  <th>{{ copy().name }}</th>
+                  <th>{{ copy().brandModel }}</th>
+                  <th>{{ copy().year }}</th>
+                  <th>{{ copy().price }}</th>
+                  <th>{{ copy().location }}</th>
+                  <th>{{ copy().availability }}</th>
+                  <th>{{ copy().actions }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -182,14 +303,14 @@ interface AdminCar {
                     <td>{{ car.location }}</td>
                     <td>
                       <span class="badge" [class]="car.isAvailable ? 'badge-success' : 'badge-ghost'">
-                        {{ car.isAvailable ? 'Available' : 'Not Available' }}
+                        {{ car.isAvailable ? copy().available : copy().notAvailable }}
                       </span>
                     </td>
                     <td>
                       <div class="flex flex-wrap gap-2">
-                        <button class="btn btn-xs" type="button" (click)="startEdit(car)">Edit</button>
-                        <a class="btn btn-xs" [routerLink]="['/cars', car.id]">Open Details</a>
-                        <button class="btn btn-xs btn-error" type="button" (click)="removeCar(car.id)">Delete</button>
+                        <button class="btn btn-xs" type="button" (click)="startEdit(car)">{{ copy().edit }}</button>
+                        <a class="btn btn-xs" [routerLink]="['/cars', car.id]">{{ copy().openDetails }}</a>
+                        <button class="btn btn-xs btn-error" type="button" (click)="removeCar(car.id)">{{ copy().delete }}</button>
                       </div>
                     </td>
                   </tr>
@@ -206,6 +327,7 @@ interface AdminCar {
 export default class AdminCarsPage {
   private readonly api = inject(AutoessaApiService);
   private readonly fb = inject(FormBuilder);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly cars = signal<AdminCar[]>([]);
   protected readonly selectedCarId = signal<string | null>(null);
@@ -219,6 +341,7 @@ export default class AdminCarsPage {
   protected readonly uploadError = signal(false);
   protected readonly mainImageFile = signal<File | null>(null);
   protected readonly mainImagePreview = signal('');
+  protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
   protected readonly carsCount = computed(() => this.cars().length);
 
@@ -245,27 +368,34 @@ export default class AdminCarsPage {
     this.formError.set('');
     if (this.carForm.invalid) {
       this.carForm.markAllAsTouched();
-      this.formError.set('Please complete all required fields correctly.');
+      this.formError.set(this.copy().fillRequiredError);
       return;
     }
 
     if (!this.selectedCarId() && !this.mainImageFile() && this.mainImagePreview().trim().length === 0) {
-      this.formError.set('Please choose a main photo before saving the car.');
+      this.formError.set(this.copy().chooseMainPhotoError);
       return;
     }
 
     this.isSaving.set(true);
     const finalizeSave = (imageUrl: string) => {
-      const stringPayload = this.toCarPayloadString(imageUrl);
-      const numericPayload = this.toCarPayloadNumeric(imageUrl);
-      const payloadCandidates: Record<string, unknown>[] = [
-        { request: stringPayload },
-        stringPayload,
-        { request: numericPayload },
-        numericPayload
-      ];
+      const payload = this.toCarPayload(imageUrl);
       const selectedId = this.selectedCarId();
-      this.executeSaveWithFallback(payloadCandidates, selectedId, 0, null);
+      const request$ = selectedId
+        ? this.api.adminUpdateCar(selectedId, payload)
+        : this.api.adminCreateCar(payload);
+
+      request$.subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.resetForm();
+          this.loadCars();
+        },
+        error: (error: unknown) => {
+          this.isSaving.set(false);
+          this.formError.set(this.extractError(error));
+        }
+      });
     };
 
     const chosenFile = this.mainImageFile();
@@ -279,7 +409,7 @@ export default class AdminCarsPage {
           const imageUrl = urls[0] ?? this.mainImagePreview();
           if (!imageUrl) {
             this.isSaving.set(false);
-            this.formError.set('Upload succeeded but no image URL was returned.');
+            this.formError.set(this.copy().uploadNoUrlError);
             return;
           }
 
@@ -370,7 +500,7 @@ export default class AdminCarsPage {
 
   protected uploadImages() {
     if (this.selectedFiles().length === 0) {
-      this.uploadMessage.set('Choose at least one image before upload.');
+      this.uploadMessage.set(this.copy().chooseAtLeastOneImageError);
       this.uploadError.set(true);
       return;
     }
@@ -389,13 +519,13 @@ export default class AdminCarsPage {
         this.isUploading.set(false);
         const urls = this.extractUrls(response);
         if (urls.length === 0) {
-          this.uploadMessage.set('Uploaded, but no image URLs were returned by the API.');
+          this.uploadMessage.set(this.copy().uploadedNoImageUrlsError);
           this.uploadError.set(true);
           return;
         }
 
         this.uploadedImages.update((current) => [...urls, ...current]);
-        this.uploadMessage.set('Images uploaded successfully.');
+        this.uploadMessage.set(this.copy().imagesUploadedSuccess);
       },
       error: (error: unknown) => {
         this.isUploading.set(false);
@@ -409,7 +539,7 @@ export default class AdminCarsPage {
     this.api.adminDeleteUploadedImage({ imageUrl }).subscribe({
       next: () => {
         this.uploadedImages.update((current) => current.filter((item) => item !== imageUrl));
-        this.uploadMessage.set('Image deleted from storage.');
+        this.uploadMessage.set(this.copy().imageDeletedSuccess);
         this.uploadError.set(false);
       },
       error: (error: unknown) => {
@@ -453,7 +583,7 @@ export default class AdminCarsPage {
     });
   }
 
-  private toCarPayloadString(imageUrl: string): Record<string, unknown> {
+  private toCarPayload(imageUrl: string): Record<string, unknown> {
     const value = this.carForm.getRawValue();
     return {
       name: value.name,
@@ -462,118 +592,45 @@ export default class AdminCarsPage {
       year: Number(value.year),
       price: Number(value.price),
       carType: value.carType,
-      listingType: value.listingType,
-      fuelType: value.fuelType,
-      transmissionType: value.transmissionType,
-      mileage: Number(value.mileage),
-      location: value.location,
-      imageUrl,
-      coverImageUrl: imageUrl,
-      images: [imageUrl],
-      isAvailable: value.isAvailable
-    };
-  }
-
-  private toCarPayloadNumeric(imageUrl: string): Record<string, unknown> {
-    const value = this.carForm.getRawValue();
-    return {
-      name: value.name,
-      brand: value.brand,
-      model: value.model,
-      year: Number(value.year),
-      price: Number(value.price),
-      carType: this.mapCarTypeToEnum(value.carType),
       listingType: this.mapListingTypeToEnum(value.listingType),
       fuelType: this.mapFuelTypeToEnum(value.fuelType),
       transmissionType: this.mapTransmissionTypeToEnum(value.transmissionType),
       mileage: Number(value.mileage),
       location: value.location,
-      imageUrl,
-      coverImageUrl: imageUrl,
-      images: [imageUrl],
-      isAvailable: value.isAvailable
-    };
-  }
-
-  private executeSaveWithFallback(
-    payloadCandidates: Record<string, unknown>[],
-    selectedId: string | null,
-    index: number,
-    lastError: unknown
-  ) {
-    if (index >= payloadCandidates.length) {
-      this.isSaving.set(false);
-      this.formError.set(this.extractError(lastError));
-      return;
-    }
-
-    const payload = payloadCandidates[index];
-    const request$ = selectedId
-      ? this.api.adminUpdateCar(selectedId, payload)
-      : this.api.adminCreateCar(payload);
-
-    request$.subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.resetForm();
-        this.loadCars();
-      },
-      error: (error: unknown) => {
-        if (this.shouldTryNextPayload(error)) {
-          this.executeSaveWithFallback(payloadCandidates, selectedId, index + 1, error);
-          return;
+      isAvailable: value.isAvailable,
+      isFeatured: false,
+      images: [
+        {
+          imageUrl,
+          displayOrder: 1
         }
-
-        this.isSaving.set(false);
-        this.formError.set(this.extractError(error));
-      }
-    });
-  }
-
-  private shouldTryNextPayload(error: unknown): boolean {
-    const status = this.getHttpStatus(error);
-    // Any 400 here means current payload shape is invalid for backend binding/validation,
-    // so try the next known request shape before surfacing the final error.
-    return status === 400;
+      ]
+    };
   }
 
   private mapListingTypeToEnum(value: string): number {
     const normalized = value.trim().toLowerCase();
-    if (normalized === 'sell') {
-      return 1;
-    }
-    return 0;
-  }
-
-  private mapCarTypeToEnum(value: string): number {
-    const normalized = value.trim().toLowerCase();
-    if (normalized === 'suv') {
-      return 1;
-    }
-    if (normalized === 'hatchback') {
+    if (normalized === 'sell' || normalized === 'sale') {
       return 2;
     }
-    if (normalized === 'coupe') {
-      return 3;
-    }
-    if (normalized === 'pickup') {
-      return 4;
-    }
-    return 0;
+    return 1;
   }
 
   private mapFuelTypeToEnum(value: string): number {
     const normalized = value.trim().toLowerCase();
-    if (normalized === 'diesel') {
+    if (normalized === 'petrol') {
       return 1;
     }
-    if (normalized === 'hybrid') {
+    if (normalized === 'diesel') {
       return 2;
     }
-    if (normalized === 'electric') {
+    if (normalized === 'hybrid') {
       return 3;
     }
-    return 0;
+    if (normalized === 'electric') {
+      return 4;
+    }
+    return 1;
   }
 
   private mapTransmissionTypeToEnum(value: string): number {
@@ -581,7 +638,7 @@ export default class AdminCarsPage {
     if (normalized === 'manual') {
       return 1;
     }
-    return 0;
+    return 2;
   }
 
   private mapCars(payload: unknown): AdminCar[] {
@@ -613,14 +670,77 @@ export default class AdminCarsPage {
       year: typeof record['year'] === 'number' ? record['year'] : new Date().getFullYear(),
       price: typeof record['price'] === 'number' ? record['price'] : 0,
       carType: typeof record['carType'] === 'string' ? record['carType'] : 'Sedan',
-      listingType: typeof record['listingType'] === 'string' ? record['listingType'] : 'Rent',
-      fuelType: typeof record['fuelType'] === 'string' ? record['fuelType'] : 'Petrol',
-      transmissionType: typeof record['transmissionType'] === 'string' ? record['transmissionType'] : 'Automatic',
+      listingType: this.normalizeListingType(record['listingType']),
+      fuelType: this.normalizeFuelType(record['fuelType']),
+      transmissionType: this.normalizeTransmissionType(record['transmissionType']),
       mileage: typeof record['mileage'] === 'number' ? record['mileage'] : 0,
       location: typeof record['location'] === 'string' ? record['location'] : 'Cairo',
       imageUrl: this.extractImageUrl(record),
       isAvailable: typeof record['isAvailable'] === 'boolean' ? record['isAvailable'] : true
     };
+  }
+
+  private normalizeListingType(value: unknown): string {
+    if (typeof value === 'number') {
+      return value === 2 ? 'Sell' : 'Rent';
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === '2' || normalized === 'sell' || normalized === 'sale') {
+        return 'Sell';
+      }
+      return 'Rent';
+    }
+
+    return 'Rent';
+  }
+
+  private normalizeFuelType(value: unknown): string {
+    if (typeof value === 'number') {
+      if (value === 2) {
+        return 'Diesel';
+      }
+      if (value === 3) {
+        return 'Hybrid';
+      }
+      if (value === 4) {
+        return 'Electric';
+      }
+      return 'Petrol';
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === '2' || normalized === 'diesel') {
+        return 'Diesel';
+      }
+      if (normalized === '3' || normalized === 'hybrid') {
+        return 'Hybrid';
+      }
+      if (normalized === '4' || normalized === 'electric') {
+        return 'Electric';
+      }
+      return 'Petrol';
+    }
+
+    return 'Petrol';
+  }
+
+  private normalizeTransmissionType(value: unknown): string {
+    if (typeof value === 'number') {
+      return value === 1 ? 'Manual' : 'Automatic';
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === '1' || normalized === 'manual') {
+        return 'Manual';
+      }
+      return 'Automatic';
+    }
+
+    return 'Automatic';
   }
 
   private extractImageUrl(record: Record<string, unknown>): string {
@@ -677,10 +797,10 @@ export default class AdminCarsPage {
   private extractError(error: unknown): string {
     const status = this.getHttpStatus(error);
     if (status === 401) {
-      return 'Unauthorized (401): your session is missing or expired. Please login again as admin and retry.';
+      return this.copy().unauthorizedError;
     }
     if (status === 403) {
-      return 'Forbidden (403): your account does not have permission for this admin action.';
+      return this.copy().forbiddenError;
     }
 
     if (typeof error === 'object' && error !== null) {
@@ -718,7 +838,7 @@ export default class AdminCarsPage {
       }
     }
 
-    return 'Action failed. Please verify API permissions and payload format.';
+    return this.copy().genericActionFailedError;
   }
 
   private extractValidationMessages(errorsPayload: unknown): string[] {

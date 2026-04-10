@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
+import { LocaleService } from '../../../core/services/locale.service';
 
 interface AdminUser {
   id: string;
@@ -11,12 +12,58 @@ interface AdminUser {
   isBlocked: boolean;
 }
 
+const EN_COPY = {
+  title: 'Moderation',
+  usersTitle: 'Users',
+  refreshUsers: 'Refresh Users',
+  name: 'Name',
+  email: 'Email',
+  phone: 'Phone',
+  role: 'Role',
+  status: 'Status',
+  actions: 'Actions',
+  blocked: 'Blocked',
+  active: 'Active',
+  unblock: 'Unblock',
+  block: 'Block',
+  delete: 'Delete',
+  userBlockedSuccess: 'User blocked successfully.',
+  userUnblockedSuccess: 'User unblocked successfully.',
+  userDeletedSuccess: 'User deleted successfully.',
+  unknown: 'Unknown',
+  userRole: 'User',
+  fallbackError: 'Action failed. Please verify API permissions.'
+};
+
+const AR_COPY: typeof EN_COPY = {
+  title: 'الإشراف',
+  usersTitle: 'المستخدمون',
+  refreshUsers: 'تحديث المستخدمين',
+  name: 'الاسم',
+  email: 'البريد الإلكتروني',
+  phone: 'الهاتف',
+  role: 'الدور',
+  status: 'الحالة',
+  actions: 'الإجراءات',
+  blocked: 'محظور',
+  active: 'نشط',
+  unblock: 'إلغاء الحظر',
+  block: 'حظر',
+  delete: 'حذف',
+  userBlockedSuccess: 'تم حظر المستخدم بنجاح.',
+  userUnblockedSuccess: 'تم إلغاء حظر المستخدم بنجاح.',
+  userDeletedSuccess: 'تم حذف المستخدم بنجاح.',
+  unknown: 'غير معروف',
+  userRole: 'مستخدم',
+  fallbackError: 'فشل الإجراء. يرجى التحقق من الصلاحيات.'
+};
+
 @Component({
   selector: 'app-admin-moderation-page',
   template: `
     <section class="space-y-6">
       <section class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="font-serif text-3xl">Moderation</h1>
+        <h1 class="font-serif text-3xl">{{ copy().title }}</h1>
       </section>
 
       @if (message()) {
@@ -26,20 +73,20 @@ interface AdminUser {
       <article class="card border border-base-300 bg-base-100 shadow">
         <div class="card-body gap-4">
           <section class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="card-title">Users ({{ usersCount() }})</h2>
-            <button class="btn btn-sm" type="button" (click)="loadUsers()">Refresh Users</button>
+            <h2 class="card-title">{{ copy().usersTitle }} ({{ usersCount() }})</h2>
+            <button class="btn btn-sm" type="button" (click)="loadUsers()">{{ copy().refreshUsers }}</button>
           </section>
 
           <div class="overflow-x-auto">
             <table class="table table-zebra">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{{ copy().name }}</th>
+                  <th>{{ copy().email }}</th>
+                  <th>{{ copy().phone }}</th>
+                  <th>{{ copy().role }}</th>
+                  <th>{{ copy().status }}</th>
+                  <th>{{ copy().actions }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -51,15 +98,15 @@ interface AdminUser {
                     <td>{{ user.role }}</td>
                     <td>
                       <span class="badge" [class]="user.isBlocked ? 'badge-error' : 'badge-success'">
-                        {{ user.isBlocked ? 'Blocked' : 'Active' }}
+                        {{ user.isBlocked ? copy().blocked : copy().active }}
                       </span>
                     </td>
                     <td>
                       <div class="flex flex-wrap gap-2">
                         <button class="btn btn-xs" type="button" (click)="toggleBlock(user)">
-                          {{ user.isBlocked ? 'Unblock' : 'Block' }}
+                          {{ user.isBlocked ? copy().unblock : copy().block }}
                         </button>
-                        <button class="btn btn-xs btn-error" type="button" (click)="deleteUser(user.id)">Delete</button>
+                        <button class="btn btn-xs btn-error" type="button" (click)="deleteUser(user.id)">{{ copy().delete }}</button>
                       </div>
                     </td>
                   </tr>
@@ -76,10 +123,12 @@ interface AdminUser {
 })
 export default class AdminModerationPage {
   private readonly api = inject(AutoessaApiService);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly users = signal<AdminUser[]>([]);
   protected readonly message = signal('');
   protected readonly isError = signal(false);
+  protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
   protected readonly usersCount = computed(() => this.users().length);
 
@@ -101,7 +150,7 @@ export default class AdminModerationPage {
   protected toggleBlock(user: AdminUser) {
     this.api.adminBlockUser(user.id, { isBlocked: !user.isBlocked }).subscribe({
       next: () => {
-        this.message.set(`User ${user.isBlocked ? 'unblocked' : 'blocked'} successfully.`);
+        this.message.set(user.isBlocked ? this.copy().userUnblockedSuccess : this.copy().userBlockedSuccess);
         this.isError.set(false);
         this.loadUsers();
       },
@@ -115,7 +164,7 @@ export default class AdminModerationPage {
   protected deleteUser(id: string) {
     this.api.adminDeleteUser(id).subscribe({
       next: () => {
-        this.message.set('User deleted successfully.');
+        this.message.set(this.copy().userDeletedSuccess);
         this.isError.set(false);
         this.loadUsers();
       },
@@ -131,10 +180,10 @@ export default class AdminModerationPage {
       const source = this.toRecord(item);
       return {
         id: this.readString(source, 'id', `user-${index + 1}`),
-        fullName: this.readString(source, 'fullName', this.readString(source, 'name', 'Unknown')),
+        fullName: this.readString(source, 'fullName', this.readString(source, 'name', this.copy().unknown)),
         email: this.readString(source, 'email', '-'),
         phoneNumber: this.readString(source, 'phoneNumber', '-'),
-        role: this.readString(source, 'role', 'User'),
+        role: this.readString(source, 'role', this.copy().userRole),
         isBlocked: this.readBoolean(source, 'isBlocked', false)
       };
     });
@@ -198,6 +247,6 @@ export default class AdminModerationPage {
       }
     }
 
-    return 'Action failed. Please verify API permissions.';
+    return this.copy().fallbackError;
   }
 }

@@ -1,8 +1,35 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
+import { LocaleService } from '../../../core/services/locale.service';
 import { DashboardService } from '../data-access/dashboard.service';
 import { BookingRequestSummary, DashboardStats } from '../data-access/dashboard.interface';
 import { StatsCardComponent } from '../ui/stats-card.component';
+
+const EN_COPY = {
+	title: 'Admin Dashboard',
+	cars: 'Cars',
+	users: 'Users',
+	bookingRequests: 'Booking Requests',
+	contactMessages: 'Contact Messages',
+	latestBookingRequests: 'Latest Booking Requests',
+	name: 'Name',
+	phone: 'Phone',
+	car: 'Car',
+	status: 'Status'
+};
+
+const AR_COPY: typeof EN_COPY = {
+	title: 'لوحة تحكم الإدارة',
+	cars: 'السيارات',
+	users: 'المستخدمون',
+	bookingRequests: 'طلبات الحجز',
+	contactMessages: 'رسائل التواصل',
+	latestBookingRequests: 'أحدث طلبات الحجز',
+	name: 'الاسم',
+	phone: 'الهاتف',
+	car: 'السيارة',
+	status: 'الحالة'
+};
 
 @Component({
 	selector: 'app-dashboard-page',
@@ -10,27 +37,27 @@ import { StatsCardComponent } from '../ui/stats-card.component';
 	template: `
 		<section class="space-y-6">
 			<section class="flex flex-wrap items-center justify-between gap-3">
-				<h1 class="font-serif text-3xl">Admin Dashboard</h1>
+				<h1 class="font-serif text-3xl">{{ copy().title }}</h1>
 			</section>
 
 			<section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-				<app-stats-card label="Cars" [value]="stats().totalCars" />
-				<app-stats-card label="Users" [value]="stats().totalUsers" />
-				<app-stats-card label="Booking Requests" [value]="stats().openBookingRequests" />
-				<app-stats-card label="Contact Messages" [value]="stats().openContactMessages" />
+				<app-stats-card [label]="copy().cars" [value]="stats().totalCars" />
+				<app-stats-card [label]="copy().users" [value]="stats().totalUsers" />
+				<app-stats-card [label]="copy().bookingRequests" [value]="stats().openBookingRequests" />
+				<app-stats-card [label]="copy().contactMessages" [value]="stats().openContactMessages" />
 			</section>
 
 			<article class="card border border-base-300 bg-base-100 shadow">
 				<div class="card-body">
-					<h2 class="card-title">Latest Booking Requests</h2>
+					<h2 class="card-title">{{ copy().latestBookingRequests }}</h2>
 					<div class="overflow-x-auto">
 						<table class="table table-zebra">
 							<thead>
 								<tr>
-									<th>Name</th>
-									<th>Phone</th>
-									<th>Car</th>
-									<th>Status</th>
+									<th>{{ copy().name }}</th>
+									<th>{{ copy().phone }}</th>
+									<th>{{ copy().car }}</th>
+									<th>{{ copy().status }}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -53,6 +80,7 @@ import { StatsCardComponent } from '../ui/stats-card.component';
 })
 export default class DashboardPage {
 	private readonly dashboardService = inject(DashboardService);
+	private readonly localeService = inject(LocaleService);
 
 	protected readonly stats = signal<DashboardStats>({
 		totalCars: 0,
@@ -62,6 +90,7 @@ export default class DashboardPage {
 	});
 
 	protected readonly latestRequests = signal<BookingRequestSummary[]>([]);
+	protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
 	constructor() {
 		this.dashboardService.getStats().subscribe((value) => this.stats.set(value));

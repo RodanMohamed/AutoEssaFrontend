@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { BranchLocation, BranchLocationsService } from '../../../core/services/branch-locations.service';
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
+import { LocaleService } from '../../../core/services/locale.service';
 
 interface ContactMessageItem {
   id: string;
@@ -18,13 +19,113 @@ interface LocalizationSettingItem {
   value: string;
 }
 
+const EN_COPY = {
+  pageTitle: 'Content Management',
+  contactInformation: 'Contact Information',
+  phoneNumber: 'Phone Number',
+  whatsappNumber: 'WhatsApp Number',
+  address: 'Address',
+  googleMapsUrl: 'Google Maps URL',
+  workingHours: 'Working Hours',
+  saving: 'Saving...',
+  saveContactInfo: 'Save Contact Info',
+  branchLocationsTitle: 'Branch Locations (3 placeholders)',
+  branchLocationsHint: 'Admin can choose the active branch shown on Contact page.',
+  branch: 'Branch',
+  status: 'Status',
+  actions: 'Actions',
+  active: 'Active',
+  inactive: 'Inactive',
+  edit: 'Edit',
+  setActive: 'Set Active',
+  branchId: 'Branch ID',
+  branchName: 'Branch Name',
+  googleMapsEmbedUrl: 'Google Maps Embed URL',
+  setAsActiveBranch: 'Set as active branch',
+  saveBranch: 'Save Branch',
+  new: 'New',
+  homePageContent: 'Home Page Content',
+  refresh: 'Refresh',
+  heroHeadline: 'Hero Headline',
+  heroSubHeadline: 'Hero Sub Headline',
+  heroCtaText: 'Hero CTA Text',
+  whyChooseUsText: 'Why Choose Us Text',
+  saveHomeContent: 'Save Home Content',
+  contactMessages: 'Contact Messages',
+  name: 'Name',
+  phone: 'Phone',
+  message: 'Message',
+  action: 'Action',
+  contacted: 'Contacted',
+  closed: 'Closed',
+  contactInformationSaved: 'Contact information saved successfully.',
+  homeContentSaved: 'Homepage content saved successfully.',
+  contactMessageUpdated: 'Contact message updated.',
+  branchSaved: 'Branch location saved successfully.',
+  activeBranchUpdated: 'Active branch updated.',
+  unknown: 'Unknown',
+  fallbackError: 'Action failed. Please verify API permissions or payload shape.',
+  newBranchPrefix: 'New Branch',
+  cairoEgypt: 'Cairo, Egypt'
+};
+
+const AR_COPY: typeof EN_COPY = {
+  pageTitle: 'إدارة المحتوى',
+  contactInformation: 'معلومات التواصل',
+  phoneNumber: 'رقم الهاتف',
+  whatsappNumber: 'رقم واتساب',
+  address: 'العنوان',
+  googleMapsUrl: 'رابط خرائط جوجل',
+  workingHours: 'ساعات العمل',
+  saving: 'جارٍ الحفظ...',
+  saveContactInfo: 'حفظ معلومات التواصل',
+  branchLocationsTitle: 'مواقع الفروع (3 عناصر افتراضية)',
+  branchLocationsHint: 'يمكن للمسؤول اختيار الفرع النشط المعروض في صفحة التواصل.',
+  branch: 'الفرع',
+  status: 'الحالة',
+  actions: 'الإجراءات',
+  active: 'نشط',
+  inactive: 'غير نشط',
+  edit: 'تعديل',
+  setActive: 'تعيين كنشط',
+  branchId: 'معرف الفرع',
+  branchName: 'اسم الفرع',
+  googleMapsEmbedUrl: 'رابط تضمين خرائط جوجل',
+  setAsActiveBranch: 'تعيين كفرع نشط',
+  saveBranch: 'حفظ الفرع',
+  new: 'جديد',
+  homePageContent: 'محتوى الصفحة الرئيسية',
+  refresh: 'تحديث',
+  heroHeadline: 'العنوان الرئيسي',
+  heroSubHeadline: 'العنوان الفرعي الرئيسي',
+  heroCtaText: 'نص زر الدعوة للإجراء',
+  whyChooseUsText: 'نص لماذا تختارنا',
+  saveHomeContent: 'حفظ محتوى الصفحة الرئيسية',
+  contactMessages: 'رسائل التواصل',
+  name: 'الاسم',
+  phone: 'الهاتف',
+  message: 'الرسالة',
+  action: 'الإجراء',
+  contacted: 'تم التواصل',
+  closed: 'مغلق',
+  contactInformationSaved: 'تم حفظ معلومات التواصل بنجاح.',
+  homeContentSaved: 'تم حفظ محتوى الصفحة الرئيسية بنجاح.',
+  contactMessageUpdated: 'تم تحديث رسالة التواصل.',
+  branchSaved: 'تم حفظ موقع الفرع بنجاح.',
+  activeBranchUpdated: 'تم تحديث الفرع النشط.',
+  unknown: 'غير معروف',
+  fallbackError: 'فشل الإجراء. يرجى التحقق من الصلاحيات أو صيغة البيانات.',
+  newBranchPrefix: 'فرع جديد',
+  cairoEgypt: 'القاهرة، مصر'
+};
+
 @Component({
   selector: 'app-admin-content-page',
   imports: [ReactiveFormsModule],
   template: `
     <section class="space-y-6">
       <section class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="font-serif text-3xl">Content Management</h1>
+        <h1 class="font-serif text-3xl">{{ copy().pageTitle }}</h1>
       </section>
 
       @if (message()) {
@@ -34,30 +135,30 @@ interface LocalizationSettingItem {
       <section class="grid gap-6 xl:grid-cols-2">
         <article class="card border border-base-300 bg-base-100 shadow">
           <div class="card-body gap-4">
-            <h2 class="card-title">Contact Information</h2>
+            <h2 class="card-title">{{ copy().contactInformation }}</h2>
             <form [formGroup]="contactForm" (ngSubmit)="saveContactInfo()" class="grid gap-4">
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Phone Number</span>
+                <span class="label-text content-form-label">{{ copy().phoneNumber }}</span>
                 <input class="input input-bordered" formControlName="phoneNumber" />
               </label>
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">WhatsApp Number</span>
+                <span class="label-text content-form-label">{{ copy().whatsappNumber }}</span>
                 <input class="input input-bordered" formControlName="whatsAppNumber" />
               </label>
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Address</span>
+                <span class="label-text content-form-label">{{ copy().address }}</span>
                 <input class="input input-bordered" formControlName="address" />
               </label>
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Google Maps URL</span>
+                <span class="label-text content-form-label">{{ copy().googleMapsUrl }}</span>
                 <input class="input input-bordered" formControlName="googleMapsUrl" />
               </label>
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Working Hours</span>
+                <span class="label-text content-form-label">{{ copy().workingHours }}</span>
                 <input class="input input-bordered" formControlName="workingHours" />
               </label>
               <button class="btn btn-primary" type="submit" [disabled]="contactForm.invalid || isSavingContact()">
-                {{ isSavingContact() ? 'Saving...' : 'Save Contact Info' }}
+                {{ isSavingContact() ? copy().saving : copy().saveContactInfo }}
               </button>
             </form>
           </div>
@@ -84,8 +185,8 @@ interface LocalizationSettingItem {
       <article class="card border border-base-300 bg-base-100 shadow">
         <div class="card-body gap-4">
           <section class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="card-title">Branch Locations (3 placeholders)</h2>
-            <span class="text-sm opacity-70">Admin can choose the active branch shown on Contact page.</span>
+            <h2 class="card-title">{{ copy().branchLocationsTitle }}</h2>
+            <span class="text-sm opacity-70">{{ copy().branchLocationsHint }}</span>
           </section>
 
           <div class="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
@@ -93,10 +194,10 @@ interface LocalizationSettingItem {
               <table class="table table-zebra">
                 <thead>
                   <tr>
-                    <th>Branch</th>
-                    <th>Address</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>{{ copy().branch }}</th>
+                    <th>{{ copy().address }}</th>
+                    <th>{{ copy().status }}</th>
+                    <th>{{ copy().actions }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -106,13 +207,13 @@ interface LocalizationSettingItem {
                       <td>{{ branch.address }}</td>
                       <td>
                         <span class="badge" [class]="branch.isActive ? 'badge-success' : 'badge-outline'">
-                          {{ branch.isActive ? 'Active' : 'Inactive' }}
+                          {{ branch.isActive ? copy().active : copy().inactive }}
                         </span>
                       </td>
                       <td>
                         <div class="flex flex-wrap gap-2">
-                          <button class="btn btn-xs" type="button" (click)="editBranch(branch)">Edit</button>
-                          <button class="btn btn-xs btn-primary" type="button" (click)="activateBranch(branch.id)">Set Active</button>
+                          <button class="btn btn-xs" type="button" (click)="editBranch(branch)">{{ copy().edit }}</button>
+                          <button class="btn btn-xs btn-primary" type="button" (click)="activateBranch(branch.id)">{{ copy().setActive }}</button>
                         </div>
                       </td>
                     </tr>
@@ -123,28 +224,28 @@ interface LocalizationSettingItem {
 
             <form [formGroup]="branchForm" (ngSubmit)="saveBranch()" class="grid gap-3">
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Branch ID</span>
+                <span class="label-text content-form-label">{{ copy().branchId }}</span>
                 <input class="input input-bordered" formControlName="id" />
               </label>
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Branch Name</span>
+                <span class="label-text content-form-label">{{ copy().branchName }}</span>
                 <input class="input input-bordered" formControlName="name" />
               </label>
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Address</span>
+                <span class="label-text content-form-label">{{ copy().address }}</span>
                 <input class="input input-bordered" formControlName="address" />
               </label>
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Google Maps Embed URL</span>
+                <span class="label-text content-form-label">{{ copy().googleMapsEmbedUrl }}</span>
                 <input class="input input-bordered" formControlName="mapsUrl" />
               </label>
               <label class="label cursor-pointer justify-start gap-3">
                 <input class="checkbox checkbox-primary" type="checkbox" formControlName="isActive" />
-                <span class="label-text">Set as active branch</span>
+                <span class="label-text">{{ copy().setAsActiveBranch }}</span>
               </label>
               <div class="flex flex-wrap gap-2">
-                <button class="btn btn-primary" type="submit">Save Branch</button>
-                <button class="btn btn-outline" type="button" (click)="newBranchForm()">New</button>
+                <button class="btn btn-primary" type="submit">{{ copy().saveBranch }}</button>
+                <button class="btn btn-outline" type="button" (click)="newBranchForm()">{{ copy().new }}</button>
               </div>
             </form>
           </div>
@@ -155,28 +256,28 @@ interface LocalizationSettingItem {
         <article class="card border border-base-300 bg-base-100 shadow">
           <div class="card-body gap-4">
             <section class="flex flex-wrap items-center justify-between gap-3">
-              <h2 class="card-title " >Home Page Content</h2>
-              <button class="btn btn-sm" type="button" (click)="loadHomeContent()">Refresh</button>
+              <h2 class="card-title " >{{ copy().homePageContent }}</h2>
+              <button class="btn btn-sm" type="button" (click)="loadHomeContent()">{{ copy().refresh }}</button>
             </section>
             <form [formGroup]="homeContentForm" (ngSubmit)="saveHomeContent()" class="grid gap-4">
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Hero Headline</span>
+                <span class="label-text content-form-label">{{ copy().heroHeadline }}</span>
                 <input class="input input-bordered" formControlName="heroHeadline" />
               </label>
               <label class="form-control content-form-row content-form-row-top">
-                <span class="label-text content-form-label">Hero Sub Headline</span>
+                <span class="label-text content-form-label">{{ copy().heroSubHeadline }}</span>
                 <textarea class="textarea textarea-bordered" rows="3" formControlName="heroSubHeadline"></textarea>
               </label>
               <label class="form-control content-form-row">
-                <span class="label-text content-form-label">Hero CTA Text</span>
+                <span class="label-text content-form-label">{{ copy().heroCtaText }}</span>
                 <input class="input input-bordered" formControlName="heroCtaText" />
               </label>
               <label class="form-control content-form-row content-form-row-top">
-                <span class="label-text content-form-label">Why Choose Us Text</span>
+                <span class="label-text content-form-label">{{ copy().whyChooseUsText }}</span>
                 <textarea class="textarea textarea-bordered" rows="4" formControlName="whyChooseUsText"></textarea>
               </label>
               <button class="btn btn-primary" type="submit" [disabled]="homeContentForm.invalid || isSavingHome()">
-                {{ isSavingHome() ? 'Saving...' : 'Save Home Content' }}
+                {{ isSavingHome() ? copy().saving : copy().saveHomeContent }}
               </button>
             </form>
           </div>
@@ -185,18 +286,18 @@ interface LocalizationSettingItem {
         <article class="card border border-base-300 bg-base-100 shadow">
           <div class="card-body gap-4">
             <section class="flex flex-wrap items-center justify-between gap-3">
-              <h2 class="card-title">Contact Messages</h2>
-              <button class="btn btn-sm" type="button" (click)="loadContactMessages()">Refresh</button>
+              <h2 class="card-title">{{ copy().contactMessages }}</h2>
+              <button class="btn btn-sm" type="button" (click)="loadContactMessages()">{{ copy().refresh }}</button>
             </section>
             <div class="overflow-x-auto">
               <table class="table table-zebra">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Message</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>{{ copy().name }}</th>
+                    <th>{{ copy().phone }}</th>
+                    <th>{{ copy().message }}</th>
+                    <th>{{ copy().status }}</th>
+                    <th>{{ copy().action }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -210,9 +311,9 @@ interface LocalizationSettingItem {
                         <select class="select select-bordered select-sm"
                           [value]="item.status"
                           (change)="updateContactMessageStatus(item.id, $event)">
-                          <option value="0">New</option>
-                          <option value="1">Contacted</option>
-                          <option value="2">Closed</option>
+                          <option value="0">{{ copy().new }}</option>
+                          <option value="1">{{ copy().contacted }}</option>
+                          <option value="2">{{ copy().closed }}</option>
                         </select>
                       </td>
                     </tr>
@@ -267,6 +368,7 @@ export default class AdminContentPage {
   private readonly api = inject(AutoessaApiService);
   private readonly fb = inject(FormBuilder);
   private readonly branchService = inject(BranchLocationsService);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly message = signal('');
   protected readonly isError = signal(false);
@@ -275,6 +377,7 @@ export default class AdminContentPage {
   protected readonly contactMessages = signal<ContactMessageItem[]>([]);
   protected readonly localizationSettings = signal<LocalizationSettingItem[]>([]);
   protected readonly branches = this.branchService.branches;
+  protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
   protected readonly contactForm = this.fb.nonNullable.group({
     phoneNumber: ['', Validators.required],
@@ -352,7 +455,7 @@ export default class AdminContentPage {
     this.api.adminUpdateContactInfo(this.contactForm.getRawValue()).subscribe({
       next: () => {
         this.isSavingContact.set(false);
-        this.message.set('Contact information saved successfully.');
+        this.message.set(this.copy().contactInformationSaved);
         this.isError.set(false);
       },
       error: (error: unknown) => {
@@ -375,7 +478,7 @@ export default class AdminContentPage {
     this.api.adminUpdateHomeContent(this.homeContentForm.getRawValue()).subscribe({
       next: () => {
         this.isSavingHome.set(false);
-        this.message.set('Homepage content saved successfully.');
+        this.message.set(this.copy().homeContentSaved);
         this.isError.set(false);
       },
       error: (error: unknown) => {
@@ -392,7 +495,7 @@ export default class AdminContentPage {
 
     this.api.adminUpdateContactMessageStatus(id, { status }).subscribe({
       next: () => {
-        this.message.set('Contact message updated.');
+        this.message.set(this.copy().contactMessageUpdated);
         this.isError.set(false);
         this.loadContactMessages();
       },
@@ -417,8 +520,8 @@ export default class AdminContentPage {
     const nextId = `branch-${this.branches().length + 1}`;
     this.branchForm.reset({
       id: nextId,
-      name: `New Branch ${this.branches().length + 1}`,
-      address: 'Cairo, Egypt',
+      name: `${this.copy().newBranchPrefix} ${this.branches().length + 1}`,
+      address: this.copy().cairoEgypt,
       mapsUrl: 'https://www.google.com/maps?q=Cairo&output=embed',
       isActive: false
     });
@@ -441,13 +544,13 @@ export default class AdminContentPage {
       value.isActive
     );
 
-    this.message.set('Branch location saved successfully.');
+    this.message.set(this.copy().branchSaved);
     this.isError.set(false);
   }
 
   protected activateBranch(id: string) {
     this.branchService.setActiveBranch(id);
-    this.message.set('Active branch updated.');
+    this.message.set(this.copy().activeBranchUpdated);
     this.isError.set(false);
   }
 
@@ -457,7 +560,7 @@ export default class AdminContentPage {
       const status = this.readNumber(source, 'status', 0);
       return {
         id: this.readString(source, 'id', `contact-${index + 1}`),
-        name: this.readString(source, 'name', 'Unknown'),
+        name: this.readString(source, 'name', this.copy().unknown),
         phoneNumber: this.readString(source, 'phoneNumber', '-'),
         message: this.readString(source, 'message', '-'),
         status,
@@ -513,12 +616,12 @@ export default class AdminContentPage {
 
   private statusLabel(status: number): string {
     if (status === 1) {
-      return 'Contacted';
+      return this.copy().contacted;
     }
     if (status === 2) {
-      return 'Closed';
+      return this.copy().closed;
     }
-    return 'New';
+    return this.copy().new;
   }
 
   private extractError(error: unknown): string {
@@ -542,6 +645,6 @@ export default class AdminContentPage {
       }
     }
 
-    return 'Action failed. Please verify API permissions or payload shape.';
+    return this.copy().fallbackError;
   }
 }

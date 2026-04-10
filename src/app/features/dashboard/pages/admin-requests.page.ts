@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
+import { LocaleService } from '../../../core/services/locale.service';
 
 interface AdminBookingRequest {
   id: string;
@@ -23,19 +24,61 @@ interface AdminCarRequest {
   statusLabel: string;
 }
 
+const EN_COPY = {
+  title: 'Requests Management',
+  bookingTitle: 'Booking Requests',
+  carRequestsTitle: 'Requested Cars',
+  refresh: 'Refresh',
+  customer: 'Customer',
+  phone: 'Phone',
+  car: 'Car',
+  dates: 'Dates',
+  status: 'Status',
+  action: 'Action',
+  desiredCar: 'Desired Car',
+  budget: 'Budget',
+  new: 'New',
+  contacted: 'Contacted',
+  closed: 'Closed',
+  bookingStatusUpdated: 'Booking request status updated.',
+  carStatusUpdated: 'Car request status updated.',
+  fallbackError: 'Request failed. Please verify API role permissions.'
+};
+
+const AR_COPY: typeof EN_COPY = {
+  title: 'إدارة الطلبات',
+  bookingTitle: 'طلبات الحجز',
+  carRequestsTitle: 'طلبات السيارات',
+  refresh: 'تحديث',
+  customer: 'العميل',
+  phone: 'الهاتف',
+  car: 'السيارة',
+  dates: 'التواريخ',
+  status: 'الحالة',
+  action: 'الإجراء',
+  desiredCar: 'السيارة المطلوبة',
+  budget: 'الميزانية',
+  new: 'جديد',
+  contacted: 'تم التواصل',
+  closed: 'مغلق',
+  bookingStatusUpdated: 'تم تحديث حالة طلب الحجز.',
+  carStatusUpdated: 'تم تحديث حالة طلب السيارة.',
+  fallbackError: 'فشل الطلب. يرجى التحقق من صلاحيات واجهة البرمجة.'
+};
+
 @Component({
   selector: 'app-admin-requests-page',
   template: `
     <section class="space-y-6">
       <section class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="font-serif text-3xl">Requests Management</h1>
+        <h1 class="font-serif text-3xl">{{ copy().title }}</h1>
       </section>
 
       <article class="card border border-base-300 bg-base-100 shadow">
         <div class="card-body gap-4">
           <section class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="card-title">Booking Requests ({{ bookingCount() }})</h2>
-            <button class="btn btn-sm" type="button" (click)="refreshAll()">Refresh</button>
+            <h2 class="card-title">{{ copy().bookingTitle }} ({{ bookingCount() }})</h2>
+            <button class="btn btn-sm" type="button" (click)="refreshAll()">{{ copy().refresh }}</button>
           </section>
 
           @if (message()) {
@@ -46,12 +89,12 @@ interface AdminCarRequest {
             <table class="table table-zebra">
               <thead>
                 <tr>
-                  <th>Customer</th>
-                  <th>Phone</th>
-                  <th>Car</th>
-                  <th>Dates</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th>{{ copy().customer }}</th>
+                  <th>{{ copy().phone }}</th>
+                  <th>{{ copy().car }}</th>
+                  <th>{{ copy().dates }}</th>
+                  <th>{{ copy().status }}</th>
+                  <th>{{ copy().action }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -66,9 +109,9 @@ interface AdminCarRequest {
                       <select class="select select-bordered select-sm"
                         [value]="request.status"
                         (change)="updateBookingStatus(request.id, $event)">
-                        <option value="0">New</option>
-                        <option value="1">Contacted</option>
-                        <option value="2">Closed</option>
+                        <option value="0">{{ copy().new }}</option>
+                        <option value="1">{{ copy().contacted }}</option>
+                        <option value="2">{{ copy().closed }}</option>
                       </select>
                     </td>
                   </tr>
@@ -81,17 +124,17 @@ interface AdminCarRequest {
 
       <article class="card border border-base-300 bg-base-100 shadow">
         <div class="card-body gap-4">
-          <h2 class="card-title">Requested Cars ({{ carRequestCount() }})</h2>
+          <h2 class="card-title">{{ copy().carRequestsTitle }} ({{ carRequestCount() }})</h2>
           <div class="overflow-x-auto">
             <table class="table table-zebra">
               <thead>
                 <tr>
-                  <th>Customer</th>
-                  <th>Phone</th>
-                  <th>Desired Car</th>
-                  <th>Budget</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th>{{ copy().customer }}</th>
+                  <th>{{ copy().phone }}</th>
+                  <th>{{ copy().desiredCar }}</th>
+                  <th>{{ copy().budget }}</th>
+                  <th>{{ copy().status }}</th>
+                  <th>{{ copy().action }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,9 +149,9 @@ interface AdminCarRequest {
                       <select class="select select-bordered select-sm"
                         [value]="request.status"
                         (change)="updateCarRequestStatus(request.id, $event)">
-                        <option value="0">New</option>
-                        <option value="1">Contacted</option>
-                        <option value="2">Closed</option>
+                        <option value="0">{{ copy().new }}</option>
+                        <option value="1">{{ copy().contacted }}</option>
+                        <option value="2">{{ copy().closed }}</option>
                       </select>
                     </td>
                   </tr>
@@ -124,11 +167,13 @@ interface AdminCarRequest {
 })
 export default class AdminRequestsPage {
   private readonly api = inject(AutoessaApiService);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly bookingRequests = signal<AdminBookingRequest[]>([]);
   protected readonly carRequests = signal<AdminCarRequest[]>([]);
   protected readonly message = signal('');
   protected readonly isError = signal(false);
+  protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
   protected readonly bookingCount = computed(() => this.bookingRequests().length);
   protected readonly carRequestCount = computed(() => this.carRequests().length);
@@ -148,7 +193,7 @@ export default class AdminRequestsPage {
 
     this.api.adminUpdateBookingRequestStatus(id, { status }).subscribe({
       next: () => {
-        this.message.set('Booking request status updated.');
+        this.message.set(this.copy().bookingStatusUpdated);
         this.isError.set(false);
         this.loadBookingRequests();
       },
@@ -165,7 +210,7 @@ export default class AdminRequestsPage {
 
     this.api.adminUpdateCarRequestStatus(id, { status }).subscribe({
       next: () => {
-        this.message.set('Car request status updated.');
+        this.message.set(this.copy().carStatusUpdated);
         this.isError.set(false);
         this.loadCarRequests();
       },
@@ -269,12 +314,12 @@ export default class AdminRequestsPage {
 
   private statusLabel(status: number): string {
     if (status === 1) {
-      return 'Contacted';
+      return this.copy().contacted;
     }
     if (status === 2) {
-      return 'Closed';
+      return this.copy().closed;
     }
-    return 'New';
+    return this.copy().new;
   }
 
   private extractError(error: unknown): string {
@@ -298,6 +343,6 @@ export default class AdminRequestsPage {
       }
     }
 
-    return 'Request failed. Please verify API role permissions.';
+    return this.copy().fallbackError;
   }
 }
