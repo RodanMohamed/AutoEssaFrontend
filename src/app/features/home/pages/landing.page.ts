@@ -20,43 +20,88 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
         [ctaText]="homeContent().heroCtaText"
       />
 
-      <section class="grid gap-5 xl:grid-cols-[0.92fr_1.08fr]">
-        <article class="rounded-4xl border border-base-300 bg-base-100 shadow-lg">
-          <div class="space-y-5 p-6 md:p-8">
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="font-serif text-2xl">{{ copy().whyChooseUsTitle }}</h3>
-              <span class="badge badge-outline">{{ copy().trustBadge }}</span>
-            </div>
-            <p class="text-base-content/75">{{ homeContent().whyChooseUsText }}</p>
-            <div class="grid gap-3 sm:grid-cols-2">
-              <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
-                <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().featureOneTitle }}</p>
-                <p class="mt-2 font-medium">{{ copy().featureOneBody }}</p>
-              </div>
-              <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
-                <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().featureTwoTitle }}</p>
-                <p class="mt-2 font-medium">{{ copy().featureTwoBody }}</p>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <div class="grid gap-5 md:grid-cols-2">
-          <article class="rounded-4xl border border-base-300 bg-base-100 shadow-lg">
-            <div class="space-y-4 p-6 md:p-8">
-              <div class="flex items-center justify-between gap-3">
-                <h3 class="font-serif text-2xl">{{ copy().categoriesTitle }}</h3>
-                <span class="badge badge-outline">{{ copy().categoryBadge }}</span>
-              </div>
-              <p class="text-base-content/75">{{ copy().categoriesBody }}</p>
-              <div class="space-y-3">
-                <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
-                  <p class="font-semibold">{{ copy().rentCategoryTitle }}</p>
-                  <p class="text-sm text-base-content/70">{{ copy().rentCategoryBody }}</p>
+      <section class="grid gap-5 xl:grid-cols-[1.02fr_0.98fr]">
+        <article class="feature-panel feature-panel-why relative overflow-hidden rounded-4xl border border-base-300 bg-base-100 shadow-lg">
+            <div class="feature-accent feature-accent-why"></div>
+            <div class="relative space-y-6 p-6 md:p-8">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.22em] text-base-content/55">{{ copy().trustBadge }}</p>
+                  <h3 class="mt-2 font-serif text-2xl md:text-3xl">{{ copy().whyChooseUsTitle }}</h3>
                 </div>
-                <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
-                  <p class="font-semibold">{{ copy().buyCategoryTitle }}</p>
-                  <p class="text-sm text-base-content/70">{{ copy().buyCategoryBody }}</p>
+                <span class="badge badge-outline badge-lg">Verified</span>
+              </div>
+
+              <p class="max-w-2xl text-base-content/75 leading-7">{{ homeContent().whyChooseUsText }}</p>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="feature-tile rounded-3xl border border-base-300 bg-base-200/55 p-4 md:p-5">
+                  <div class="flex items-start gap-3">
+                    <span class="feature-number">01</span>
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().featureOneTitle }}</p>
+                      <p class="mt-2 font-medium leading-6">{{ copy().featureOneBody }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="feature-tile rounded-3xl border border-base-300 bg-base-200/55 p-4 md:p-5">
+                  <div class="flex items-start gap-3">
+                    <span class="feature-number">02</span>
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().featureTwoTitle }}</p>
+                      <p class="mt-2 font-medium leading-6">{{ copy().featureTwoBody }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-3xl border border-base-300 bg-base-200/45 p-4 md:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <p class="font-semibold">Trusted support, polished listings, and quick response times.</p>
+                  <span class="badge badge-outline">{{ homeContent().heroCtaText }}</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+        <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
+          <article class="feature-panel feature-panel-categories relative overflow-hidden rounded-4xl border border-base-300 bg-base-100 shadow-lg">
+            <div class="relative space-y-5 p-6 md:p-8">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.22em] text-base-content/55">Browse</p>
+                  <h3 class="mt-2 font-serif text-2xl md:text-3xl">{{ copy().categoriesTitle }}</h3>
+                </div>
+                <span class="badge badge-outline badge-lg">{{ copy().categoryBadge }}</span>
+              </div>
+
+              <p class="max-w-xl text-base-content/75 leading-7">{{ copy().categoriesBody }}</p>
+
+              <div class="grid gap-3">
+                <div class="category-card category-card-rent rounded-3xl border border-base-300 p-4 md:p-5">
+                  <div class="flex items-start gap-4">
+                    <span class="category-pill">R</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="font-semibold text-lg">{{ copy().rentCategoryTitle }}</p>
+                        <span class="badge badge-sm badge-outline">Flexible</span>
+                      </div>
+                      <p class="mt-2 text-sm leading-6 text-base-content/70">{{ copy().rentCategoryBody }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="category-card category-card-buy rounded-3xl border border-base-300 p-4 md:p-5">
+                  <div class="flex items-start gap-4">
+                    <span class="category-pill">B</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="font-semibold text-lg">{{ copy().buyCategoryTitle }}</p>
+                        <span class="badge badge-sm badge-outline">Curated</span>
+                      </div>
+                      <p class="mt-2 text-sm leading-6 text-base-content/70">{{ copy().buyCategoryBody }}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -106,7 +151,11 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
                 </div>
                 <div class="rounded-2xl border border-base-300 bg-base-200/40 p-4">
                   <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">Hand-picked experience</p>
-                  
+                  <div class="mt-3 space-y-2">
+                    <div class="h-2.5 w-full rounded-full bg-base-300/70"></div>
+                    <div class="h-2.5 w-4/5 rounded-full bg-base-300/50"></div>
+                    <div class="h-2.5 w-2/3 rounded-full bg-base-300/40"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -135,6 +184,121 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
   styles: `
     .insights-panel {
       isolation: isolate;
+    }
+
+    .feature-panel {
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    .feature-panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 40px rgba(124, 80, 38, 0.12);
+    }
+
+    .feature-accent {
+      position: absolute;
+      inset-inline-end: 0;
+      inset-block-start: 0;
+      width: 9rem;
+      height: 9rem;
+      border-radius: 0 0 0 9999px;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .feature-accent-why {
+      background: linear-gradient(135deg, #b77d4b, #76a16d);
+    }
+
+    .feature-panel-categories {
+      overflow: hidden;
+    }
+
+    .feature-panel-categories::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(225, 160, 92, 0.12), transparent 32%),
+        radial-gradient(circle at bottom left, rgba(118, 161, 109, 0.1), transparent 28%);
+      pointer-events: none;
+    }
+
+    .feature-tile {
+      transition: transform 200ms ease, background-color 200ms ease;
+    }
+
+    .feature-tile:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .feature-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, rgba(183, 125, 75, 0.18), rgba(118, 161, 109, 0.18));
+      color: #6e4b2d;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      flex-shrink: 0;
+    }
+
+    .category-card {
+      position: relative;
+      overflow: hidden;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+
+    .category-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 28px rgba(124, 80, 38, 0.1);
+    }
+
+    .category-card-rent {
+      background: linear-gradient(135deg, rgba(255, 247, 236, 0.95), rgba(255, 255, 255, 0.92));
+    }
+
+    .category-card-buy {
+      background: linear-gradient(135deg, rgba(241, 248, 238, 0.95), rgba(255, 255, 255, 0.92));
+    }
+
+    .category-card::after {
+      content: '';
+      position: absolute;
+      inset-inline-end: -1.5rem;
+      inset-block-start: -1.5rem;
+      width: 5rem;
+      height: 5rem;
+      border-radius: 9999px;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .category-card-rent::after {
+      background: rgba(183, 125, 75, 0.9);
+    }
+
+    .category-card-buy::after {
+      background: rgba(118, 161, 109, 0.9);
+    }
+
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(183, 125, 75, 0.16), rgba(118, 161, 109, 0.16));
+      font-size: 1rem;
+      font-weight: 700;
+      color: #5e3f24;
+      flex-shrink: 0;
     }
 
     .insights-glow {
@@ -166,6 +330,24 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
     .insight-card {
       animation: insightRise 720ms ease both;
       animation-delay: var(--delay);
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+
+    .insight-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(124, 80, 38, 0.08);
+    }
+
+    .insight-card-one {
+      background: linear-gradient(180deg, rgba(255, 248, 239, 0.95), rgba(255, 255, 255, 0.9));
+    }
+
+    .insight-card-two {
+      background: linear-gradient(180deg, rgba(241, 248, 238, 0.95), rgba(255, 255, 255, 0.9));
+    }
+
+    .insight-card-three {
+      background: linear-gradient(180deg, rgba(244, 243, 255, 0.95), rgba(255, 255, 255, 0.9));
     }
 
     .insight-wave {
