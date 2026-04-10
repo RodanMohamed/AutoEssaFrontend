@@ -70,7 +70,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
               </div>
               <p class="text-base-content/75">{{ copy().insightsBody }}</p>
               <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <div class="rounded-2xl border border-base-300 bg-base-200/50 p-3 text-center">
                     <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightOneLabel }}</p>
                     <p class="mt-1 font-semibold">{{ copy().insightOneValue }}</p>
@@ -86,7 +86,6 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
                 </div>
                 <div class="rounded-2xl border border-base-300 bg-base-200/40 p-4">
                   <p class="font-semibold">{{ copy().insightsFootnoteTitle }}</p>
-
                 </div>
               </div>
             </div>
