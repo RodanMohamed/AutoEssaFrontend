@@ -62,30 +62,51 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
             </div>
           </article>
 
-          <article class="rounded-4xl border border-base-300 bg-base-100 shadow-lg">
-            <div class="space-y-4 p-6 md:p-8">
+          <article class="insights-panel relative overflow-hidden rounded-4xl border border-base-300 bg-base-100 shadow-lg">
+            <div class="insights-glow insights-glow-one"></div>
+            <div class="insights-glow insights-glow-two"></div>
+
+            <div class="relative space-y-5 p-6 md:p-8">
               <div class="flex items-center justify-between gap-3">
-                <h3 class="font-serif text-2xl">{{ copy().insightsTitle }}</h3>
-                <span class="badge badge-outline">{{ copy().insightsBadge }}</span>
+                <div>
+                  <p class="text-xs uppercase tracking-[0.22em] text-base-content/55">{{ copy().insightsBadge }}</p>
+                  <h3 class="mt-2 font-serif text-2xl">{{ copy().insightsTitle }}</h3>
+                </div>
+                <span class="badge badge-outline">{{ copy().insightsFootnoteTitle }}</span>
               </div>
-              <p class="text-base-content/75">{{ copy().insightsBody }}</p>
-              <div class="space-y-4">
-                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <div class="rounded-2xl border border-base-300 bg-base-200/50 p-3 text-center">
-                    <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightOneLabel }}</p>
-                    <p class="mt-1 font-semibold">{{ copy().insightOneValue }}</p>
-                  </div>
-                  <div class="rounded-2xl border border-base-300 bg-base-200/50 p-3 text-center">
-                    <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightTwoLabel }}</p>
-                    <p class="mt-1 font-semibold">{{ copy().insightTwoValue }}</p>
-                  </div>
-                  <div class="rounded-2xl border border-base-300 bg-base-200/50 p-3 text-center">
-                    <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightThreeLabel }}</p>
-                    <p class="mt-1 font-semibold">{{ copy().insightThreeValue }}</p>
+
+              <p class="max-w-xl text-base-content/75">{{ copy().insightsBody }}</p>
+
+              <div class="grid gap-3 sm:grid-cols-3">
+                <div class="insight-card rounded-2xl border border-base-300 bg-base-200/50 p-4 text-center" style="--delay: 0s;">
+                  <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightOneLabel }}</p>
+                  <p class="mt-2 text-2xl font-semibold">{{ copy().insightOneValue }}</p>
+                </div>
+                <div class="insight-card rounded-2xl border border-base-300 bg-base-200/50 p-4 text-center" style="--delay: 0.12s;">
+                  <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightTwoLabel }}</p>
+                  <p class="mt-2 text-2xl font-semibold">{{ copy().insightTwoValue }}</p>
+                </div>
+                <div class="insight-card rounded-2xl border border-base-300 bg-base-200/50 p-4 text-center" style="--delay: 0.24s;">
+                  <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightThreeLabel }}</p>
+                  <p class="mt-2 text-2xl font-semibold">{{ copy().insightThreeValue }}</p>
+                </div>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
+                <div class="insight-wave rounded-2xl border border-base-300 bg-base-200/40 p-4">
+                  <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">Live movement</p>
+                  <div class="mt-4 flex items-end gap-2">
+                    <span class="insight-bar h-10 w-3"></span>
+                    <span class="insight-bar h-16 w-3"></span>
+                    <span class="insight-bar h-12 w-3"></span>
+                    <span class="insight-bar h-20 w-3"></span>
+                    <span class="insight-bar h-14 w-3"></span>
+                    <span class="insight-bar h-24 w-3"></span>
                   </div>
                 </div>
                 <div class="rounded-2xl border border-base-300 bg-base-200/40 p-4">
-                  <p class="font-semibold">{{ copy().insightsFootnoteTitle }}</p>
+                  <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">Hand-picked experience</p>
+                  
                 </div>
               </div>
             </div>
@@ -110,6 +131,120 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
       </section>
 
     </section>
+  `,
+  styles: `
+    .insights-panel {
+      isolation: isolate;
+    }
+
+    .insights-glow {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(36px);
+      opacity: 0.55;
+      pointer-events: none;
+      animation: insightsFloat 9s ease-in-out infinite;
+    }
+
+    .insights-glow-one {
+      top: -2rem;
+      right: -1rem;
+      width: 9rem;
+      height: 9rem;
+      background: rgba(225, 160, 92, 0.2);
+    }
+
+    .insights-glow-two {
+      bottom: -2rem;
+      left: -1rem;
+      width: 8rem;
+      height: 8rem;
+      background: rgba(163, 190, 140, 0.2);
+      animation-delay: -3s;
+    }
+
+    .insight-card {
+      animation: insightRise 720ms ease both;
+      animation-delay: var(--delay);
+    }
+
+    .insight-wave {
+      overflow: hidden;
+    }
+
+    .insight-bar {
+      display: block;
+      border-radius: 9999px 9999px 0 0;
+      background: linear-gradient(180deg, rgba(80, 120, 90, 0.95), rgba(80, 120, 90, 0.35));
+      transform-origin: bottom;
+      animation: barPulse 2.4s ease-in-out infinite;
+    }
+
+    .insight-bar:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .insight-bar:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .insight-bar:nth-child(4) {
+      animation-delay: 0.45s;
+    }
+
+    .insight-bar:nth-child(5) {
+      animation-delay: 0.6s;
+    }
+
+    .insight-bar:nth-child(6) {
+      animation-delay: 0.75s;
+    }
+
+    .insight-bar:nth-child(7) {
+      animation-delay: 0.9s;
+    }
+
+    @keyframes insightRise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes insightsFloat {
+      0%,
+      100% {
+        transform: translateY(0) scale(1);
+      }
+
+      50% {
+        transform: translateY(10px) scale(1.05);
+      }
+    }
+
+    @keyframes barPulse {
+      0%,
+      100% {
+        transform: scaleY(0.88);
+      }
+
+      50% {
+        transform: scaleY(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .insights-glow,
+      .insight-card,
+      .insight-bar {
+        animation: none !important;
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
