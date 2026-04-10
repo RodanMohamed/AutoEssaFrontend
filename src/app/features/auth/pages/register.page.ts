@@ -84,7 +84,7 @@ export default class RegisterPage {
 			.subscribe({
 			next: () => {
 				this.status.set('Registration successful.');
-				this.router.navigateByUrl('/account');
+				this.router.navigateByUrl('/');
 			},
 			error: (error: unknown) => {
 				this.isError.set(true);

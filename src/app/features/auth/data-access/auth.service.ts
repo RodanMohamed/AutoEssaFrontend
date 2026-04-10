@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { catchError, map, of, tap, throwError } from 'rxjs';
+import { Router } from '@angular/router';
 
 import { AuthApi } from './auth.api';
 import { AuthStore } from './auth.store';
@@ -11,6 +12,7 @@ import { extractApiErrorMessage, parseRegisteredAccounts } from '../utils/auth.h
 export class AuthService {
 	private readonly authApi = inject(AuthApi);
 	private readonly authStore = inject(AuthStore);
+	private readonly router = inject(Router);
 
 	login(payload: LoginRequest) {
 		const localAccount = this.findAccountByEmail(payload.email);
@@ -90,6 +92,7 @@ export class AuthService {
 
 	logout() {
 		this.authStore.clearSession();
+		this.router.navigateByUrl('/');
 	}
 
 	private getLocalAccounts(): RegisteredAccount[] {

@@ -102,8 +102,7 @@ export default class LoginPage {
 		this.authService.login({ email: value.email, password: value.password }).subscribe({
 			next: (session) => {
 				this.status.set('Login successful.');
-				const destination = session.user.role === 'Admin' ? '/dashboard' : '/account';
-				this.router.navigateByUrl(destination);
+				this.router.navigateByUrl('/');
 			},
 			error: (error: unknown) => {
 				this.isError.set(true);
@@ -123,7 +122,7 @@ export default class LoginPage {
 				role: 'Admin'
 			}
 		});
-		this.router.navigateByUrl('/dashboard');
+		this.router.navigateByUrl('/');
 	}
 }
 

@@ -13,19 +13,12 @@ export class CarsApi {
 
   getCars(query?: CarsQuery) {
     const cacheKey = this.getCacheKey(query);
-    const cachedCars = this.readCache(cacheKey);
     const params = this.buildQueryParams(query);
-    const remote$ = this.http.get<unknown>(`${API_BASE_URL}/api/Cars`, { params }).pipe(
+    return this.http.get<unknown>(`${API_BASE_URL}/api/Cars`, { params }).pipe(
       map((payload) => this.mapCars(payload)),
       tap((cars) => this.writeCache(cacheKey, cars)),
-      catchError(() => of(cachedCars))
+      catchError(() => of([] as Car[]))
     );
-
-    if (cachedCars.length > 0) {
-      return concat(of(cachedCars), remote$);
-    }
-
-    return concat(of([] as Car[]), remote$);
   }
 
   getCarById(id: string) {
