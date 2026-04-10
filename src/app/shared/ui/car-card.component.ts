@@ -16,15 +16,14 @@ import { UserService } from '../../features/user/data-access/user.service';
       <figure class="relative">
         <img [src]="car().imageUrl" [alt]="car().brand + ' ' + car().model" class="h-52 w-full object-cover" />
         <button
-          class="btn btn-circle btn-sm absolute right-3 top-3 bg-base-100/10 shadow-md"
+          class="favorite-toggle btn btn-circle btn-sm absolute right-3 top-3"
           type="button"
           [disabled]="isUpdatingFavorite()"
           [attr.aria-label]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
           [title]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
           (click)="toggleFavorite()">
           <svg
-
-          class="h-6 w-6 transition-colors"
+            class="favorite-icon h-7 w-7"
             viewBox="0 0 62 62"
             fill="none"
             xmlns="http://www.w3.org/2000/svg">
@@ -32,6 +31,7 @@ import { UserService } from '../../features/user/data-access/user.service';
             <path
               d="M41.6066 32.7129L33.1211 41.1999C32.5585 41.7623 31.7956 42.0783 31.0001 42.0783C30.2046 42.0783 29.4416 41.7623 28.8791 41.1999L20.3936 32.7144C19.6921 32.0191 19.1349 31.1921 18.754 30.2808C18.373 29.3696 18.1758 28.392 18.1736 27.4044C18.1714 26.4167 18.3644 25.4383 18.7413 24.5254C19.1183 23.6125 19.6719 22.783 20.3703 22.0846C21.0687 21.3862 21.8981 20.8327 22.811 20.4557C23.724 20.0787 24.7023 19.8858 25.69 19.888C26.6777 19.8901 27.6552 20.0873 28.5665 20.4683C29.4777 20.8493 30.3047 21.4065 31.0001 22.1079C32.4124 20.7307 34.3105 19.9654 36.2831 19.9778C38.2557 19.9901 40.1441 20.7792 41.539 22.1739C42.934 23.5687 43.7233 25.457 43.736 27.4296C43.7486 29.4022 42.9836 31.3004 41.6066 32.7129Z"
               stroke="#dc2626"
+              stroke-width="2.5"
               stroke-linecap="round"
               stroke-linejoin="round"
               [attr.fill]="isFavorite() ? '#dc2626' : 'none'" />
@@ -46,7 +46,7 @@ import { UserService } from '../../features/user/data-access/user.service';
         <p class="text-sm text-base-content/70">{{ car().year }} . {{ car().transmissionType }} . {{ car().fuelType }}</p>
         <p class="text-lg font-semibold text-primary">{{ car().price | currency: 'EGP ' : 'symbol' : '1.0-0' }}</p>
         @if (favoriteMessage().length > 0) {
-          <p class="text-xs text-base-content/70">{{ favoriteMessage() }}</p>
+          <p class="text-xs" [class.text-error]="favoriteMessageIsError()" [class.text-success]="!favoriteMessageIsError()">{{ favoriteMessage() }}</p>
         }
         <div class="card-actions justify-end">
           <a class="btn btn-sm btn-outline" [routerLink]="['/cars', car().id]">{{ detailsLabel() }}</a>
@@ -84,6 +84,18 @@ import { UserService } from '../../features/user/data-access/user.service';
     .car-card:hover img {
       transform: scale(1.03);
     }
+
+    .favorite-toggle {
+      z-index: 5;
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      background: rgba(255, 255, 255, 0.95);
+      color: #074d4d;
+      padding: 0.15rem;
+    }
+
+    .favorite-icon {
+      display: block;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -97,6 +109,7 @@ export class CarCardComponent {
   protected readonly isFavorite = signal(false);
   protected readonly isUpdatingFavorite = signal(false);
   protected readonly favoriteMessage = signal('');
+  protected readonly favoriteMessageIsError = signal(false);
 
   constructor() {
     effect(() => {
@@ -121,10 +134,12 @@ export class CarCardComponent {
 
   protected toggleFavorite() {
     if (!this.authStore.isAuthenticated()) {
+      this.favoriteMessageIsError.set(true);
       this.favoriteMessage.set('Please login first to use favorites.');
       return;
     }
 
+    this.favoriteMessageIsError.set(false);
     const carId = String(this.car().id);
     this.favoriteMessage.set('');
     this.isUpdatingFavorite.set(true);
@@ -134,10 +149,12 @@ export class CarCardComponent {
       next: () => {
         this.isFavorite.set(!this.isFavorite());
         this.isUpdatingFavorite.set(false);
+        this.favoriteMessageIsError.set(false);
         this.favoriteMessage.set(this.isFavorite() ? 'Added to favorites.' : 'Removed from favorites.' );
       },
       error: () => {
         this.isUpdatingFavorite.set(false);
+        this.favoriteMessageIsError.set(true);
         this.favoriteMessage.set('Unable to update favorite right now.');
       }
     });
