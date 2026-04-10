@@ -17,16 +17,16 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
         <div class="grid gap-4 md:grid-cols-[1.25fr_0.75fr_auto] md:items-end">
           <label class="form-control">
-            <span class="label-text mb-1">{{ copy().searchLabel }}</span>
+            <span class="mb-1 block text-sm font-medium">{{ copy().searchLabel }}</span>
             <input formControlName="query" class="input input-bordered input-lg" type="text" [placeholder]="copy().searchPlaceholder" />
           </label>
 
           <label class="form-control">
-            <span class="label-text mb-1">{{ copy().typeLabel }}</span>
+            <span class="mb-1 block text-sm font-medium">{{ copy().typeLabel }}</span>
             <select formControlName="listingType" class="select select-bordered select-lg">
               <option value="all">{{ copy().allOption }}</option>
               <option value="Rent">{{ copy().rentOption }}</option>
-              <option value="Buy">{{ copy().buyOption }}</option>
+              <option value="Sell">{{ copy().buyOption }}</option>
             </select>
           </label>
 

@@ -7,7 +7,7 @@ import { CarsApi } from './cars.api';
 
 export const carsResolver: ResolveFn<Car[]> = () => {
   const carsApi = inject(CarsApi);
-  return carsApi.getCars({ pageNumber: 1, pageSize: 24 }).pipe(take(1));
+  return carsApi.getCars({ pageNumber: 1, pageSize: 500 }).pipe(take(1));
 };
 
 export const featuredCarsResolver: ResolveFn<Car[]> = () => {

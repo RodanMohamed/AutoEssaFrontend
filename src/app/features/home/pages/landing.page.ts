@@ -65,18 +65,28 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
           <article class="rounded-4xl border border-base-300 bg-base-100 shadow-lg">
             <div class="space-y-4 p-6 md:p-8">
               <div class="flex items-center justify-between gap-3">
-                <h3 class="font-serif text-2xl">{{ copy().categoriesTitle }}</h3>
-                <span class="badge badge-outline">{{ copy().categoryBadge }}</span>
+                <h3 class="font-serif text-2xl">{{ copy().insightsTitle }}</h3>
+                <span class="badge badge-outline">{{ copy().insightsBadge }}</span>
               </div>
-              <p class="text-base-content/75">{{ copy().categoriesBody }}</p>
-              <div class="space-y-3">
-                <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
-                  <p class="font-semibold">{{ copy().rentCategoryTitle }}</p>
-                  <p class="text-sm text-base-content/70">{{ copy().rentCategoryBody }}</p>
+              <p class="text-base-content/75">{{ copy().insightsBody }}</p>
+              <div class="space-y-4">
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="rounded-2xl border border-base-300 bg-base-200/50 p-3 text-center">
+                    <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightOneLabel }}</p>
+                    <p class="mt-1 font-semibold">{{ copy().insightOneValue }}</p>
+                  </div>
+                  <div class="rounded-2xl border border-base-300 bg-base-200/50 p-3 text-center">
+                    <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightTwoLabel }}</p>
+                    <p class="mt-1 font-semibold">{{ copy().insightTwoValue }}</p>
+                  </div>
+                  <div class="rounded-2xl border border-base-300 bg-base-200/50 p-3 text-center">
+                    <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().insightThreeLabel }}</p>
+                    <p class="mt-1 font-semibold">{{ copy().insightThreeValue }}</p>
+                  </div>
                 </div>
-                <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
-                  <p class="font-semibold">{{ copy().buyCategoryTitle }}</p>
-                  <p class="text-sm text-base-content/70">{{ copy().buyCategoryBody }}</p>
+                <div class="rounded-2xl border border-base-300 bg-base-200/40 p-4">
+                  <p class="font-semibold">{{ copy().insightsFootnoteTitle }}</p>
+
                 </div>
               </div>
             </div>
@@ -84,12 +94,15 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
         </div>
       </section>
 
-      <section class="mx-auto w-full max-w-3xl rounded-3xl border border-base-300 bg-base-100/85 p-4 shadow-lg md:p-6">
+      <section class="w-full rounded-3xl border border-base-300 bg-base-100/85 p-4 shadow-lg md:p-6">
         <app-quick-search (searchChanged)="onSearch($event)" />
       </section>
 
       <section id="featured" class="space-y-4">
-        <h2 class="font-serif text-3xl">{{ copy().featuredCarsTitle }}</h2>
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <h2 class="font-serif text-3xl">{{ copy().featuredCarsTitle }}</h2>
+    
+        </div>
         <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           @for (car of filteredCars(); track car.id) {
             <app-car-card [car]="car" />
@@ -139,18 +152,38 @@ export default class LandingPage {
     rentCategoryBody: 'Ideal for short trips or day-to-day use.',
     buyCategoryTitle: 'Buy',
     buyCategoryBody: 'Curated listings for cars available to purchase.',
-    featuredCarsTitle: 'Featured Cars'
+    insightsTitle: 'Market Snapshot',
+    insightsBadge: 'Today',
+    insightsBody: 'A quick overview to help you decide faster before exploring full inventory.',
+    insightOneLabel: 'Inventory',
+    insightOneValue: 'Live',
+    insightTwoLabel: 'Response',
+    insightTwoValue: '< 15 min',
+    insightThreeLabel: 'Coverage',
+    insightThreeValue: 'Major cities',
+    insightsFootnoteTitle: 'Hand-picked Experience',
+
+    featuredCarsTitle: 'Latest Cars',
+
   }));
 
   protected readonly filteredCars = computed(() => {
     const text = this.query().trim().toLowerCase();
     const type = this.listingType();
+    const hasFilters = text.length > 0 || type !== 'all';
 
-    return this.cars().filter((car) => {
+    const matches = this.cars().filter((car) => {
       const matchesText = `${car.brand} ${car.model}`.toLowerCase().includes(text);
-      const matchesType = type === 'all' || car.listingType === type;
+      const normalizedListingType = car.listingType.trim().toLowerCase();
+      const matchesType =
+        type === 'all' ||
+        normalizedListingType === type.toLowerCase() ||
+        (type === 'Sell' && normalizedListingType === 'sale') ||
+        (type === 'Sale' && normalizedListingType === 'sell');
       return matchesText && matchesType;
     });
+
+    return hasFilters ? matches : matches.slice(0, 6);
   });
 
   constructor() {

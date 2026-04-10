@@ -52,7 +52,12 @@ export class CarsApi {
       params = params.set('SearchTerm', query.searchTerm.trim());
     }
     if (query.listingType && query.listingType !== 'all') {
-      params = params.set('ListingType', query.listingType);
+      const normalized = query.listingType.trim().toLowerCase();
+      if (normalized === 'buy' || normalized === 'sell' || normalized === 'sale') {
+        params = params.set('ListingType', 'Sell');
+      } else {
+        params = params.set('ListingType', query.listingType);
+      }
     }
     if (query.fuelType && query.fuelType !== 'all') {
       params = params.set('FuelType', query.fuelType);
@@ -108,13 +113,76 @@ export class CarsApi {
       year: typeof record['year'] === 'number' ? record['year'] : 2024,
       price: typeof record['price'] === 'number' ? record['price'] : 0,
       carType: typeof record['carType'] === 'string' ? record['carType'] : 'Sedan',
-      listingType: typeof record['listingType'] === 'string' ? record['listingType'] : 'Rent',
-      fuelType: typeof record['fuelType'] === 'string' ? record['fuelType'] : 'Petrol',
-      transmissionType: typeof record['transmissionType'] === 'string' ? record['transmissionType'] : 'Automatic',
+      listingType: this.normalizeListingType(record['listingType']),
+      fuelType: this.normalizeFuelType(record['fuelType']),
+      transmissionType: this.normalizeTransmissionType(record['transmissionType']),
       mileage: typeof record['mileage'] === 'number' ? record['mileage'] : 0,
       location: typeof record['location'] === 'string' ? record['location'] : 'Cairo',
       imageUrl
     };
+  }
+
+  private normalizeListingType(value: unknown): string {
+    if (typeof value === 'number') {
+      return value === 2 ? 'Sell' : 'Rent';
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === '2' || normalized === 'buy' || normalized === 'sell' || normalized === 'sale') {
+        return 'Sell';
+      }
+      return 'Rent';
+    }
+
+    return 'Rent';
+  }
+
+  private normalizeFuelType(value: unknown): string {
+    if (typeof value === 'number') {
+      if (value === 2) {
+        return 'Diesel';
+      }
+      if (value === 3) {
+        return 'Hybrid';
+      }
+      if (value === 4) {
+        return 'Electric';
+      }
+      return 'Petrol';
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === '2' || normalized === 'diesel') {
+        return 'Diesel';
+      }
+      if (normalized === '3' || normalized === 'hybrid') {
+        return 'Hybrid';
+      }
+      if (normalized === '4' || normalized === 'electric') {
+        return 'Electric';
+      }
+      return 'Petrol';
+    }
+
+    return 'Petrol';
+  }
+
+  private normalizeTransmissionType(value: unknown): string {
+    if (typeof value === 'number') {
+      return value === 1 ? 'Manual' : 'Automatic';
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === '1' || normalized === 'manual') {
+        return 'Manual';
+      }
+      return 'Automatic';
+    }
+
+    return 'Automatic';
   }
 
   private extractImageUrl(record: Record<string, unknown>): string {
@@ -171,7 +239,7 @@ export class CarsApi {
         year: 2022,
         price: 1200000,
         carType: 'Sedan',
-        listingType: 'Buy',
+        listingType: 'Sell',
         fuelType: 'Petrol',
         transmissionType: 'Automatic',
         mileage: 34000,
