@@ -10,6 +10,7 @@ import { AutoessaApiService } from '../../../core/services/autoessa-api.service'
 import { LocaleService } from '../../../core/services/locale.service';
 import { AuthStore } from '../../auth/data-access/auth.store';
 import { FormBuilder } from '@angular/forms';
+import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
 
 @Component({
   selector: 'app-car-details-page',
@@ -71,10 +72,16 @@ import { FormBuilder } from '@angular/forms';
                 <label class="form-control md:col-span-2">
                   <span class="label-text">{{ copy().fullNameLabel }}</span>
                   <input class="input input-bordered ml-2" formControlName="fullName" type="text" />
+                  @if (isBookingControlInvalid('fullName')) {
+                    <span class="form-error-text text-sm">{{ copy().requiredError }}</span>
+                  }
                 </label>
                 <label class="form-control md:col-span-2">
                   <span class="label-text">{{ copy().phoneLabel }}</span>
                   <input class="input input-bordered ml-2" formControlName="phoneNumber" type="text" />
+                  @if (isBookingControlInvalid('phoneNumber')) {
+                    <span class="form-error-text text-sm">{{ copy().requiredError }}</span>
+                  }
                 </label>
                 <label class="form-control">
                   <span class="label-text">{{ copy().startDateLabel }}</span>
@@ -239,7 +246,9 @@ export default class CarDetailsPage {
           endDateLabel: 'تاريخ النهاية',
           messageLabel: 'رسالة',
           sendRequestButton: 'إرسال الطلب',
-          availabilityButton: 'تحقق من التوفر'
+          availabilityButton: 'تحقق من التوفر',
+          requiredError: 'هذا الحقل مطلوب',
+          validationError: 'يرجى مراجعة الحقول المحددة ثم المحاولة مرة أخرى.'
         }
       : {
           transmissionLabel: 'Transmission',
@@ -257,7 +266,9 @@ export default class CarDetailsPage {
           endDateLabel: 'End Date',
           messageLabel: 'Message',
           sendRequestButton: 'Send Request',
-          availabilityButton: 'Check Availability'
+          availabilityButton: 'Check Availability',
+          requiredError: 'This field is required.',
+          validationError: 'Please review the highlighted fields and try again.'
         }
   );
   protected readonly listingTypeLabel = computed(() =>
@@ -345,7 +356,14 @@ export default class CarDetailsPage {
 
   protected submitBooking() {
     const carId = this.car()?.id;
-    if (!carId || this.bookingForm.invalid) {
+    if (!carId) {
+      return;
+    }
+
+    if (this.bookingForm.invalid) {
+      this.bookingForm.markAllAsTouched();
+      this.isError.set(true);
+      this.actionStatus.set(this.copy().validationError);
       return;
     }
 
@@ -365,9 +383,11 @@ export default class CarDetailsPage {
           this.actionStatus.set('Booking request sent successfully.');
           this.bookingForm.reset({ fullName: '', phoneNumber: '', message: '', startDate: null, endDate: null });
         },
-        error: () => {
+        error: (error: unknown) => {
           this.isError.set(true);
-          this.actionStatus.set('Unable to send booking request right now.');
+          this.actionStatus.set(
+            extractApiErrorMessage(error, 'Unable to send your booking request right now. Please try again.')
+          );
         }
       });
   }
@@ -466,6 +486,11 @@ export default class CarDetailsPage {
 
     const imageUrl = this.mainImagePreview().trim() || currentCar.imageUrl;
     completeSave(imageUrl);
+  }
+
+  protected isBookingControlInvalid(controlName: 'fullName' | 'phoneNumber') {
+    const control = this.bookingForm.controls[controlName];
+    return control.invalid && (control.touched || control.dirty);
   }
 
   private loadFavoriteState(carId: string) {

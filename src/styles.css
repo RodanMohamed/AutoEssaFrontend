@@ -128,11 +128,54 @@ p {
 	gap: 0.35rem;
 }
 
+.form-control .input,
+.form-control .select,
+.form-control .textarea {
+	margin-left: 0 !important;
+}
+
 .label-text {
 	color: #6a4b2f;
 	font-weight: 600;
 	letter-spacing: 0.01em;
 	margin-bottom: 0.1rem;
+}
+
+form label.flex.items-center.gap-3,
+form label.flex.items-start.gap-3 {
+	display: grid;
+	grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr);
+	align-items: start;
+	column-gap: 0.75rem;
+}
+
+form label.flex.items-center.gap-3 .label-text,
+form label.flex.items-start.gap-3 .label-text {
+	margin-top: 0.6rem;
+	margin-bottom: 0;
+}
+
+form label.flex.items-center.gap-3 > .input,
+form label.flex.items-center.gap-3 > .select,
+form label.flex.items-center.gap-3 > .textarea,
+form label.flex.items-start.gap-3 > .input,
+form label.flex.items-start.gap-3 > .select,
+form label.flex.items-start.gap-3 > .textarea {
+	width: 100%;
+}
+
+form .input.ng-invalid.ng-touched,
+form .select.ng-invalid.ng-touched,
+form .textarea.ng-invalid.ng-touched {
+	border-color: #c03434;
+	box-shadow: 0 0 0 3px rgba(192, 52, 52, 0.15);
+}
+
+.form-error-text,
+.mat-mdc-form-field-error,
+.mat-error,
+.text-error {
+	color: #b42318 !important;
 }
 
 .table :where(th, td) {
@@ -181,6 +224,17 @@ a.link {
 @media (max-width: 640px) {
 	html {
 		font-size: 15.5px;
+	}
+
+	form label.flex.items-center.gap-3,
+	form label.flex.items-start.gap-3 {
+		grid-template-columns: 1fr;
+		row-gap: 0.35rem;
+	}
+
+	form label.flex.items-center.gap-3 .label-text,
+	form label.flex.items-start.gap-3 .label-text {
+		margin-top: 0;
 	}
 
 	.table :where(th, td) {

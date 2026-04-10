@@ -7,6 +7,7 @@ import { ContactApi } from '../data-access/contact.api';
 import { ContactInfo } from '../data-access/contact.interface';
 import { LocaleService } from '../../../core/services/locale.service';
 import { BranchLocationsService } from '../../../core/services/branch-locations.service';
+import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
 
 @Component({
   selector: 'app-contact-page',
@@ -159,6 +160,9 @@ export default class ContactPage {
 
   protected submit() {
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.isError.set(true);
+      this.status.set('Please review the highlighted fields and try again.');
       return;
     }
 
@@ -171,9 +175,11 @@ export default class ContactPage {
         this.status.set('Message sent successfully.');
         this.form.reset({ name: '', phoneNumber: '', message: '' });
       },
-      error: () => {
+      error: (error: unknown) => {
         this.isError.set(true);
-        this.status.set('Unable to send message now. Please try again or use WhatsApp.');
+        this.status.set(
+          extractApiErrorMessage(error, 'Unable to send your message now. Please try again or contact us on WhatsApp.')
+        );
       }
     });
   }
