@@ -40,7 +40,7 @@ import { UserService } from '../../features/user/data-access/user.service';
       </figure>
       <div class="card-body">
         <div class="flex items-start justify-between gap-2">
-          <h3 class="card-title">{{ car().brand }} {{ car().model }}</h3>
+          <h3 class="card-title">{{ carDisplayName() }}</h3>
           <span class="badge badge-primary badge-outline">{{ listingTypeLabel() }}</span>
         </div>
         <p class="text-sm text-base-content/70">{{ car().year }} . {{ car().transmissionType }} . {{ car().fuelType }}</p>
@@ -130,6 +130,15 @@ export class CarCardComponent {
         : 'شراء'
       : this.car().listingType
   );
+  protected readonly carDisplayName = computed(() => {
+    const name = this.car().name?.trim() ?? '';
+    if (name.length > 0) {
+      return name;
+    }
+
+    const composed = `${this.car().brand} ${this.car().model}`.trim();
+    return composed.length > 0 ? composed : 'Car';
+  });
   protected readonly detailsLabel = computed(() => (this.localeService.locale() === 'ar' ? 'التفاصيل' : 'Details'));
 
   protected toggleFavorite() {

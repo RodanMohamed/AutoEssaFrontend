@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, concat, map, Observable, of, tap } from 'rxjs';
+import { catchError, concat, map, of, tap } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/core.config';
 import { Car, CarsQuery } from './cars.interface';
@@ -18,21 +18,21 @@ export class CarsApi {
     const remote$ = this.http.get<unknown>(`${API_BASE_URL}/api/Cars`, { params }).pipe(
       map((payload) => this.mapCars(payload)),
       tap((cars) => this.writeCache(cacheKey, cars)),
-      catchError(() => of(cachedCars.length > 0 ? cachedCars : this.mockCars()))
+      catchError(() => of(cachedCars))
     );
 
     if (cachedCars.length > 0) {
       return concat(of(cachedCars), remote$);
     }
 
-    return concat(of(this.mockCars()), remote$);
+    return concat(of([] as Car[]), remote$);
   }
 
   getCarById(id: string) {
     const fromCache = this.findByIdInCache(id);
     const remote$ = this.http.get<unknown>(`${API_BASE_URL}/api/Cars/${id}`).pipe(
       map((payload) => this.mapSingleCar(payload)),
-      catchError(() => of(this.mockCars().find((car) => car.id === id) ?? this.mockCars()[0]))
+      catchError(() => of(fromCache ?? this.mapItem({ id }, 1)))
     );
 
     if (fromCache) {
@@ -94,7 +94,7 @@ export class CarsApi {
       }
     }
 
-    return this.mockCars();
+    return [];
   }
 
   private mapSingleCar(payload: unknown): Car {
@@ -104,12 +104,15 @@ export class CarsApi {
   private mapItem(item: unknown, fallbackId: number): Car {
     const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
     const imageUrl = this.extractImageUrl(record);
+    const brand = typeof record['brand'] === 'string' ? record['brand'] : '';
+    const model = typeof record['model'] === 'string' ? record['model'] : '';
+    const name = typeof record['name'] === 'string' ? record['name'] : `${brand} ${model}`.trim();
 
     return {
       id: typeof record['id'] === 'string' ? record['id'] : `car-${fallbackId}`,
-      brand: typeof record['brand'] === 'string' ? record['brand'] : 'AutoEssa',
-      model: typeof record['model'] === 'string' ? record['model'] : 'Edition',
-      name: typeof record['name'] === 'string' ? record['name'] : 'Car',
+      brand,
+      model,
+      name: name.length > 0 ? name : 'Car',
       year: typeof record['year'] === 'number' ? record['year'] : 2024,
       price: typeof record['price'] === 'number' ? record['price'] : 0,
       carType: typeof record['carType'] === 'string' ? record['carType'] : 'Sedan',
@@ -212,41 +215,6 @@ export class CarsApi {
     }
 
     return 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=80';
-  }
-
-  private mockCars(): Car[] {
-    return [
-      {
-        id: '1',
-        brand: 'Mercedes',
-        model: 'C200',
-        name: 'Mercedes C200',
-        year: 2023,
-        price: 5500,
-        carType: 'Sedan',
-        listingType: 'Rent',
-        fuelType: 'Petrol',
-        transmissionType: 'Automatic',
-        mileage: 23000,
-        location: 'Cairo',
-        imageUrl: 'https://images.unsplash.com/photo-1616788494707-ec28f08d05a1?auto=format&fit=crop&w=1200&q=80'
-      },
-      {
-        id: '2',
-        brand: 'Toyota',
-        model: 'Corolla',
-        name: 'Toyota Corolla',
-        year: 2022,
-        price: 1200000,
-        carType: 'Sedan',
-        listingType: 'Sell',
-        fuelType: 'Petrol',
-        transmissionType: 'Automatic',
-        mileage: 34000,
-        location: 'Giza',
-        imageUrl: 'https://images.unsplash.com/photo-1549925862-990f9be5f0f8?auto=format&fit=crop&w=1200&q=80'
-      }
-    ];
   }
 
   private getCacheKey(query?: CarsQuery): string {

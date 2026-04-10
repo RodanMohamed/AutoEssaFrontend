@@ -63,7 +63,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
               @if (!isAuthenticated()) {
                 <a routerLink="/auth/login" class="btn btn-primary w-14  header-cta py-3 h-5 text-sm " style="border-radius: 0">Login</a>
               } @else {
-                <button type="button" class="btn btn-outline w-14 header-cta py-3 h-5 text-sm" (click)="logout()">Logout</button>
+                <button type="button" class="btn btn-outline w-18 header-cta py-3 h-5 text-sm " (click)="logout()">Logout</button>
               }
               </div>
             </div>

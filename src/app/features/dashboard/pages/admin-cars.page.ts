@@ -661,12 +661,15 @@ export default class AdminCarsPage {
 
   private mapCar(item: unknown, fallback: number): AdminCar {
     const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
+    const brand = typeof record['brand'] === 'string' ? record['brand'] : '';
+    const model = typeof record['model'] === 'string' ? record['model'] : '';
+    const name = typeof record['name'] === 'string' ? record['name'] : `${brand} ${model}`.trim();
 
     return {
       id: typeof record['id'] === 'string' ? record['id'] : `car-${fallback}`,
-      name: typeof record['name'] === 'string' ? record['name'] : 'Car',
-      brand: typeof record['brand'] === 'string' ? record['brand'] : 'AutoEssa',
-      model: typeof record['model'] === 'string' ? record['model'] : 'Edition',
+      name: name.length > 0 ? name : 'Car',
+      brand,
+      model,
       year: typeof record['year'] === 'number' ? record['year'] : new Date().getFullYear(),
       price: typeof record['price'] === 'number' ? record['price'] : 0,
       carType: typeof record['carType'] === 'string' ? record['carType'] : 'Sedan',
