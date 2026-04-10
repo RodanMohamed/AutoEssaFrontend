@@ -308,9 +308,9 @@ const AR_COPY: typeof EN_COPY = {
                     </td>
                     <td>
                       <div class="flex flex-wrap gap-2">
-                        <button class="btn btn-xs" type="button" (click)="startEdit(car)">{{ copy().edit }}</button>
+                        <button class="btn btn-xs btn-warning w-18 " type="button" (click)="startEdit(car)">{{ copy().edit }}</button>
                         <a class="btn btn-xs" [routerLink]="['/cars', car.id]">{{ copy().openDetails }}</a>
-                        <button class="btn btn-xs btn-error" type="button" (click)="removeCar(car.id)">{{ copy().delete }}</button>
+                        <button class="btn btn-xs btn-error w-18" type="button" (click)="removeCar(car.id)">{{ copy().delete }}</button>
                       </div>
                     </td>
                   </tr>
