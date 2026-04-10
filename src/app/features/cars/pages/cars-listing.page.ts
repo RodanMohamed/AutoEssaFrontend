@@ -197,19 +197,30 @@ export default class CarsListingPage {
     this.isError.set(false);
 
     const filters = this.filtersForm.getRawValue();
-    this.carsApi
-      .getCars({
-        searchTerm: filters.searchTerm,
-        listingType: filters.listingType,
-        fuelType: filters.fuelType,
-        sortBy: filters.sortBy,
-        carType: filters.carType,
-        minPrice: filters.minPrice ?? undefined,
-        maxPrice: filters.maxPrice ?? undefined,
-        pageNumber: 1,
-        pageSize: 500
-      })
-      .subscribe({
+    const hasActiveFilters =
+      filters.searchTerm.trim().length > 0 ||
+      filters.listingType !== 'all' ||
+      filters.fuelType !== 'all' ||
+      filters.sortBy !== 'default' ||
+      filters.carType.trim().length > 0 ||
+      typeof filters.minPrice === 'number' ||
+      typeof filters.maxPrice === 'number';
+
+    const request$ = hasActiveFilters
+      ? this.carsApi.getCars({
+          searchTerm: filters.searchTerm,
+          listingType: filters.listingType,
+          fuelType: filters.fuelType,
+          sortBy: filters.sortBy,
+          carType: filters.carType,
+          minPrice: filters.minPrice ?? undefined,
+          maxPrice: filters.maxPrice ?? undefined,
+          pageNumber: 1,
+          pageSize: 24
+        })
+      : this.carsApi.getCars();
+
+    request$.subscribe({
         next: (cars) => {
           this.cars.set(cars);
           this.status.set(`${cars.length} cars loaded.`);
