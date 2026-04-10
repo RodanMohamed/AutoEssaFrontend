@@ -35,7 +35,7 @@ import { FormBuilder } from '@angular/forms';
 
             <div class="flex flex-wrap gap-3">
               <a mat-flat-button color="primary" [href]="whatsAppLink()" target="_blank" rel="noopener">{{ copy().whatsAppButton }}</a>
-              <a mat-stroked-button href="tel:+201000000000">{{ copy().callButton }}</a>
+              <a mat-stroked-button href="tel:+201096060677">{{ copy().callButton }}</a>
               <button
                 class="btn btn-circle btn-outline"
                 type="button"
@@ -312,7 +312,7 @@ export default class CarDetailsPage {
 
     const selectedCar = this.car();
     const text = selectedCar ? `${selectedCar.brand} ${selectedCar.model}` : 'this car';
-    return `https://wa.me/201000000000?text=${encodeURIComponent(`Hi, I am interested in ${text}`)}`;
+    return `https://wa.me/201096060677?text=${encodeURIComponent(`Hi, I am interested in ${text}`)}`;
   }
 
   protected toggleFavorite() {

@@ -127,8 +127,8 @@ export default class ContactPage {
       : 'We answer quickly on WhatsApp and phone to help customers complete rent or buy requests.'
   );
   protected readonly contactInfo = signal<ContactInfo>({
-    phoneNumber: '+20 100 000 0000',
-    whatsAppNumber: '+20 100 000 0000',
+    phoneNumber: '+20 10 96060677',
+    whatsAppNumber: '+20 10 96060677',
     address: 'Cairo, Egypt',
     googleMapsUrl: 'https://www.google.com/maps?q=Cairo&output=embed',
     workingHours: 'Daily 10:00 AM - 10:00 PM'

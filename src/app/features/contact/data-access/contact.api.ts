@@ -24,8 +24,8 @@ export class ContactApi {
     const source = typeof payload === 'object' && payload !== null ? (payload as Record<string, unknown>) : {};
 
     return {
-      phoneNumber: typeof source['phoneNumber'] === 'string' ? source['phoneNumber'] : '+20 100 000 0000',
-      whatsAppNumber: typeof source['whatsAppNumber'] === 'string' ? source['whatsAppNumber'] : '+20 100 000 0000',
+      phoneNumber: typeof source['phoneNumber'] === 'string' ? source['phoneNumber'] : '+20 10 96060677',
+      whatsAppNumber: typeof source['whatsAppNumber'] === 'string' ? source['whatsAppNumber'] : '+20 10 96060677',
       address: typeof source['address'] === 'string' ? source['address'] : 'Cairo, Egypt',
       googleMapsUrl:
         typeof source['googleMapsUrl'] === 'string'
@@ -37,8 +37,8 @@ export class ContactApi {
 
   private defaultContactInfo(): ContactInfo {
     return {
-      phoneNumber: '+20 100 000 0000',
-      whatsAppNumber: '+20 100 000 0000',
+      phoneNumber: '+20 10 96060677',
+      whatsAppNumber: '+20 10 96060677',
       address: 'Cairo, Egypt',
       googleMapsUrl: 'https://www.google.com/maps?q=Cairo&output=embed',
       workingHours: 'Daily 10:00 AM - 10:00 PM'

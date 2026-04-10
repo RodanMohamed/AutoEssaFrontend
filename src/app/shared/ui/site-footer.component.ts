@@ -8,7 +8,10 @@ import { LocaleService } from '../../core/services/locale.service';
     <footer class="site-footer border-t">
       <div class="mx-auto flex w-full max-w-[1320px] flex-col gap-2 px-4 py-8 text-sm md:flex-row md:items-center md:justify-between md:px-6 lg:px-8">
         <p class="tagline">{{ copy().tagline }}</p>
-        <p class="whatsapp">{{ copy().whatsApp }}</p>
+        <div class="contact-links flex flex-col gap-1 text-right">
+          <a class="whatsapp" href="https://wa.me/201096060677" target="_blank" rel="noopener">{{ copy().whatsApp }}</a>
+          <a class="phone" href="tel:+201096060677">{{ copy().phone }}</a>
+        </div>
       </div>
     </footer>
   `,
@@ -27,6 +30,16 @@ import { LocaleService } from '../../core/services/locale.service';
       font-weight: 600;
       letter-spacing: 0.01em;
     }
+
+    .contact-links a {
+      color: #6f4e31;
+      text-decoration: none;
+    }
+
+    .contact-links a:hover {
+      text-decoration: underline;
+      text-underline-offset: 0.2rem;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -37,11 +50,13 @@ export class SiteFooterComponent {
     this.localeService.locale() === 'ar'
       ? {
           tagline: 'Auto Essa . استأجر واشترِ السيارات بثقة.',
-          whatsApp: 'واتساب: +20 100 000 0000'
+          whatsApp: 'واتساب: +20 10 96060677',
+          phone: 'اتصال: +20 10 96060677'
         }
       : {
           tagline: 'Auto Essa . Rent and Buy Cars with confidence.',
-          whatsApp: 'WhatsApp: +20 100 000 0000'
+          whatsApp: 'WhatsApp: +20 10 96060677',
+          phone: 'Call: +20 10 96060677'
         }
   );
 }

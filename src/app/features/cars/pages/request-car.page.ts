@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
+import { CreateCarRequestLeadPayload } from '../../../core/interfaces/autoessa-endpoints.interface';
 import { LocaleService } from '../../../core/services/locale.service';
 import { AuthStore } from '../../auth/data-access/auth.store';
+import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
 
 @Component({
   selector: 'app-request-car-page',
@@ -17,37 +18,72 @@ import { AuthStore } from '../../auth/data-access/auth.store';
         <div class="card-body space-y-4">
           <label class="flex items-center gap-3">
             <span class="label-text min-w-32">{{ copy().fullNameLabel }}</span>
-            <input class="input input-bordered flex-1" formControlName="fullName" type="text" />
+            <div class="flex-1">
+              <input class="input input-bordered w-full" formControlName="fullName" type="text" />
+              @if (isInvalid('fullName')) {
+                <p class="mt-1 text-xs text-error">{{ copy().requiredError }}</p>
+              }
+            </div>
           </label>
 
           <label class="flex items-center gap-3">
             <span class="label-text min-w-32">{{ copy().phoneLabel }}</span>
-            <input class="input input-bordered flex-1" formControlName="phoneNumber" type="text" />
+            <div class="flex-1">
+              <input class="input input-bordered w-full" formControlName="phoneNumber" type="text" />
+              @if (isInvalid('phoneNumber')) {
+                <p class="mt-1 text-xs text-error">{{ copy().requiredError }}</p>
+              }
+            </div>
           </label>
 
           <label class="flex items-center gap-3">
             <span class="label-text min-w-32">{{ copy().brandLabel }}</span>
-            <input class="input input-bordered flex-1" formControlName="desiredBrand" type="text" />
+            <div class="flex-1">
+              <input class="input input-bordered w-full" formControlName="desiredBrand" type="text" />
+              @if (isInvalid('desiredBrand')) {
+                <p class="mt-1 text-xs text-error">{{ copy().requiredError }}</p>
+              }
+            </div>
           </label>
 
           <label class="flex items-center gap-3">
             <span class="label-text min-w-32">{{ copy().modelLabel }}</span>
-            <input class="input input-bordered flex-1" formControlName="desiredModel" type="text" />
+            <div class="flex-1">
+              <input class="input input-bordered w-full" formControlName="desiredModel" type="text" />
+              @if (isInvalid('desiredModel')) {
+                <p class="mt-1 text-xs text-error">{{ copy().requiredError }}</p>
+              }
+            </div>
           </label>
 
           <label class="flex items-center gap-3">
             <span class="label-text min-w-32">{{ copy().yearFromLabel }}</span>
-            <input class="input input-bordered flex-1" formControlName="desiredYearFrom" type="number" />
+            <div class="flex-1">
+              <input class="input input-bordered w-full" formControlName="desiredYearFrom" type="number" min="1990" />
+              @if (isInvalid('desiredYearFrom')) {
+                <p class="mt-1 text-xs text-error">{{ copy().yearError }}</p>
+              }
+            </div>
           </label>
 
           <label class="flex items-center gap-3">
             <span class="label-text min-w-32">{{ copy().yearToLabel }}</span>
-            <input class="input input-bordered flex-1" formControlName="desiredYearTo" type="number" />
+            <div class="flex-1">
+              <input class="input input-bordered w-full" formControlName="desiredYearTo" type="number" min="1990" />
+              @if (isInvalid('desiredYearTo')) {
+                <p class="mt-1 text-xs text-error">{{ copy().yearError }}</p>
+              }
+            </div>
           </label>
 
           <label class="flex items-center gap-3">
             <span class="label-text min-w-32">{{ copy().budgetLabel }}</span>
-            <input class="input input-bordered flex-1" formControlName="budget" type="number" />
+            <div class="flex-1">
+              <input class="input input-bordered w-full" formControlName="budget" type="number" min="1" />
+              @if (isInvalid('budget')) {
+                <p class="mt-1 text-xs text-error">{{ copy().budgetError }}</p>
+              }
+            </div>
           </label>
 
           <label class="flex items-start gap-3">
@@ -90,6 +126,9 @@ export default class RequestCarPage {
           yearToLabel: 'السنة إلى',
           budgetLabel: 'الميزانية (جنيه مصري)',
           notesLabel: 'ملاحظات',
+          requiredError: 'هذا الحقل مطلوب.',
+          yearError: 'أدخل سنة صالحة.',
+          budgetError: 'أدخل ميزانية صالحة.',
           submitButton: 'إرسال طلب السيارة'
         }
       : {
@@ -103,23 +142,34 @@ export default class RequestCarPage {
           yearToLabel: 'Year To',
           budgetLabel: 'Budget (EGP)',
           notesLabel: 'Notes',
+          requiredError: 'This field is required.',
+          yearError: 'Enter a valid year.',
+          budgetError: 'Enter a valid budget.',
           submitButton: 'Submit Car Request'
         }
   );
 
   protected readonly form = new FormGroup({
-    fullName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    phoneNumber: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    desiredBrand: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    desiredModel: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    desiredYearFrom: new FormControl<number | null>(null),
-    desiredYearTo: new FormControl<number | null>(null),
-    budget: new FormControl<number | null>(null),
+    fullName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
+    phoneNumber: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(8)] }),
+    desiredBrand: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
+    desiredModel: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
+    desiredYearFrom: new FormControl<number | null>(null, [Validators.min(1990)]),
+    desiredYearTo: new FormControl<number | null>(null, [Validators.min(1990)]),
+    budget: new FormControl<number | null>(null, [Validators.min(1)]),
     notes: new FormControl('', { nonNullable: true })
   });
 
+  protected isInvalid(controlName: 'fullName' | 'phoneNumber' | 'desiredBrand' | 'desiredModel' | 'desiredYearFrom' | 'desiredYearTo' | 'budget') {
+    const control = this.form.controls[controlName];
+    return control.touched && control.invalid;
+  }
+
   protected submit() {
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.isError.set(true);
+      this.status.set(this.copy().requiredError);
       return;
     }
 
@@ -127,21 +177,24 @@ export default class RequestCarPage {
     this.isError.set(false);
 
     const value = this.form.getRawValue();
-    this.api
-      .createCarLeadRequest({
-        userId: this.authStore.session()?.user.id ?? null,
+    const sessionUserId = this.authStore.session()?.user.id;
+    const payload: CreateCarRequestLeadPayload = {
         fullName: value.fullName,
         phoneNumber: value.phoneNumber,
         desiredBrand: value.desiredBrand,
         desiredModel: value.desiredModel,
-        desiredYearFrom: value.desiredYearFrom,
-        desiredYearTo: value.desiredYearTo,
-        budget: value.budget,
-        notes: value.notes || null
-      })
+        ...(sessionUserId && sessionUserId !== '0' && sessionUserId !== 'local-user' ? { userId: sessionUserId } : {}),
+        ...(typeof value.desiredYearFrom === 'number' ? { desiredYearFrom: value.desiredYearFrom } : {}),
+        ...(typeof value.desiredYearTo === 'number' ? { desiredYearTo: value.desiredYearTo } : {}),
+        ...(typeof value.budget === 'number' ? { budget: value.budget } : {}),
+        ...(value.notes.trim().length > 0 ? { notes: value.notes.trim() } : {})
+      };
+
+    this.api
+      .createCarLeadRequest(payload)
       .subscribe({
         next: () => {
-          this.status.set('Car request submitted successfully.');
+          this.status.set('Car request submitted successfully. It will appear in My Requests.');
           this.form.reset({
             fullName: '',
             phoneNumber: '',
@@ -153,9 +206,9 @@ export default class RequestCarPage {
             notes: ''
           });
         },
-        error: () => {
+        error: (error: unknown) => {
           this.isError.set(true);
-          this.status.set('Unable to submit request right now. Please try again later.');
+          this.status.set(extractApiErrorMessage(error, 'Unable to submit request right now. Please try again later.'));
         }
       });
   }
