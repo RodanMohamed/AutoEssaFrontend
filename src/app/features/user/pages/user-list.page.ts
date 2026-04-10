@@ -22,8 +22,34 @@ import { AuthStore } from '../../auth/data-access/auth.store';
 
 			<article class="card border border-base-300 bg-base-100 shadow">
 				<div class="card-body">
-					<h2 class="card-title">{{ copy().profileTitle }}</h2>
-					<app-user-form [initialProfile]="profile()" (submitted)="onProfileSave($event)" />
+					<section class="flex flex-wrap items-center justify-between gap-3">
+						<h2 class="card-title">{{ copy().profileTitle }}</h2>
+						@if (!isEditingProfile()) {
+							<button class="btn btn-sm" type="button" (click)="startEditProfile()">{{ copy().editProfileButton }}</button>
+						} @else {
+							<button class="btn btn-sm btn-ghost" type="button" (click)="cancelEditProfile()">{{ copy().cancelEditButton }}</button>
+						}
+					</section>
+
+					@if (!isEditingProfile()) {
+						<div class="grid gap-3 sm:grid-cols-2">
+							<div class="rounded-xl border border-base-300 p-3">
+								<p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().nameLabel }}</p>
+								<p class="mt-1 font-medium">{{ profile().name || '-' }}</p>
+							</div>
+							<div class="rounded-xl border border-base-300 p-3">
+								<p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().emailLabel }}</p>
+								<p class="mt-1 font-medium">{{ profile().email || '-' }}</p>
+							</div>
+							<div class="rounded-xl border border-base-300 p-3 sm:col-span-2">
+								<p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().phoneLabel }}</p>
+								<p class="mt-1 font-medium">{{ profile().phone || '-' }}</p>
+							</div>
+						</div>
+					} @else {
+						<app-user-form [initialProfile]="profile()" (submitted)="onProfileSave($event)" />
+					}
+
 					@if (savedMessage()) {
 						<p class="text-sm text-success">{{ savedMessage() }}</p>
 					}
@@ -75,6 +101,7 @@ export default class UserListPage {
 	protected readonly favorites = signal<FavoriteCarItem[]>([]);
 	protected readonly profile = signal<UserProfile>({ name: '', phone: '', email: '' });
 	protected readonly savedMessage = signal('');
+	protected readonly isEditingProfile = signal(false);
 	protected readonly copy = computed(() =>
 		this.localeService.locale() === 'ar'
 			? {
@@ -82,6 +109,11 @@ export default class UserListPage {
 				favoritesTab: 'المفضلة',
 				requestsTab: 'الطلبات',
 				profileTitle: 'الملف الشخصي',
+				editProfileButton: 'تعديل',
+				cancelEditButton: 'إلغاء',
+				nameLabel: 'الاسم',
+				emailLabel: 'البريد الإلكتروني',
+				phoneLabel: 'رقم الهاتف',
 				favoritesTitle: 'السيارات المفضلة',
 				savedLabel: 'محفوظة',
 				emptyFavorites: 'لا توجد سيارات محفوظة بعد. تصفح السيارات وأضف ما يعجبك إلى المفضلة.'
@@ -91,6 +123,11 @@ export default class UserListPage {
 				favoritesTab: 'Favorites',
 				requestsTab: 'Requests',
 				profileTitle: 'Profile',
+				editProfileButton: 'Edit',
+				cancelEditButton: 'Cancel',
+				nameLabel: 'Name',
+				emailLabel: 'Email',
+				phoneLabel: 'Phone',
 				favoritesTitle: 'Favorite Cars',
 				savedLabel: 'saved',
 				emptyFavorites: 'No saved cars yet. Browse cars and add some to favorites.'
@@ -111,7 +148,17 @@ export default class UserListPage {
 
 		this.userService.saveProfile(session.user.id, value);
 		this.profile.set(value);
+		this.isEditingProfile.set(false);
 		this.savedMessage.set(`Profile saved for ${value.name}.`);
+	}
+
+	protected startEditProfile() {
+		this.savedMessage.set('');
+		this.isEditingProfile.set(true);
+	}
+
+	protected cancelEditProfile() {
+		this.isEditingProfile.set(false);
 	}
 
 	protected removeFavorite(car: FavoriteCarItem) {

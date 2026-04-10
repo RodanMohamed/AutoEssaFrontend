@@ -9,15 +9,15 @@ import { UserProfile } from '../data-access/user.interface';
 	template: `
 		<form [formGroup]="form" (ngSubmit)="submit()" class="grid gap-3 sm:grid-cols-2">
 			<label class="form-control">
-				<span class="label-text">Name</span>
+				<span class="label-text mr-2">Name</span>
 				<input class="input input-bordered" formControlName="name" type="text" />
 			</label>
 			<label class="form-control">
-				<span class="label-text">Email</span>
+				<span class="label-text m2-2">Email</span>
 				<input class="input input-bordered" formControlName="email" type="email" />
 			</label>
 			<label class="form-control">
-				<span class="label-text">Phone</span>
+				<span class="label-text mr-2">Phone</span>
 				<input class="input input-bordered" formControlName="phone" type="text" />
 			</label>
 			<div class="sm:col-span-2">
