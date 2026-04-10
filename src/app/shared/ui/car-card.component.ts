@@ -16,26 +16,25 @@ import { UserService } from '../../features/user/data-access/user.service';
       <figure class="relative">
         <img [src]="car().imageUrl" [alt]="car().brand + ' ' + car().model" class="h-52 w-full object-cover" />
         <button
-          class="btn btn-circle btn-sm absolute right-3 top-3 border-[#c89261] bg-base-100/10 text-[#c89261] shadow-md hover:border-[#ae7545] hover:bg-[#c89261] hover:text-base-100"
+          class="btn btn-circle btn-sm absolute right-3 top-3 bg-base-100/10 shadow-md"
           type="button"
-          [class.border-error]="isFavorite()"
-          [class.bg-error]="isFavorite()"
-          [class.text-base-100]="isFavorite()"
           [disabled]="isUpdatingFavorite()"
           [attr.aria-label]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
           [title]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
           (click)="toggleFavorite()">
           <svg
-            class="h-5 w-5 transition-colors"
-            viewBox="0 0 24 24"
+
+          class="h-6 w-6 transition-colors"
+            viewBox="0 0 62 62"
             fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            [class.text-error]="isFavorite()"
-            [class.fill-current]="isFavorite()">
-            <path d="M12 21s-7.2-4.35-9.54-8.15A5.75 5.75 0 0 1 12 5.57a5.75 5.75 0 0 1 9.54 7.28C19.2 16.65 12 21 12 21z" />
+            xmlns="http://www.w3.org/2000/svg">
+            <circle cx="31" cy="31" r="30" [attr.stroke]="isFavorite() ? '#dc2626' : '#074D4D'" stroke-width="2" [attr.fill]="isFavorite() ? '#fee2e2' : 'none'" />
+            <path
+              d="M41.6066 32.7129L33.1211 41.1999C32.5585 41.7623 31.7956 42.0783 31.0001 42.0783C30.2046 42.0783 29.4416 41.7623 28.8791 41.1999L20.3936 32.7144C19.6921 32.0191 19.1349 31.1921 18.754 30.2808C18.373 29.3696 18.1758 28.392 18.1736 27.4044C18.1714 26.4167 18.3644 25.4383 18.7413 24.5254C19.1183 23.6125 19.6719 22.783 20.3703 22.0846C21.0687 21.3862 21.8981 20.8327 22.811 20.4557C23.724 20.0787 24.7023 19.8858 25.69 19.888C26.6777 19.8901 27.6552 20.0873 28.5665 20.4683C29.4777 20.8493 30.3047 21.4065 31.0001 22.1079C32.4124 20.7307 34.3105 19.9654 36.2831 19.9778C38.2557 19.9901 40.1441 20.7792 41.539 22.1739C42.934 23.5687 43.7233 25.457 43.736 27.4296C43.7486 29.4022 42.9836 31.3004 41.6066 32.7129Z"
+              stroke="#dc2626"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              [attr.fill]="isFavorite() ? '#dc2626' : 'none'" />
           </svg>
         </button>
       </figure>

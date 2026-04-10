@@ -44,8 +44,22 @@ export class UserApi {
 
 	private mockFavorites(): FavoriteCarItem[] {
 		return [
-			{ id: '1', brand: 'Mercedes', model: 'C200', year: 2023, price: 5500 },
-			{ id: '2', brand: 'BMW', model: 'X3', year: 2024, price: 7600 }
+			{
+				id: '1',
+				brand: 'Mercedes',
+				model: 'C200',
+				year: 2023,
+				price: 5500,
+				imageUrl: 'https://images.unsplash.com/photo-1616788494707-ec28f08d05a1?auto=format&fit=crop&w=1200&q=80'
+			},
+			{
+				id: '2',
+				brand: 'BMW',
+				model: 'X3',
+				year: 2024,
+				price: 7600,
+				imageUrl: 'https://images.unsplash.com/photo-1549925862-990f9be5f0f8?auto=format&fit=crop&w=1200&q=80'
+			}
 		];
 	}
 

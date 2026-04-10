@@ -40,9 +40,15 @@ import { AuthStore } from '../../auth/data-access/auth.store';
 						@for (car of favorites(); track car.id) {
 							<article class="rounded-2xl border border-base-300 p-4">
 								<div class="flex items-start justify-between gap-2">
-									<div>
+									<div class="flex items-start gap-3">
+										<img
+											[src]="car.imageUrl"
+											alt="Favorite car image"
+											class="h-12 w-16 rounded-lg border border-base-300 object-cover" />
+										<div>
 										<p class="font-semibold">{{ car.brand }} {{ car.model }}</p>
 										<p class="text-sm text-base-content/70">{{ car.year }}</p>
+										</div>
 									</div>
 									<p class="text-primary">EGP {{ car.price }}</p>
 								</div>

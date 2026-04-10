@@ -4,6 +4,7 @@ export interface FavoriteCarItem {
 	model: string;
 	year: number;
 	price: number;
+	imageUrl: string;
 }
 
 export interface BookingRequestItem {
