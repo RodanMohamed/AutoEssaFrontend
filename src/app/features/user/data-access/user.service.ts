@@ -86,25 +86,45 @@ export class UserService {
 	}
 
 	mapFavorites(payload: unknown): FavoriteCarItem[] {
-		if (!Array.isArray(payload)) {
+		const collection = this.extractCollection(payload);
+		if (collection.length === 0) {
 			return [];
 		}
 
-		return payload.map((item, index) => {
+		return collection.map((item, index) => {
 			const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
 			return mapFavorite(record, index + 1);
 		});
 	}
 
 	mapBookingRequests(payload: unknown): BookingRequestItem[] {
-		if (!Array.isArray(payload)) {
+		const collection = this.extractCollection(payload);
+		if (collection.length === 0) {
 			return [];
 		}
 
-		return payload.map((item, index) => {
+		return collection.map((item, index) => {
 			const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
 			return mapBookingRequest(record, index + 1);
 		});
+	}
+
+	private extractCollection(payload: unknown): unknown[] {
+		if (Array.isArray(payload)) {
+			return payload;
+		}
+
+		if (typeof payload === 'object' && payload !== null) {
+			const source = payload as Record<string, unknown>;
+			const candidates = [source['items'], source['data'], source['value']];
+			for (const candidate of candidates) {
+				if (Array.isArray(candidate)) {
+					return candidate;
+				}
+			}
+		}
+
+		return [];
 	}
 
 	private readStoredProfiles(): Record<string, UserProfile> {

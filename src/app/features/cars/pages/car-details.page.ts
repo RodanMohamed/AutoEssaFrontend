@@ -36,8 +36,24 @@ import { FormBuilder } from '@angular/forms';
             <div class="flex flex-wrap gap-3">
               <a mat-flat-button color="primary" [href]="whatsAppLink()" target="_blank" rel="noopener">{{ copy().whatsAppButton }}</a>
               <a mat-stroked-button href="tel:+201000000000">{{ copy().callButton }}</a>
-              <button mat-stroked-button type="button" (click)="toggleFavorite()">
-                {{ isFavorite() ? copy().removeFavorite : copy().addFavorite }}
+              <button
+                class="btn btn-circle btn-outline"
+                type="button"
+                [attr.aria-label]="isFavorite() ? copy().removeFavorite : copy().addFavorite"
+                [title]="isFavorite() ? copy().removeFavorite : copy().addFavorite"
+                (click)="toggleFavorite()">
+                <svg
+                  class="h-5 w-5 transition-colors"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  [attr.stroke]="isFavorite() ? 'currentColor' : 'currentColor'"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  [class.text-error]="isFavorite()"
+                  [class.fill-current]="isFavorite()">
+                  <path d="M12 21s-7.2-4.35-9.54-8.15A5.75 5.75 0 0 1 12 5.57a5.75 5.75 0 0 1 9.54 7.28C19.2 16.65 12 21 12 21z" />
+                </svg>
               </button>
             </div>
 
@@ -298,6 +314,12 @@ export default class CarDetailsPage {
   }
 
   protected toggleFavorite() {
+    if (!this.authStore.isAuthenticated()) {
+      this.isError.set(true);
+      this.actionStatus.set('Please login first to manage favorites.');
+      return;
+    }
+
     const carId = this.car()?.id;
     if (!carId) {
       return;
@@ -447,24 +469,53 @@ export default class CarDetailsPage {
   private loadFavoriteState(carId: string) {
     this.api.getMyFavorites().subscribe({
       next: (payload: unknown) => {
-        if (!Array.isArray(payload)) {
+        const collection = this.extractCollection(payload);
+        if (collection.length === 0) {
           this.isFavorite.set(false);
           return;
         }
 
-        const isFav = payload.some((item) => {
+        const isFav = collection.some((item) => {
           if (typeof item !== 'object' || item === null) {
             return false;
           }
 
           const record = item as Record<string, unknown>;
-          return record['id'] === carId || record['carId'] === carId;
+          if (record['id'] === carId || record['carId'] === carId) {
+            return true;
+          }
+
+          const nestedCar = record['car'];
+          if (typeof nestedCar === 'object' && nestedCar !== null) {
+            const carRecord = nestedCar as Record<string, unknown>;
+            return carRecord['id'] === carId;
+          }
+
+          return false;
         });
 
         this.isFavorite.set(isFav);
       },
       error: () => this.isFavorite.set(false)
     });
+  }
+
+  private extractCollection(payload: unknown): unknown[] {
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    if (typeof payload === 'object' && payload !== null) {
+      const source = payload as Record<string, unknown>;
+      const candidates = [source['items'], source['data'], source['value']];
+      for (const candidate of candidates) {
+        if (Array.isArray(candidate)) {
+          return candidate;
+        }
+      }
+    }
+
+    return [];
   }
 
   private loadWhatsAppLink(carId: string) {

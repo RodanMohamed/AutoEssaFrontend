@@ -44,8 +44,8 @@ export class UserApi {
 
 	private mockFavorites(): FavoriteCarItem[] {
 		return [
-			{ id: 1, brand: 'Mercedes', model: 'C200', year: 2023, price: 5500 },
-			{ id: 2, brand: 'BMW', model: 'X3', year: 2024, price: 7600 }
+			{ id: '1', brand: 'Mercedes', model: 'C200', year: 2023, price: 5500 },
+			{ id: '2', brand: 'BMW', model: 'X3', year: 2024, price: 7600 }
 		];
 	}
 

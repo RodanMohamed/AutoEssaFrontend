@@ -2,12 +2,29 @@ import { BookingRequestItem, FavoriteCarItem } from '../data-access/user.interfa
 import { normalizeDate } from './user.helpers';
 
 export function mapFavorite(item: Record<string, unknown>, fallbackId: number): FavoriteCarItem {
+	const nestedCar = typeof item['car'] === 'object' && item['car'] !== null
+		? (item['car'] as Record<string, unknown>)
+		: null;
+
+	const idCandidate = item['carId'] ?? item['id'] ?? nestedCar?.['id'];
+	const brandCandidate = item['brand'] ?? nestedCar?.['brand'];
+	const modelCandidate = item['model'] ?? nestedCar?.['model'] ?? item['name'] ?? nestedCar?.['name'];
+	const yearCandidate = item['year'] ?? nestedCar?.['year'];
+	const priceCandidate = item['price'] ?? nestedCar?.['price'];
+
+	const priceNumber =
+		typeof priceCandidate === 'number'
+			? priceCandidate
+			: typeof priceCandidate === 'string'
+				? Number(priceCandidate)
+				: NaN;
+
 	return {
-		id: typeof item['id'] === 'number' ? item['id'] : fallbackId,
-		brand: typeof item['brand'] === 'string' ? item['brand'] : 'AutoEssa',
-		model: typeof item['model'] === 'string' ? item['model'] : 'Car',
-		year: typeof item['year'] === 'number' ? item['year'] : 2024,
-		price: typeof item['price'] === 'number' ? item['price'] : 0
+		id: typeof idCandidate === 'string' && idCandidate.trim().length > 0 ? idCandidate : String(fallbackId),
+		brand: typeof brandCandidate === 'string' && brandCandidate.trim().length > 0 ? brandCandidate : 'AutoEssa',
+		model: typeof modelCandidate === 'string' && modelCandidate.trim().length > 0 ? modelCandidate : 'Car',
+		year: typeof yearCandidate === 'number' ? yearCandidate : 2024,
+		price: Number.isFinite(priceNumber) ? priceNumber : 0
 	};
 }
 
