@@ -63,37 +63,39 @@ import { FormBuilder } from '@angular/forms';
           </div>
         </article>
 
-        <article class="card border border-base-300 bg-base-100 shadow">
-          <div class="card-body">
-            <h2 class="card-title">{{ copy().bookingTitle }}</h2>
-            <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="grid gap-3 md:grid-cols-2">
-              <label class="form-control md:col-span-2">
-                <span class="label-text">{{ copy().fullNameLabel }}</span>
-                <input class="input input-bordered ml-2" formControlName="fullName" type="text" />
-              </label>
-              <label class="form-control md:col-span-2">
-                <span class="label-text">{{ copy().phoneLabel }}</span>
-                <input class="input input-bordered ml-2" formControlName="phoneNumber" type="text" />
-              </label>
-              <label class="form-control">
-                <span class="label-text">{{ copy().startDateLabel }}</span>
-                <input class="input input-bordered ml-2" formControlName="startDate" type="date" />
-              </label>
-              <label class="form-control">
-                <span class="label-text">{{ copy().endDateLabel }}</span>
-                <input class="input input-bordered ml-2" formControlName="endDate" type="date" />
-              </label>
-              <label class="form-control md:col-span-2">
-                <span class="label-text">{{ copy().messageLabel }}</span>
-                <textarea class="textarea textarea-bordered ml-2" formControlName="message" rows="3"></textarea>
-              </label>
-              <div class="md:col-span-2 flex gap-2">
-                <button class="btn btn-primary" type="submit" [disabled]="bookingForm.invalid">{{ copy().sendRequestButton }}</button>
-                <button class="btn btn-outline" type="button" (click)="checkAvailability()">{{ copy().availabilityButton }}</button>
-              </div>
-            </form>
-          </div>
-        </article>
+        @if (!isAdmin()) {
+          <article class="card border border-base-300 bg-base-100 shadow">
+            <div class="card-body">
+              <h2 class="card-title">{{ copy().bookingTitle }}</h2>
+              <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="grid gap-3 md:grid-cols-2">
+                <label class="form-control md:col-span-2">
+                  <span class="label-text">{{ copy().fullNameLabel }}</span>
+                  <input class="input input-bordered ml-2" formControlName="fullName" type="text" />
+                </label>
+                <label class="form-control md:col-span-2">
+                  <span class="label-text">{{ copy().phoneLabel }}</span>
+                  <input class="input input-bordered ml-2" formControlName="phoneNumber" type="text" />
+                </label>
+                <label class="form-control">
+                  <span class="label-text">{{ copy().startDateLabel }}</span>
+                  <input class="input input-bordered ml-2" formControlName="startDate" type="date" />
+                </label>
+                <label class="form-control">
+                  <span class="label-text">{{ copy().endDateLabel }}</span>
+                  <input class="input input-bordered ml-2" formControlName="endDate" type="date" />
+                </label>
+                <label class="form-control md:col-span-2">
+                  <span class="label-text">{{ copy().messageLabel }}</span>
+                  <textarea class="textarea textarea-bordered ml-2" formControlName="message" rows="3"></textarea>
+                </label>
+                <div class="md:col-span-2 flex gap-2">
+                  <button class="btn btn-primary" type="submit" [disabled]="bookingForm.invalid">{{ copy().sendRequestButton }}</button>
+                  <button class="btn btn-outline" type="button" (click)="checkAvailability()">{{ copy().availabilityButton }}</button>
+                </div>
+              </form>
+            </div>
+          </article>
+        }
 
           @if (isAdmin() && car()) {
             <article class="card border border-base-300 bg-base-100 shadow xl:col-span-2">

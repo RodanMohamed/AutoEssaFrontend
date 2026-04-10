@@ -21,6 +21,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
             <!-- Desktop Nav (center on large screens) -->
             <nav class="hidden items-center gap-1 lg:flex flex-1 justify-center" aria-label="Primary">
               @if (isAuthenticated() && isAdmin()) {
+                <a mat-button routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
                 <a mat-button routerLink="/dashboard" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
                 <a mat-button routerLink="/dashboard/cars" routerLinkActive="is-active">Cars</a>
                 <a mat-button routerLink="/dashboard/requests" routerLinkActive="is-active">Requests</a>
@@ -74,6 +75,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
             <nav class="mobile-menu flex flex-col gap-1 lg:hidden border-t border-base-300 pt-7" aria-label="Mobile navigation">
               @if (isAuthenticated() && isAdmin()) {
       <!-- Admin links -->
+          <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>
       <a class="mobile-link" routerLink="/dashboard" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Overview</a>
       <a class="mobile-link" routerLink="/dashboard/cars" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Cars</a>
       <a class="mobile-link" routerLink="/dashboard/requests" routerLinkActive="mobile-link-active" (click)="toggleMenu()">Requests</a>
