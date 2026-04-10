@@ -1,13 +1,14 @@
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { LocaleService } from '../../../core/services/locale.service';
-import { BookingRequestItem } from '../data-access/user.interface';
+import { BookingRequestItem, CarRequestItem } from '../data-access/user.interface';
 import { UserService } from '../data-access/user.service';
 
 @Component({
 	selector: 'app-user-details-page',
-	imports: [RouterLink],
+	imports: [RouterLink, DecimalPipe],
 	template: `
 		<section class="space-y-6">
 			<div class="flex flex-wrap items-center justify-between gap-3">
@@ -21,9 +22,10 @@ import { UserService } from '../data-access/user.service';
 			<article class="card border border-base-300 bg-base-100 shadow">
 				<div class="card-body gap-4">
 					<div class="flex items-center justify-between gap-3">
-						<p class="text-sm text-base-content/70">{{ copy().description }}</p>
-						<span class="badge badge-outline">{{ bookingRequests().length }} {{ copy().requestsLabel }}</span>
+						<h2 class="card-title">{{ copy().bookingTitle }} ({{ bookingRequests().length }})</h2>
+						<span class="badge badge-outline">{{ copy().bookingBadge }}</span>
 					</div>
+					<p class="text-sm text-base-content/70">{{ copy().description }}</p>
 					<div class="overflow-x-auto">
 					<table class="table table-zebra">
 						<thead>
@@ -53,6 +55,40 @@ import { UserService } from '../data-access/user.service';
 					</div>
 				</div>
 			</article>
+
+			<article class="card border border-base-300 bg-base-100 shadow">
+				<div class="card-body gap-4">
+					<div class="flex items-center justify-between gap-3">
+						<h2 class="card-title">{{ copy().carRequestsTitle }} ({{ carRequests().length }})</h2>
+						<span class="badge badge-outline">{{ carRequests().length }} {{ copy().carRequestsLabel }}</span>
+					</div>
+					<div class="overflow-x-auto">
+					<table class="table table-zebra">
+						<thead>
+							<tr>
+								<th>Requested Car</th>
+								<th>Budget</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (request of carRequests(); track request.id) {
+								<tr>
+									<td>{{ request.desiredCar }}</td>
+									<td>{{ request.budget | number }} EGP</td>
+									<td><span class="badge badge-outline">{{ request.status }}</span></td>
+								</tr>
+							}
+							@if (carRequests().length === 0) {
+								<tr>
+									<td colspan="3" class="text-center text-sm text-base-content/70">No car requests found.</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+					</div>
+				</div>
+			</article>
 		</section>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush
@@ -61,21 +97,28 @@ export default class UserDetailsPage {
 	private readonly userService = inject(UserService);
 
 	protected readonly bookingRequests = signal<BookingRequestItem[]>([]);
+	protected readonly carRequests = signal<CarRequestItem[]>([]);
 	protected readonly copy = computed(() =>
 		this.localeService.locale() === 'ar'
 			? {
-				title: 'طلباتي للحجز',
+				title: 'طلباتي',
 				favoritesTab: 'المفضلة',
 				requestsTab: 'الطلبات',
-				description: 'تتبع طلبات الحجز المرسلة وحالة المتابعة الحالية.',
-				requestsLabel: 'طلب'
+				description: 'تتبع طلبات الحجز وطلبات السيارات التي أرسلتها وحالة المتابعة الحالية.',
+				bookingTitle: 'طلبات الحجز',
+				bookingBadge: 'الحجوزات',
+				carRequestsTitle: 'طلبات السيارات',
+				carRequestsLabel: 'طلب'
 			}
 			: {
-				title: 'My Booking Requests',
+				title: 'My Requests',
 				favoritesTab: 'Favorites',
 				requestsTab: 'Requests',
-				description: 'Track your submitted booking requests and their current follow-up status.',
-				requestsLabel: 'requests'
+				description: 'Track your submitted booking requests and car requests in one place.',
+				bookingTitle: 'Booking Requests',
+				bookingBadge: 'Bookings',
+				carRequestsTitle: 'Car Requests',
+				carRequestsLabel: 'requests'
 			}
 	);
 
@@ -92,6 +135,15 @@ export default class UserDetailsPage {
 			},
 			error: () => {
 				this.bookingRequests.set([]);
+			}
+		});
+
+		this.userService.getMyCarRequests().subscribe({
+			next: (payload: unknown) => {
+				this.carRequests.set(this.userService.mapCarRequests(payload));
+			},
+			error: () => {
+				this.carRequests.set([]);
 			}
 		});
 	}

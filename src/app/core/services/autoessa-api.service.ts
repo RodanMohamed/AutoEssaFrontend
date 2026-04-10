@@ -35,6 +35,7 @@ export class AutoessaApiService {
   }
   getMyBookingRequests() { return this.http.get(`${API_BASE_URL}/api/BookingRequests/me`); }
   createCarLeadRequest(payload: CreateCarRequestLeadPayload) { return this.http.post(`${API_BASE_URL}/api/CarRequests`, payload); }
+  getMyCarRequests() { return this.http.get(`${API_BASE_URL}/api/CarRequests/me`); }
   getMyFavorites() { return this.http.get(`${API_BASE_URL}/api/Favorites/me`); }
   addFavorite(carId: string) { return this.http.post(`${API_BASE_URL}/api/Favorites/${carId}`, {}); }
   removeFavorite(carId: string) { return this.http.delete(`${API_BASE_URL}/api/Favorites/${carId}`); }

@@ -150,11 +150,31 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
                   </div>
                 </div>
                 <div class="rounded-2xl border border-base-300 bg-base-200/40 p-4">
-                  <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">Hand-picked experience</p>
+                  <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">Curated Selection</p>
                   <div class="mt-3 space-y-2">
-                    <div class="h-2.5 w-full rounded-full bg-base-300/70"></div>
-                    <div class="h-2.5 w-4/5 rounded-full bg-base-300/50"></div>
-                    <div class="h-2.5 w-2/3 rounded-full bg-base-300/40"></div>
+                    <style>
+  @keyframes wave-flow {
+    0% { d: path("M0,10 Q20,0 40,10 Q60,20 80,10 Q100,0 120,10 Q140,20 160,10"); }
+    50% { d: path("M0,10 Q20,20 40,10 Q60,0 80,10 Q100,20 120,10 Q140,0 160,10"); }
+    100% { d: path("M0,10 Q20,0 40,10 Q60,20 80,10 Q100,0 120,10 Q140,20 160,10"); }
+  }
+  @keyframes wave-move {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-80px); }
+  }
+  .wave-path {
+    fill: none;
+    stroke: #378ADD;
+    stroke-width: 2;
+    stroke-linecap: round;
+    animation: wave-move 1.5s linear infinite;
+  }
+</style>
+
+<svg width="160" height="20" viewBox="0 0 160 20" xmlns="http://www.w3.org/2000/svg" style="overflow: hidden; display: block;">
+  <path class="wave-path"
+    d="M-80,10 Q-60,2 -40,10 Q-20,18 0,10 Q20,2 40,10 Q60,18 80,10 Q100,2 120,10 Q140,18 160,10 Q180,2 200,10 Q220,18 240,10" />
+</svg>
                   </div>
                 </div>
               </div>

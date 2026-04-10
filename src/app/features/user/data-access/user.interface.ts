@@ -15,6 +15,15 @@ export interface BookingRequestItem {
 	status: string;
 }
 
+export interface CarRequestItem {
+	id: number | string;
+	customerName: string;
+	phoneNumber: string;
+	desiredCar: string;
+	budget: number;
+	status: string;
+}
+
 export interface UserProfile {
 	name: string;
 	phone: string;

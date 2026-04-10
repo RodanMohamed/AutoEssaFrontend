@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
-import { BookingRequestItem, FavoriteCarItem, UserProfile } from './user.interface';
-import { mapBookingRequest, mapFavorite } from '../utils/user.mappers';
+import { BookingRequestItem, CarRequestItem, FavoriteCarItem, UserProfile } from './user.interface';
+import { mapBookingRequest, mapCarRequest, mapFavorite } from '../utils/user.mappers';
 
 const USER_PROFILES_STORAGE_KEY = 'autoessa.user.profiles';
 const AUTH_REGISTERED_ACCOUNTS_KEY = 'autoessa.auth.accounts';
@@ -81,6 +81,10 @@ export class UserService {
 		return this.api.getMyBookingRequests();
 	}
 
+	getMyCarRequests() {
+		return this.api.getMyCarRequests();
+	}
+
 	removeFavorite(carId: string) {
 		return this.api.removeFavorite(carId);
 	}
@@ -106,6 +110,18 @@ export class UserService {
 		return collection.map((item, index) => {
 			const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
 			return mapBookingRequest(record, index + 1);
+		});
+	}
+
+	mapCarRequests(payload: unknown): CarRequestItem[] {
+		const collection = this.extractCollection(payload);
+		if (collection.length === 0) {
+			return [];
+		}
+
+		return collection.map((item, index) => {
+			const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
+			return mapCarRequest(record, index + 1);
 		});
 	}
 

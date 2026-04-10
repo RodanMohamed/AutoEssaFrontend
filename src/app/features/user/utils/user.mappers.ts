@@ -1,4 +1,4 @@
-import { BookingRequestItem, FavoriteCarItem } from '../data-access/user.interface';
+import { BookingRequestItem, CarRequestItem, FavoriteCarItem } from '../data-access/user.interface';
 import { normalizeDate } from './user.helpers';
 
 export function mapFavorite(item: Record<string, unknown>, fallbackId: number): FavoriteCarItem {
@@ -42,6 +42,35 @@ export function mapBookingRequest(item: Record<string, unknown>, fallbackId: num
 		fromDate: normalizeDate(typeof item['fromDate'] === 'string' ? item['fromDate'] : undefined),
 		toDate: normalizeDate(typeof item['toDate'] === 'string' ? item['toDate'] : undefined),
 		status: typeof item['status'] === 'string' ? item['status'] : 'New'
+	};
+}
+
+export function mapCarRequest(item: Record<string, unknown>, fallbackId: number): CarRequestItem {
+	const desiredBrand = typeof item['desiredBrand'] === 'string' ? item['desiredBrand'] : '';
+	const desiredModel = typeof item['desiredModel'] === 'string' ? item['desiredModel'] : '';
+	const desiredCarValue = typeof item['desiredCar'] === 'string' ? item['desiredCar'] : '';
+	const statusCandidate = item['status'];
+
+	return {
+		id: typeof item['id'] === 'string' && item['id'].trim().length > 0
+			? item['id']
+			: typeof item['id'] === 'number'
+				? item['id']
+				: fallbackId,
+		customerName: typeof item['fullName'] === 'string' ? item['fullName'] : 'Unknown',
+		phoneNumber: typeof item['phoneNumber'] === 'string' ? item['phoneNumber'] : '-',
+		desiredCar: `${desiredBrand} ${desiredModel}`.trim() || desiredCarValue || 'N/A',
+		budget: typeof item['budget'] === 'number' ? item['budget'] : 0,
+		status:
+			typeof statusCandidate === 'number'
+				? statusCandidate === 1
+					? 'Contacted'
+					: statusCandidate === 2
+						? 'Closed'
+						: 'New'
+				: typeof statusCandidate === 'string' && statusCandidate.trim().length > 0
+					? statusCandidate
+					: 'New'
 	};
 }
 
