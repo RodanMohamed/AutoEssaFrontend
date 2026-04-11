@@ -117,7 +117,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
                   <p class="text-xs uppercase tracking-[0.22em] text-base-content/55">{{ copy().insightsBadge }}</p>
                   <h3 class="mt-2 font-serif text-2xl">{{ copy().insightsTitle }}</h3>
                 </div>
-                <span class="badge badge-outline">{{ copy().insightsFootnoteTitle }}</span>
+                <span class="badge badge-outline " style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">{{ copy().insightsFootnoteTitle }}</span>
               </div>
 
               <p class="max-w-xl text-base-content/75">{{ copy().insightsBody }}</p>

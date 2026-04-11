@@ -132,7 +132,16 @@ export class UserService {
 
 		if (typeof payload === 'object' && payload !== null) {
 			const source = payload as Record<string, unknown>;
-			const candidates = [source['items'], source['data'], source['value']];
+			const candidates = [
+				source['items'],
+				source['data'],
+				source['value'],
+				source['results'],
+				source['requests'],
+				source['bookingRequests'],
+				source['carRequests'],
+				source['leads']
+			];
 			for (const candidate of candidates) {
 				if (Array.isArray(candidate)) {
 					return candidate;
