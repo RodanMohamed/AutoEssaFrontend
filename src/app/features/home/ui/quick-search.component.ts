@@ -1,5 +1,32 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { LocaleService } from '../../../core/services/locale.service';
+
+const EN_COPY = {
+  eyebrow: 'Search now',
+  title: 'Find the right car',
+  badge: 'Fast',
+  searchLabel: 'Car or brand',
+  searchPlaceholder: 'Mercedes, Toyota...',
+  typeLabel: 'Type',
+  allOption: 'Rent + Buy',
+  rentOption: 'Rent',
+  buyOption: 'Buy',
+  searchButton: 'Search'
+};
+
+const AR_COPY: typeof EN_COPY = {
+  eyebrow: 'ابحث الآن',
+  title: 'اعثر على السيارة المناسبة',
+  badge: 'سريع',
+  searchLabel: 'السيارة أو العلامة',
+  searchPlaceholder: 'مرسيدس، تويوتا...',
+  typeLabel: 'النوع',
+  allOption: 'إيجار + شراء',
+  rentOption: 'إيجار',
+  buyOption: 'شراء',
+  searchButton: 'بحث'
+};
 
 @Component({
   selector: 'app-quick-search',
@@ -38,20 +65,11 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class QuickSearchComponent {
+  private readonly localeService = inject(LocaleService);
+
   readonly searchChanged = output<{ query: string; listingType: string }>();
 
-  protected readonly copy = computed(() => ({
-    eyebrow: 'Search now',
-    title: 'Find the right car',
-    badge: 'Fast',
-    searchLabel: 'Car or brand',
-    searchPlaceholder: 'Mercedes, Toyota...',
-    typeLabel: 'Type',
-    allOption: 'Rent + Buy',
-    rentOption: 'Rent',
-    buyOption: 'Buy',
-    searchButton: 'Search'
-  }));
+  protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
   protected readonly form = new FormGroup({
     query: new FormControl('', { nonNullable: true }),

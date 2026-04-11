@@ -50,8 +50,8 @@ export class SiteFooterComponent {
     this.localeService.locale() === 'ar'
       ? {
           tagline: 'Auto Essa . استأجر واشترِ السيارات بثقة.',
-          whatsApp: 'واتساب: +20 10 96060677',
-          phone: 'اتصال: +20 10 96060677'
+          whatsApp: 'واتساب:٠١٠٩٦٠٦٠٦٧٧ ',
+          phone: 'اتصال:٠١٠٩٦٠٦٠٦٧٧'
         }
       : {
           tagline: 'Auto Essa . Rent and Buy Cars with confidence.',

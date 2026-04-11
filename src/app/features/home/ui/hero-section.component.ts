@@ -8,7 +8,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       <div class="hero-glow hero-glow-right" aria-hidden="true"></div>
 
       <div class="relative mx-auto max-w-3xl text-center">
-        <p class="hero-kicker mb-3 text-xs font-semibold uppercase tracking-[0.22em]">Premium Car Marketplace</p>
+        <p class="hero-kicker mb-3 text-xs font-semibold uppercase tracking-[0.22em]">{{ kicker() }}</p>
         <h1 class="hero-title font-serif text-4xl leading-tight sm:text-5xl lg:text-6xl">{{ title() }}</h1>
         <p class="hero-subtitle mx-auto mt-4 max-w-2xl">{{ subtitle() }}</p>
         <div class="mt-7">
@@ -92,6 +92,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeroSectionComponent {
+  kicker = input('Premium Car Marketplace');
   title = input.required<string>();
   subtitle = input.required<string>();
   ctaText = input('Browse Featured Cars');

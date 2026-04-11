@@ -29,7 +29,11 @@ export class HomeContentApi {
       heroHeadline: this.readString(source, 'heroHeadline', 'Premium Cars for Rent and Sale'),
       heroSubHeadline: this.readString(source, 'heroSubHeadline', 'Quick search, trusted listings, and direct WhatsApp booking in minutes.'),
       heroCtaText: this.readString(source, 'heroCtaText', 'Browse Featured Cars'),
-      whyChooseUsText: this.readString(source, 'whyChooseUsText', 'Verified cars, transparent pricing, and responsive support.')
+      whyChooseUsText: this.readString(source, 'whyChooseUsText', 'Verified cars, transparent pricing, and responsive support.'),
+      heroHeadlineAr: this.readOptionalString(source, 'heroHeadlineAr'),
+      heroSubHeadlineAr: this.readOptionalString(source, 'heroSubHeadlineAr'),
+      heroCtaTextAr: this.readOptionalString(source, 'heroCtaTextAr'),
+      whyChooseUsTextAr: this.readOptionalString(source, 'whyChooseUsTextAr')
     };
   }
 
@@ -75,6 +79,11 @@ export class HomeContentApi {
   private readString(source: Record<string, unknown>, key: string, fallback: string): string {
     const value = source[key];
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+  }
+
+  private readOptionalString(source: Record<string, unknown>, key: string): string | undefined {
+    const value = source[key];
+    return typeof value === 'string' && value.trim().length > 0 ? value : undefined;
   }
 
   private readNumber(source: Record<string, unknown>, key: string, fallback: number): number {

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { LocaleService } from '../../../core/services/locale.service';
 import { CarsApi } from '../../cars/data-access/cars.api';
 import { Car } from '../../cars/data-access/cars.interface';
 import { HomeContentApi } from '../data-access/home-content.api';
@@ -9,15 +10,106 @@ import { CarCardComponent } from '../../../shared/ui/car-card.component';
 import { HeroSectionComponent } from '../ui/hero-section.component';
 import { QuickSearchComponent } from '../ui/quick-search.component';
 
+const EN_COPY = {
+  heroKicker: 'Premium Car Marketplace',
+  verifiedBadge: 'Verified',
+  trustedSupportText: 'Trusted support, polished listings, and quick response times.',
+  browseLabel: 'Browse',
+  flexibleBadge: 'Flexible',
+  curatedBadge: 'Curated',
+  liveMovementTitle: 'Live movement',
+  curatedSelectionTitle: 'Curated Selection',
+  searchBadge: 'Quick Search',
+  fastSearchBadge: 'Instant results',
+  searchTitle: 'Find the right car faster',
+  searchDescription: 'Use the search to narrow cars by name, type, rent, or buy mode.',
+  searchStatOneLabel: 'Filter',
+  searchStatOneValue: 'Focused',
+  searchStatTwoLabel: 'Time',
+  searchStatTwoValue: 'Lower',
+  searchStatThreeLabel: 'Decision',
+  searchStatThreeValue: 'Faster',
+  whyChooseUsTitle: 'Why choose us',
+  trustBadge: 'Trust',
+  featureOneTitle: 'Transparency',
+  featureOneBody: 'Clear specs and pricing without noise.',
+  featureTwoTitle: 'Communication',
+  featureTwoBody: 'Fast WhatsApp and phone response.',
+  categoriesTitle: 'Categories',
+  categoriesBody: 'Rent daily or monthly, or buy from curated listings.',
+  categoryBadge: 'Browse',
+  rentCategoryTitle: 'Rent',
+  rentCategoryBody: 'Ideal for short trips or day-to-day use.',
+  buyCategoryTitle: 'Buy',
+  buyCategoryBody: 'Curated listings for cars available to purchase.',
+  insightsTitle: 'Market Snapshot',
+  insightsBadge: 'Today',
+  insightsBody: 'A quick overview to help you decide faster before exploring full inventory.',
+  insightOneLabel: 'Inventory',
+  insightOneValue: 'Live',
+  insightTwoLabel: 'Response',
+  insightTwoValue: '< 15 min',
+  insightThreeLabel: 'Coverage',
+  insightThreeValue: 'Major cities',
+  insightsFootnoteTitle: 'Hand-picked Experience',
+  featuredCarsTitle: 'Latest Cars'
+};
+
+const AR_COPY: typeof EN_COPY = {
+  heroKicker: 'سوق السيارات الفاخرة',
+  verifiedBadge: 'موثّق',
+  trustedSupportText: 'دعم موثوق، عروض مرتبة، واستجابة سريعة.',
+  browseLabel: 'تصفح',
+  flexibleBadge: 'مرن',
+  curatedBadge: 'مختار بعناية',
+  liveMovementTitle: 'حركة مباشرة',
+  curatedSelectionTitle: 'اختيارات منتقاة',
+  searchBadge: 'بحث سريع',
+  fastSearchBadge: 'نتائج فورية',
+  searchTitle: 'اعثر على السيارة المناسبة بسرعة',
+  searchDescription: 'استخدم البحث لتصفية السيارات بالاسم أو النوع أو وضع الإيجار والشراء.',
+  searchStatOneLabel: 'التصفية',
+  searchStatOneValue: 'أدق',
+  searchStatTwoLabel: 'الوقت',
+  searchStatTwoValue: 'أقل',
+  searchStatThreeLabel: 'القرار',
+  searchStatThreeValue: 'أسرع',
+  whyChooseUsTitle: 'لماذا تختارنا',
+  trustBadge: 'ثقة',
+  featureOneTitle: 'شفافية',
+  featureOneBody: 'مواصفات وأسعار واضحة بدون تعقيد.',
+  featureTwoTitle: 'تواصل',
+  featureTwoBody: 'استجابة سريعة عبر واتساب والهاتف.',
+  categoriesTitle: 'الفئات',
+  categoriesBody: 'استأجر يوميًا أو شهريًا، أو اشترِ من عروض مختارة.',
+  categoryBadge: 'تصفح',
+  rentCategoryTitle: 'إيجار',
+  rentCategoryBody: 'مثالي للرحلات القصيرة أو الاستخدام اليومي.',
+  buyCategoryTitle: 'شراء',
+  buyCategoryBody: 'عروض منتقاة لسيارات متاحة للشراء.',
+  insightsTitle: 'لمحة السوق',
+  insightsBadge: 'اليوم',
+  insightsBody: 'نظرة سريعة تساعدك على اتخاذ القرار قبل استعراض كامل المخزون.',
+  insightOneLabel: 'المخزون',
+  insightOneValue: 'مباشر',
+  insightTwoLabel: 'الاستجابة',
+  insightTwoValue: 'أقل من 15 دقيقة',
+  insightThreeLabel: 'التغطية',
+  insightThreeValue: 'المدن الرئيسية',
+  insightsFootnoteTitle: 'تجربة منتقاة بعناية',
+  featuredCarsTitle: 'أحدث السيارات'
+};
+
 @Component({
   selector: 'app-landing-page',
   imports: [HeroSectionComponent, QuickSearchComponent, CarCardComponent],
   template: `
     <section class="space-y-8">
       <app-hero-section
-        [title]="homeContent().heroHeadline"
-        [subtitle]="homeContent().heroSubHeadline"
-        [ctaText]="homeContent().heroCtaText"
+        [kicker]="copy().heroKicker"
+        [title]="localizedHomeContent().heroHeadline"
+        [subtitle]="localizedHomeContent().heroSubHeadline"
+        [ctaText]="localizedHomeContent().heroCtaText"
       />
 
       <section class="grid gap-5 xl:grid-cols-[1.02fr_0.98fr]">
@@ -29,10 +121,10 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
                   <p class="text-xs uppercase tracking-[0.22em] text-base-content/55">{{ copy().trustBadge }}</p>
                   <h3 class="mt-2 font-serif text-2xl md:text-3xl">{{ copy().whyChooseUsTitle }}</h3>
                 </div>
-                <span class="badge badge-outline badge-lg">Verified</span>
+                <span class="badge badge-outline badge-lg">{{ copy().verifiedBadge }}</span>
               </div>
 
-              <p class="max-w-2xl text-base-content/75 leading-7">{{ homeContent().whyChooseUsText }}</p>
+              <p class="max-w-2xl text-base-content/75 leading-7">{{ localizedHomeContent().whyChooseUsText }}</p>
 
               <div class="grid gap-3 sm:grid-cols-2">
                 <div class="feature-tile rounded-3xl border border-base-300 bg-base-200/55 p-4 md:p-5">
@@ -57,8 +149,8 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
 
               <div class="rounded-3xl border border-base-300 bg-base-200/45 p-4 md:p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                  <p class="font-semibold">Trusted support, polished listings, and quick response times.</p>
-                  <span class="badge badge-outline">{{ homeContent().heroCtaText }}</span>
+                  <p class="font-semibold">{{ copy().trustedSupportText }}</p>
+                  <span class="badge badge-outline">{{ localizedHomeContent().heroCtaText }}</span>
                 </div>
               </div>
             </div>
@@ -69,7 +161,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
             <div class="relative space-y-5 p-6 md:p-8">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p class="text-xs uppercase tracking-[0.22em] text-base-content/55">Browse</p>
+                  <p class="text-xs uppercase tracking-[0.22em] text-base-content/55">{{ copy().browseLabel }}</p>
                   <h3 class="mt-2 font-serif text-2xl md:text-3xl">{{ copy().categoriesTitle }}</h3>
                 </div>
                 <span class="badge badge-outline badge-lg">{{ copy().categoryBadge }}</span>
@@ -84,7 +176,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
                     <div class="min-w-0 flex-1">
                       <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="font-semibold text-lg">{{ copy().rentCategoryTitle }}</p>
-                        <span class="badge badge-sm badge-outline">Flexible</span>
+                        <span class="badge badge-sm badge-outline">{{ copy().flexibleBadge }}</span>
                       </div>
                       <p class="mt-2 text-sm leading-6 text-base-content/70">{{ copy().rentCategoryBody }}</p>
                     </div>
@@ -97,7 +189,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
                     <div class="min-w-0 flex-1">
                       <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="font-semibold text-lg">{{ copy().buyCategoryTitle }}</p>
-                        <span class="badge badge-sm badge-outline">Curated</span>
+                        <span class="badge badge-sm badge-outline">{{ copy().curatedBadge }}</span>
                       </div>
                       <p class="mt-2 text-sm leading-6 text-base-content/70">{{ copy().buyCategoryBody }}</p>
                     </div>
@@ -139,7 +231,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
 
               <div class="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
                 <div class="insight-wave rounded-2xl border border-base-300 bg-base-200/40 p-4">
-                  <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">Live movement</p>
+                  <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">{{ copy().liveMovementTitle }}</p>
                   <div class="mt-4 flex items-end gap-2">
                     <span class="insight-bar h-10 w-3"></span>
                     <span class="insight-bar h-16 w-3"></span>
@@ -150,7 +242,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
                   </div>
                 </div>
                 <div class="rounded-2xl border border-base-300 bg-base-200/40 p-4">
-                  <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">Curated Selection</p>
+                  <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">{{ copy().curatedSelectionTitle }}</p>
                   <div class="mt-3 space-y-2">
                     <style>
   @keyframes wave-flow {
@@ -454,6 +546,7 @@ export default class LandingPage {
   private readonly carsApi = inject(CarsApi);
   private readonly homeContentApi = inject(HomeContentApi);
   private readonly route = inject(ActivatedRoute);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly cars = signal<Car[]>([]);
   protected readonly homeContent = signal<HomeContent>({
@@ -462,46 +555,29 @@ export default class LandingPage {
     heroCtaText: 'Browse Featured Cars',
     whyChooseUsText: 'Verified cars, transparent pricing, and responsive support.'
   });
+  private readonly localizationMap = signal<Record<string, string>>({});
   private readonly query = signal('');
   private readonly listingType = signal('all');
-  protected readonly copy = computed(() => ({
-    searchBadge: 'Quick Search',
-    fastSearchBadge: 'Instant results',
-    searchTitle: 'Find the right car faster',
-    searchDescription: 'Use the search to narrow cars by name, type, rent, or buy mode.',
-    searchStatOneLabel: 'Filter',
-    searchStatOneValue: 'Focused',
-    searchStatTwoLabel: 'Time',
-    searchStatTwoValue: 'Lower',
-    searchStatThreeLabel: 'Decision',
-    searchStatThreeValue: 'Faster',
-    whyChooseUsTitle: 'Why choose us',
-    trustBadge: 'Trust',
-    featureOneTitle: 'Transparency',
-    featureOneBody: 'Clear specs and pricing without noise.',
-    featureTwoTitle: 'Communication',
-    featureTwoBody: 'Fast WhatsApp and phone response.',
-    categoriesTitle: 'Categories',
-    categoriesBody: 'Rent daily or monthly, or buy from curated listings.',
-    categoryBadge: 'Browse',
-    rentCategoryTitle: 'Rent',
-    rentCategoryBody: 'Ideal for short trips or day-to-day use.',
-    buyCategoryTitle: 'Buy',
-    buyCategoryBody: 'Curated listings for cars available to purchase.',
-    insightsTitle: 'Market Snapshot',
-    insightsBadge: 'Today',
-    insightsBody: 'A quick overview to help you decide faster before exploring full inventory.',
-    insightOneLabel: 'Inventory',
-    insightOneValue: 'Live',
-    insightTwoLabel: 'Response',
-    insightTwoValue: '< 15 min',
-    insightThreeLabel: 'Coverage',
-    insightThreeValue: 'Major cities',
-    insightsFootnoteTitle: 'Hand-picked Experience',
+  protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
-    featuredCarsTitle: 'Latest Cars',
+  protected readonly localizedHomeContent = computed(() => {
+    const content = this.homeContent();
+    if (this.localeService.locale() !== 'ar') {
+      return {
+        heroHeadline: content.heroHeadline,
+        heroSubHeadline: content.heroSubHeadline,
+        heroCtaText: content.heroCtaText,
+        whyChooseUsText: content.whyChooseUsText
+      };
+    }
 
-  }));
+    return {
+      heroHeadline: this.resolveArabicValue('heroHeadline', content.heroHeadline, content.heroHeadlineAr),
+      heroSubHeadline: this.resolveArabicValue('heroSubHeadline', content.heroSubHeadline, content.heroSubHeadlineAr),
+      heroCtaText: this.resolveArabicValue('heroCtaText', content.heroCtaText, content.heroCtaTextAr),
+      whyChooseUsText: this.resolveArabicValue('whyChooseUsText', content.whyChooseUsText, content.whyChooseUsTextAr)
+    };
+  });
 
   protected readonly filteredCars = computed(() => {
     const text = this.query().trim().toLowerCase();
@@ -531,10 +607,42 @@ export default class LandingPage {
 
     this.carsApi.getCars().subscribe((cars) => this.cars.set(cars));
     this.homeContentApi.getHomeContent().subscribe((content) => this.homeContent.set(content));
+    this.homeContentApi.getLocalizationSettings().subscribe((settings) => {
+      const map: Record<string, string> = {};
+      for (const setting of settings) {
+        map[setting.key.toLowerCase()] = setting.value;
+      }
+      this.localizationMap.set(map);
+    });
   }
 
   protected onSearch(value: { query: string; listingType: string }) {
     this.query.set(value.query.trim());
     this.listingType.set(value.listingType.trim());
+  }
+
+  private resolveArabicValue(fieldName: string, englishFallback: string, inlineArabic?: string): string {
+    if (typeof inlineArabic === 'string' && inlineArabic.trim().length > 0) {
+      return inlineArabic;
+    }
+
+    const map = this.localizationMap();
+    const candidates = [
+      `${fieldName}Ar`,
+      `${fieldName}_ar`,
+      `home.${fieldName}.ar`,
+      `homepage.${fieldName}.ar`,
+      `homePage.${fieldName}.ar`,
+      `homepage_${fieldName}_ar`
+    ];
+
+    for (const key of candidates) {
+      const value = map[key.toLowerCase()];
+      if (typeof value === 'string' && value.trim().length > 0) {
+        return value;
+      }
+    }
+
+    return englishFallback;
   }
 }

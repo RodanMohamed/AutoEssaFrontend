@@ -3,6 +3,10 @@ export interface HomeContent {
   heroSubHeadline: string;
   heroCtaText: string;
   whyChooseUsText: string;
+  heroHeadlineAr?: string;
+  heroSubHeadlineAr?: string;
+  heroCtaTextAr?: string;
+  whyChooseUsTextAr?: string;
 }
 
 export interface LocalizationSetting {

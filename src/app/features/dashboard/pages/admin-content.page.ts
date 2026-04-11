@@ -10,11 +10,16 @@ interface LocalizationSettingItem {
   value: string;
 }
 
+const EGYPTIAN_MOBILE_REGEX = /^(?:\+20|0)?1[0125]\d{8}$/;
+
 const EN_COPY = {
   pageTitle: 'Content Management',
   contactInformation: 'Contact Information',
   phoneNumber: 'Phone Number',
   whatsappNumber: 'WhatsApp Number',
+  phoneRequired: 'Phone number is required.',
+  whatsappRequired: 'WhatsApp number is required.',
+  invalidEgyptianNumber: 'Please enter a valid Egyptian mobile number (e.g. 01012345678 or +201012345678).',
   address: 'Address',
   googleMapsUrl: 'Google Maps URL',
   workingHours: 'Working Hours',
@@ -67,6 +72,9 @@ const AR_COPY: typeof EN_COPY = {
   contactInformation: 'معلومات التواصل',
   phoneNumber: 'رقم الهاتف',
   whatsappNumber: 'رقم واتساب',
+  phoneRequired: 'رقم الهاتف مطلوب.',
+  whatsappRequired: 'رقم واتساب مطلوب.',
+  invalidEgyptianNumber: 'يرجى إدخال رقم موبايل مصري صحيح (مثال: 01012345678 أو +201012345678).',
   address: 'العنوان',
   googleMapsUrl: 'رابط خرائط جوجل',
   workingHours: 'ساعات العمل',
@@ -134,12 +142,26 @@ const AR_COPY: typeof EN_COPY = {
             <form [formGroup]="contactForm" (ngSubmit)="saveContactInfo()" class="grid gap-4">
               <label class="form-control content-form-row">
                 <span class="label-text content-form-label">{{ copy().phoneNumber }}</span>
-                <input class="input input-bordered" formControlName="phoneNumber" />
+                <input class="input input-bordered" type="tel" formControlName="phoneNumber" />
               </label>
+              @if (contactForm.controls.phoneNumber.touched && contactForm.controls.phoneNumber.hasError('required')) {
+                <p class="text-error text-xs">{{ copy().phoneRequired }}</p>
+              }
+              @if (contactForm.controls.phoneNumber.touched && contactForm.controls.phoneNumber.hasError('pattern')) {
+                <p class="text-error text-xs">{{ copy().invalidEgyptianNumber }}</p>
+              }
+
               <label class="form-control content-form-row">
                 <span class="label-text content-form-label">{{ copy().whatsappNumber }}</span>
-                <input class="input input-bordered" formControlName="whatsAppNumber" />
+                <input class="input input-bordered" type="tel" formControlName="whatsAppNumber" />
               </label>
+              @if (contactForm.controls.whatsAppNumber.touched && contactForm.controls.whatsAppNumber.hasError('required')) {
+                <p class="text-error text-xs">{{ copy().whatsappRequired }}</p>
+              }
+              @if (contactForm.controls.whatsAppNumber.touched && contactForm.controls.whatsAppNumber.hasError('pattern')) {
+                <p class="text-error text-xs">{{ copy().invalidEgyptianNumber }}</p>
+              }
+
               <label class="form-control content-form-row">
                 <span class="label-text content-form-label">{{ copy().address }}</span>
                 <input class="input input-bordered" formControlName="address" />
@@ -355,8 +377,8 @@ export default class AdminContentPage {
   protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
 
   protected readonly contactForm = this.fb.nonNullable.group({
-    phoneNumber: ['', Validators.required],
-    whatsAppNumber: ['', Validators.required],
+    phoneNumber: ['', [Validators.required, Validators.pattern(EGYPTIAN_MOBILE_REGEX)]],
+    whatsAppNumber: ['', [Validators.required, Validators.pattern(EGYPTIAN_MOBILE_REGEX)]],
     address: ['', Validators.required],
     googleMapsUrl: ['', Validators.required],
     workingHours: ['', Validators.required]
