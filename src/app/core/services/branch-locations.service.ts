@@ -159,25 +159,25 @@ export class BranchLocationsService {
 
   private defaultBranches(): BranchLocation[] {
     return [
+      // {
+      //   id: 'branch-1',
+      //   name: 'Nasr City Branch',
+      //   address: 'Nasr City, Cairo, Egypt',
+      //   mapsUrl: 'https://www.google.com/maps?q=Nasr+City+Cairo&output=embed',
+      //   isActive: true
+      // },
       {
-        id: 'branch-1',
-        name: 'Nasr City Branch',
-        address: 'Nasr City, Cairo, Egypt',
-        mapsUrl: 'https://www.google.com/maps?q=Nasr+City+Cairo&output=embed',
+        id: 'branch-2',
+        name: 'Agouza Branch',
+        address: 'Agouza, Cairo, Egypt',
+        mapsUrl: 'https://www.google.com/maps/place/%D8%B9%D9%8A%D8%B3%D9%89+%D9%84%D9%84%D8%B3%D9%8A%D8%A7%D8%B1%D8%A7%D8%AA%E2%80%AD/@30.0586402,31.2141598,17z/data=!3m1!4b1!4m6!3m5!1s0x1458412035347337:0xef4d45c14349c49e!8m2!3d30.0586402!4d31.2141598!16s%2Fg%2F1tj435wp!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDQwOC4wIKXMDSoASAFQAw%3D%3D',
         isActive: true
       },
       {
-        id: 'branch-2',
-        name: 'Maadi Branch',
-        address: 'Maadi, Cairo, Egypt',
-        mapsUrl: 'https://www.google.com/maps?q=Maadi+Cairo&output=embed',
-        isActive: false
-      },
-      {
         id: 'branch-3',
-        name: 'Alexandria Branch',
-        address: 'Smouha, Alexandria, Egypt',
-        mapsUrl: 'https://www.google.com/maps?q=Smouha+Alexandria&output=embed',
+        name: 'Agouza Branch 2',
+        address: 'Elhwaitya, cairo, Egypt',
+        mapsUrl: 'https://www.google.com/maps/place/%D8%B9%D9%8A%D8%B3%D9%89+%D9%84%D9%84%D8%B3%D9%8A%D8%A7%D8%B1%D8%A7%D8%AA%E2%80%AD/@30.0586402,31.2141598,17z/data=!3m1!4b1!4m6!3m5!1s0x1458412035347337:0xef4d45c14349c49e!8m2!3d30.0586402!4d31.2141598!16s%2Fg%2F1tj435wp!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDQwOC4wIKXMDSoASAFQAw%3D%3D',
         isActive: false
       }
     ];
