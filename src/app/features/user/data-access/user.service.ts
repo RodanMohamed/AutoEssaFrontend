@@ -105,6 +105,10 @@ export class UserService {
 		);
 	}
 
+	getPendingCarRequests(): CarRequestItem[] {
+		return this.mergePendingCarRequests([]);
+	}
+
 	rememberPendingCarRequest(userId: string | undefined, payload: CreateCarRequestLeadPayload): void {
 		const session = this.authStore.session();
 		const ownerId = userId?.trim() || session?.user.id?.trim() || '';
@@ -167,6 +171,10 @@ export class UserService {
 			const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
 			return mapCarRequest(record, index + 1);
 		});
+	}
+
+	mergeCarRequestsWithPending(remoteRequests: CarRequestItem[]): CarRequestItem[] {
+		return this.mergePendingCarRequests(remoteRequests);
 	}
 
 	private mergePendingCarRequests(remoteRequests: CarRequestItem[]): CarRequestItem[] {

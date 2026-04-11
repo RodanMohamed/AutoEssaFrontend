@@ -130,6 +130,7 @@ export default class UserDetailsPage {
 
 	constructor() {
 		this.loadCarsCatalog();
+		this.carRequests.set(this.userService.getPendingCarRequests());
 		this.loadRequests();
 	}
 
@@ -148,10 +149,10 @@ export default class UserDetailsPage {
 
 		this.userService.getMyCarRequests().subscribe({
 			next: (items) => {
-				this.carRequests.set(items);
+				this.carRequests.set(this.userService.mergeCarRequestsWithPending(items));
 			},
 			error: () => {
-				this.carRequests.set([]);
+				this.carRequests.set(this.userService.getPendingCarRequests());
 			}
 		});
 	}
