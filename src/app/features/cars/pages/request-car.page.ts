@@ -196,7 +196,7 @@ export default class RequestCarPage {
       .createCarLeadRequest(payload)
       .subscribe({
         next: () => {
-          if (sessionUserId && sessionUserId !== '0' && sessionUserId !== 'local-user') {
+          if (sessionUserId && sessionUserId.trim().length > 0) {
             this.userService.rememberPendingCarRequest(sessionUserId, payload);
           }
           this.status.set('Car request submitted successfully. It will appear in My Requests.');
