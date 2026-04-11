@@ -1,6 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
 
 import { API_BASE_URL } from '../core.config';
 import {
@@ -38,12 +37,8 @@ export class AutoessaApiService {
   createCarLeadRequest(payload: CreateCarRequestLeadPayload) {
     const endpoint = `${API_BASE_URL}/api/CarRequests`;
     const requestBody = this.toCreateCarRequestBody(payload);
-    const requestEnvelope = {
-      ...requestBody,
-      request: requestBody
-    };
 
-    return this.http.post(endpoint, requestEnvelope);
+    return this.http.post(endpoint, { request: requestBody });
   }
   getMyCarRequests() { return this.http.get(`${API_BASE_URL}/api/CarRequests/me`); }
   getMyFavorites() { return this.http.get(`${API_BASE_URL}/api/Favorites/me`); }
@@ -100,27 +95,15 @@ export class AutoessaApiService {
     const notes = typeof payload.notes === 'string' ? payload.notes.trim() : '';
 
     return {
-      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0
-        ? { userId: payload.userId.trim(), UserId: payload.userId.trim() }
-        : {}),
-      fullName: payload.fullName,
+      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 ? { UserId: payload.userId.trim() } : {}),
       FullName: payload.fullName,
-      name: payload.fullName,
-      Name: payload.fullName,
-      phoneNumber: payload.phoneNumber,
       PhoneNumber: payload.phoneNumber,
-      desiredBrand: payload.desiredBrand,
       DesiredBrand: payload.desiredBrand,
-      desiredModel: payload.desiredModel,
       DesiredModel: payload.desiredModel,
-      ...(typeof payload.desiredYearFrom === 'number'
-        ? { desiredYearFrom: payload.desiredYearFrom, DesiredYearFrom: payload.desiredYearFrom }
-        : {}),
-      ...(typeof payload.desiredYearTo === 'number'
-        ? { desiredYearTo: payload.desiredYearTo, DesiredYearTo: payload.desiredYearTo }
-        : {}),
-      ...(typeof payload.budget === 'number' ? { budget: payload.budget, Budget: payload.budget } : {}),
-      ...(notes.length > 0 ? { notes, Notes: notes } : {})
+      ...(typeof payload.desiredYearFrom === 'number' ? { DesiredYearFrom: payload.desiredYearFrom } : {}),
+      ...(typeof payload.desiredYearTo === 'number' ? { DesiredYearTo: payload.desiredYearTo } : {}),
+      ...(typeof payload.budget === 'number' ? { Budget: payload.budget } : {}),
+      ...(notes.length > 0 ? { Notes: notes } : {})
     };
   }
 

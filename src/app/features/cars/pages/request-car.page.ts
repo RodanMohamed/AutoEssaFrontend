@@ -17,7 +17,6 @@ import { UserService } from '../../user/data-access/user.service';
 import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
 
 const CURRENT_YEAR = new Date().getFullYear();
-const EGYPT_MOBILE_PHONE_REGEX = /^01[0125]\d{8}$/;
 
 //////////////////////////////////////////////////////////
 // Validators
@@ -86,6 +85,7 @@ const yearRangeValidator: ValidatorFn = (control: AbstractControl): ValidationEr
   class="input input-bordered w-full"
   formControlName="fullName"
   type="text"
+  maxlength="100"
 />
 
 @if (isInvalid('fullName')) {
@@ -115,6 +115,7 @@ const yearRangeValidator: ValidatorFn = (control: AbstractControl): ValidationEr
   formControlName="phoneNumber"
   type="text"
   inputmode="tel"
+  maxlength="30"
 />
 
 @if (isRequiredInvalid('phoneNumber')) {
@@ -124,13 +125,7 @@ const yearRangeValidator: ValidatorFn = (control: AbstractControl): ValidationEr
 </p>
 
 }
-@else if (isPhoneInvalid()) {
 
-<p class="mt-1 text-xs text-error">
-{{ copy().phoneError }}
-</p>
-
-}
 
 </div>
 
@@ -150,6 +145,7 @@ const yearRangeValidator: ValidatorFn = (control: AbstractControl): ValidationEr
   class="input input-bordered w-full"
   formControlName="desiredBrand"
   type="text"
+  maxlength="100"
 />
 
 @if (isInvalid('desiredBrand')) {
@@ -178,6 +174,7 @@ const yearRangeValidator: ValidatorFn = (control: AbstractControl): ValidationEr
   class="input input-bordered w-full"
   formControlName="desiredModel"
   type="text"
+  maxlength="100"
 />
 
 @if (isInvalid('desiredModel')) {
@@ -294,6 +291,7 @@ const yearRangeValidator: ValidatorFn = (control: AbstractControl): ValidationEr
   class="textarea textarea-bordered w-full"
   formControlName="notes"
   rows="4"
+  maxlength="1000"
 ></textarea>
 
 </div>
@@ -362,7 +360,7 @@ protected readonly form = new FormGroup(
     nonNullable: true,
     validators: [
       Validators.required,
-      Validators.minLength(3),
+      Validators.maxLength(100),
       noWhitespaceValidator
     ]
   }),
@@ -371,7 +369,8 @@ protected readonly form = new FormGroup(
     nonNullable: true,
     validators: [
       Validators.required,
-      Validators.pattern(EGYPT_MOBILE_PHONE_REGEX)
+      Validators.maxLength(30),
+      noWhitespaceValidator
     ]
   }),
 
@@ -379,8 +378,8 @@ protected readonly form = new FormGroup(
     nonNullable: true,
     validators: [
       Validators.required,
-      Validators.minLength(2),
-      Validators.maxLength(40)
+      Validators.maxLength(100),
+      noWhitespaceValidator
     ]
   }),
 
@@ -388,8 +387,8 @@ protected readonly form = new FormGroup(
     nonNullable: true,
     validators: [
       Validators.required,
-      Validators.minLength(2),
-      Validators.maxLength(40)
+      Validators.maxLength(100),
+      noWhitespaceValidator
     ]
   }),
 
@@ -419,7 +418,7 @@ protected readonly form = new FormGroup(
 
   notes: new FormControl('', {
     nonNullable: true,
-    validators: [Validators.maxLength(500)]
+    validators: [Validators.maxLength(1000)]
   })
 
 },
@@ -444,18 +443,6 @@ protected isRequiredInvalid(controlName: keyof typeof this.form.controls) {
 const control = this.form.controls[controlName];
 
 return control.touched && control.hasError('required');
-
-}
-
-protected isPhoneInvalid() {
-
-const control = this.form.controls.phoneNumber;
-
-return (
-control.touched &&
-!control.hasError('required') &&
-control.hasError('pattern')
-);
 
 }
 
@@ -603,7 +590,7 @@ yearError: 'نطاق السنة غير صحيح.',
 
 budgetError: 'ميزانية غير صحيحة.',
 
-notesError: 'عدد الحروف كبير.',
+notesError: 'الحد الأقصى للملاحظات هو 1000 حرف.',
 
 submitButton: 'إرسال الطلب'
 
@@ -640,7 +627,7 @@ yearError: 'Invalid year range.',
 
 budgetError: 'Invalid budget.',
 
-notesError: 'Too many characters.',
+notesError: 'Notes can be up to 1000 characters only.',
 
 submitButton: 'Submit Request'
 
