@@ -44,7 +44,7 @@ export class DashboardApi {
 					return this.mockBookings();
 				}
 
-				return payload.slice(0, 6).map((item, index) => {
+				return payload.slice(0, 3).map((item, index) => {
 					const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
 
 					const booking: BookingRequestSummary = {
