@@ -131,8 +131,8 @@ export default class ContactPage {
     phoneNumber: '+20 10 96060677',
     whatsAppNumber: '+20 10 96060677',
     address: 'Cairo, Egypt',
-    googleMapsUrl: 'https://www.google.com/maps?q=Cairo&output=embed',
-    workingHours: 'Daily 10:00 AM - 10:00 PM'
+    googleMapsUrl: 'https://www.google.com/maps/place/%D8%B9%D9%8A%D8%B3%D9%89+%D9%84%D9%84%D8%B3%D9%8A%D8%A7%D8%B1%D8%A7%D8%AA%E2%80%AD/@30.0586402,31.2141598,17z/data=!3m1!4b1!4m6!3m5!1s0x1458412035347337:0xef4d45c14349c49e!8m2!3d30.0586402!4d31.2141598!16s%2Fg%2F1tj435wp!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDQwOC4wIKXMDSoASAFQAw%3D%3D',
+    workingHours: 'Daily 11:00 AM - 11:00 PM'
   });
   protected readonly branches = this.branchService.branches;
   protected readonly activeBranch = computed(() => this.branchService.getActiveBranch());
