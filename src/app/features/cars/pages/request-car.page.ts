@@ -10,15 +10,6 @@ import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
 const CURRENT_YEAR = new Date().getFullYear();
 const EGYPT_MOBILE_PHONE_REGEX = /^01[0125]\d{8}$/;
 
-const trimmedRequiredValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-  const value = control.value;
-  if (typeof value !== 'string') {
-    return { required: true };
-  }
-
-  return value.trim().length > 0 ? null : { required: true };
-};
-
 const yearRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const group = control as FormGroup;
   const yearFrom = group.controls['desiredYearFrom']?.value as number | null | undefined;
@@ -192,7 +183,7 @@ export default class RequestCarPage {
     {
       fullName: new FormControl('', {
         nonNullable: true,
-        validators: [trimmedRequiredValidator, Validators.minLength(3), Validators.maxLength(80)]
+        validators: [Validators.required]
       }),
       phoneNumber: new FormControl('', {
         nonNullable: true,
