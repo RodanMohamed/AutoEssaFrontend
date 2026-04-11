@@ -29,6 +29,7 @@ const EN_COPY = {
   inactive: 'Inactive',
   edit: 'Edit',
   setActive: 'Set Active',
+  delete: 'Delete',
   branchId: 'Branch ID',
   branchName: 'Branch Name',
   googleMapsEmbedUrl: 'Google Maps Embed URL',
@@ -53,6 +54,8 @@ const EN_COPY = {
   contactMessageUpdated: 'Contact message updated.',
   branchSaved: 'Branch location saved successfully.',
   activeBranchUpdated: 'Active branch updated.',
+  branchDeleted: 'Branch deleted successfully.',
+  branchDeleteBlocked: 'At least one branch location must remain.',
   unknown: 'Unknown',
   fallbackError: 'Action failed. Please verify API permissions or payload shape.',
   newBranchPrefix: 'New Branch',
@@ -78,6 +81,7 @@ const AR_COPY: typeof EN_COPY = {
   inactive: 'غير نشط',
   edit: 'تعديل',
   setActive: 'تعيين كنشط',
+  delete: 'حذف',
   branchId: 'معرف الفرع',
   branchName: 'اسم الفرع',
   googleMapsEmbedUrl: 'رابط تضمين خرائط جوجل',
@@ -102,6 +106,8 @@ const AR_COPY: typeof EN_COPY = {
   contactMessageUpdated: 'تم تحديث رسالة التواصل.',
   branchSaved: 'تم حفظ موقع الفرع بنجاح.',
   activeBranchUpdated: 'تم تحديث الفرع النشط.',
+  branchDeleted: 'تم حذف الفرع بنجاح.',
+  branchDeleteBlocked: 'يجب أن يبقى فرع واحد على الأقل.',
   unknown: 'غير معروف',
   fallbackError: 'فشل الإجراء. يرجى التحقق من الصلاحيات أو صيغة البيانات.',
   newBranchPrefix: 'فرع جديد',
@@ -179,7 +185,8 @@ const AR_COPY: typeof EN_COPY = {
           </section>
 
           <div class="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-            <div class="overflow-x-auto">
+            <div>
+              <div class="hidden overflow-x-auto md:block">
               <table class="table table-zebra">
                 <thead>
                   <tr>
@@ -203,12 +210,33 @@ const AR_COPY: typeof EN_COPY = {
                         <div class="flex flex-wrap gap-2">
                           <button class="btn btn-xs" type="button" (click)="editBranch(branch)">{{ copy().edit }}</button>
                           <button class="btn btn-xs btn-primary" type="button" (click)="activateBranch(branch.id)">{{ copy().setActive }}</button>
+                          <button class="btn btn-xs btn-error" type="button" (click)="deleteBranch(branch.id)">{{ copy().delete }}</button>
                         </div>
                       </td>
                     </tr>
                   }
                 </tbody>
               </table>
+              </div>
+
+              <div class="grid gap-3 md:hidden">
+                @for (branch of branches(); track branch.id) {
+                  <article class="rounded-xl border border-base-300 bg-base-100 p-3">
+                    <div class="flex items-start justify-between gap-2">
+                      <h3 class="font-semibold">{{ branch.name }}</h3>
+                      <span class="badge" [class]="branch.isActive ? 'badge-success' : 'badge-outline'">
+                        {{ branch.isActive ? copy().active : copy().inactive }}
+                      </span>
+                    </div>
+                    <p class="mt-2 text-sm text-base-content/75">{{ branch.address }}</p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <button class="btn btn-xs" type="button" (click)="editBranch(branch)">{{ copy().edit }}</button>
+                      <button class="btn btn-xs btn-primary" type="button" (click)="activateBranch(branch.id)">{{ copy().setActive }}</button>
+                      <button class="btn btn-xs btn-error" type="button" (click)="deleteBranch(branch.id)">{{ copy().delete }}</button>
+                    </div>
+                  </article>
+                }
+              </div>
             </div>
 
             <form [formGroup]="branchForm" (ngSubmit)="saveBranch()" class="grid gap-3">
@@ -472,6 +500,19 @@ export default class AdminContentPage {
     this.branchService.setActiveBranch(id);
     this.message.set(this.copy().activeBranchUpdated);
     this.isError.set(false);
+  }
+
+  protected deleteBranch(id: string) {
+    const deleted = this.branchService.deleteBranch(id);
+    if (!deleted) {
+      this.message.set(this.copy().branchDeleteBlocked);
+      this.isError.set(true);
+      return;
+    }
+
+    this.message.set(this.copy().branchDeleted);
+    this.isError.set(false);
+    this.newBranchForm();
   }
 
   private mapLocalization(payload: unknown): LocalizationSettingItem[] {

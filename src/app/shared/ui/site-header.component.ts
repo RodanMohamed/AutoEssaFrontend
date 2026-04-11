@@ -19,7 +19,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
             <a routerLink="/" class="brand-link font-serif text-xl font-semibold tracking-wide shrink-0">Auto Essa</a>
 
             <!-- Desktop Nav (center on large screens) -->
-            <nav class="hidden items-center gap-1 lg:flex flex-1 justify-center" aria-label="Primary">
+            <nav class="hidden items-center gap-1 lg:flex flex-1 justify-center " aria-label="Primary">
               @if (isAuthenticated() && isAdmin()) {
                 <a mat-button routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
                 <a mat-button routerLink="/dashboard" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
@@ -72,7 +72,7 @@ import { LocaleSwitcherComponent } from './locale-switcher.component';
 
           <!-- Mobile Menu (dropdown below) -->
           @if (isMenuOpen()) {
-            <nav class="mobile-menu flex flex-col gap-1 lg:hidden border-t border-base-300 pt-7" aria-label="Mobile navigation">
+            <nav class="mobile-menu flex flex-col gap-1 lg:hidden border-t border-base-300 pt-7 mt-36" aria-label="Mobile navigation">
               @if (isAuthenticated() && isAdmin()) {
       <!-- Admin links -->
           <a class="mobile-link" routerLink="/" routerLinkActive="mobile-link-active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMenu()">Home</a>

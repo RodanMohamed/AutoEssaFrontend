@@ -14,6 +14,16 @@ const BRANCH_STORAGE_KEY = 'autoessa.branches';
 export class BranchLocationsService {
   readonly branches = signal<BranchLocation[]>(this.readBranches());
 
+  constructor() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (event: StorageEvent) => {
+        if (event.key === BRANCH_STORAGE_KEY) {
+          this.branches.set(this.readBranches());
+        }
+      });
+    }
+  }
+
   saveBranch(payload: Omit<BranchLocation, 'isActive'>, isActive?: boolean) {
     const current = this.branches();
     const exists = current.some((item) => item.id === payload.id);
@@ -51,6 +61,22 @@ export class BranchLocationsService {
     }));
 
     this.setBranches(this.ensureOneActive(updated));
+  }
+
+  deleteBranch(id: string): boolean {
+    const current = this.branches();
+    if (current.length <= 1) {
+      return false;
+    }
+
+    const exists = current.some((item) => item.id === id);
+    if (!exists) {
+      return false;
+    }
+
+    const remaining = current.filter((item) => item.id !== id);
+    this.setBranches(this.ensureOneActive(remaining));
+    return true;
   }
 
   getActiveBranch(): BranchLocation {
