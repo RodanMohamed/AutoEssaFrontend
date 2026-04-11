@@ -185,7 +185,7 @@ export default class RequestCarPage {
         phoneNumber: value.phoneNumber,
         desiredBrand: value.desiredBrand,
         desiredModel: value.desiredModel,
-        ...(sessionUserId && sessionUserId !== '0' && sessionUserId !== 'local-user' ? { userId: sessionUserId } : {}),
+        ...(sessionUserId && sessionUserId.trim().length > 0 ? { userId: sessionUserId } : {}),
         ...(typeof value.desiredYearFrom === 'number' ? { desiredYearFrom: value.desiredYearFrom } : {}),
         ...(typeof value.desiredYearTo === 'number' ? { desiredYearTo: value.desiredYearTo } : {}),
         ...(typeof value.budget === 'number' ? { budget: value.budget } : {}),

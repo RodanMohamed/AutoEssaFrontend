@@ -13,6 +13,7 @@ const PENDING_CAR_REQUESTS_STORAGE_KEY = 'autoessa.user.pending-car-requests';
 
 interface PendingCarRequestRecord {
 	ownerId: string;
+	ownerEmail: string;
 	customerName: string;
 	phoneNumber: string;
 	desiredCar: string;
@@ -104,7 +105,9 @@ export class UserService {
 	}
 
 	rememberPendingCarRequest(userId: string | undefined, payload: CreateCarRequestLeadPayload): void {
-		const ownerId = userId?.trim() || this.authStore.session()?.user.id?.trim() || '';
+		const session = this.authStore.session();
+		const ownerId = userId?.trim() || session?.user.id?.trim() || '';
+		const ownerEmail = session?.user.email?.trim().toLowerCase() || '';
 		if (!ownerId) {
 			return;
 		}
@@ -112,6 +115,7 @@ export class UserService {
 		const current = this.readPendingCarRequests();
 		current.push({
 			ownerId,
+			ownerEmail,
 			customerName: payload.fullName.trim(),
 			phoneNumber: payload.phoneNumber.trim(),
 			desiredCar: `${payload.desiredBrand} ${payload.desiredModel}`.trim(),
@@ -163,13 +167,15 @@ export class UserService {
 	}
 
 	private mergePendingCarRequests(remoteRequests: CarRequestItem[]): CarRequestItem[] {
-		const sessionId = this.authStore.session()?.user.id;
+		const session = this.authStore.session();
+		const sessionId = session?.user.id;
+		const sessionEmail = session?.user.email?.trim().toLowerCase() || '';
 		if (!sessionId) {
 			return remoteRequests;
 		}
 
 		const pendingRequests: CarRequestItem[] = this.readPendingCarRequests()
-			.filter((item) => item.ownerId === sessionId)
+			.filter((item) => item.ownerId === sessionId || (sessionEmail.length > 0 && item.ownerEmail === sessionEmail))
 			.map((item, index) => ({
 				id: `pending-${item.createdAt}-${index}`,
 				customerName: item.customerName,
@@ -210,7 +216,12 @@ export class UserService {
 				return [];
 			}
 
-			return parsed.filter((item): item is PendingCarRequestRecord => this.isPendingCarRequestRecord(item));
+			return parsed
+				.filter((item): item is PendingCarRequestRecord => this.isPendingCarRequestRecord(item))
+				.map((item) => ({
+					...item,
+					ownerEmail: typeof item.ownerEmail === 'string' ? item.ownerEmail : ''
+				}));
 		} catch {
 			return [];
 		}
@@ -222,8 +233,10 @@ export class UserService {
 		}
 
 		const record = item as Record<string, unknown>;
+		const ownerEmail = record['ownerEmail'];
 		return (
 			typeof record['ownerId'] === 'string' &&
+			(typeof ownerEmail === 'string' || typeof ownerEmail === 'undefined') &&
 			typeof record['customerName'] === 'string' &&
 			typeof record['phoneNumber'] === 'string' &&
 			typeof record['desiredCar'] === 'string' &&
