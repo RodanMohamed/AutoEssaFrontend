@@ -101,16 +101,30 @@ export class AutoessaApiService {
   adminDeleteUser(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/users/${id}`); }
 
   private toCreateCarRequestBody(payload: CreateCarRequestLeadPayload) {
+    const normalizedNotes = typeof payload.notes === 'string' ? payload.notes.trim() : '';
+
     return {
-      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 ? { UserId: payload.userId.trim() } : {}),
+      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0
+        ? { userId: payload.userId.trim(), UserId: payload.userId.trim() }
+        : {}),
+      fullName: payload.fullName,
       FullName: payload.fullName,
+      name: payload.fullName,
+      Name: payload.fullName,
+      phoneNumber: payload.phoneNumber,
       PhoneNumber: payload.phoneNumber,
+      desiredBrand: payload.desiredBrand,
       DesiredBrand: payload.desiredBrand,
+      desiredModel: payload.desiredModel,
       DesiredModel: payload.desiredModel,
-      ...(typeof payload.desiredYearFrom === 'number' ? { DesiredYearFrom: payload.desiredYearFrom } : {}),
-      ...(typeof payload.desiredYearTo === 'number' ? { DesiredYearTo: payload.desiredYearTo } : {}),
-      ...(typeof payload.budget === 'number' ? { Budget: payload.budget } : {}),
-      ...(typeof payload.notes === 'string' && payload.notes.trim().length > 0 ? { Notes: payload.notes.trim() } : {})
+      ...(typeof payload.desiredYearFrom === 'number'
+        ? { desiredYearFrom: payload.desiredYearFrom, DesiredYearFrom: payload.desiredYearFrom }
+        : {}),
+      ...(typeof payload.desiredYearTo === 'number'
+        ? { desiredYearTo: payload.desiredYearTo, DesiredYearTo: payload.desiredYearTo }
+        : {}),
+      ...(typeof payload.budget === 'number' ? { budget: payload.budget, Budget: payload.budget } : {}),
+      ...(normalizedNotes.length > 0 ? { notes: normalizedNotes, Notes: normalizedNotes } : {})
     };
   }
 
