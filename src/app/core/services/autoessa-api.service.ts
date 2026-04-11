@@ -101,7 +101,7 @@ export class AutoessaApiService {
   adminDeleteUser(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/users/${id}`); }
 
   private toCreateCarRequestBody(payload: CreateCarRequestLeadPayload) {
-    const normalizedNotes = typeof payload.notes === 'string' ? payload.notes.trim() : '';
+    const notes = typeof payload.notes === 'string' ? payload.notes.trim() : '';
 
     return {
       ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0
@@ -124,7 +124,7 @@ export class AutoessaApiService {
         ? { desiredYearTo: payload.desiredYearTo, DesiredYearTo: payload.desiredYearTo }
         : {}),
       ...(typeof payload.budget === 'number' ? { budget: payload.budget, Budget: payload.budget } : {}),
-      ...(normalizedNotes.length > 0 ? { notes: normalizedNotes, Notes: normalizedNotes } : {})
+      ...(notes.length > 0 ? { notes, Notes: notes } : {})
     };
   }
 
