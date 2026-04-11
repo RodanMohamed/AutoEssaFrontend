@@ -44,8 +44,8 @@ export class AutoessaApiService {
     };
 
     // DEBUG: Log the exact payload being sent
-    console.log('🚀 API: Final payload for CarRequests:', JSON.stringify(finalPayload, null, 2));
-    console.log('🎯 FullName in request:', finalPayload.request.FullName || finalPayload.request.fullName);
+    console.log(' API: Final payload for CarRequests:', JSON.stringify(finalPayload, null, 2));
+    console.log(' FullName in request:', finalPayload.request.FullName || finalPayload.request.fullName);
 
     return this.http.post(endpoint, finalPayload);
   }
