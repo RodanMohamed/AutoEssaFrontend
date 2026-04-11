@@ -26,7 +26,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
             <select formControlName="listingType" class="select select-bordered select-lg">
               <option value="all">{{ copy().allOption }}</option>
               <option value="Rent">{{ copy().rentOption }}</option>
-              <option value="Sell">{{ copy().buyOption }}</option>
+              <option value="Buy">{{ copy().buyOption }}</option>
             </select>
           </label>
 

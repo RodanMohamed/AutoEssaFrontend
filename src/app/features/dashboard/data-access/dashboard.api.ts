@@ -3,23 +3,27 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, of } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/core.config';
+import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
+import { CarsApi } from '../../cars/data-access/cars.api';
 import { BookingRequestSummary, DashboardStats } from './dashboard.interface';
-import { asNumber, asString } from '../utils/dashboard.helpers';
+import { asString } from '../utils/dashboard.helpers';
 import { DASHBOARD_FALLBACK_STATS } from '../utils/dashboard.constants';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardApi {
 	private readonly http = inject(HttpClient);
+	private readonly autoessaApi = inject(AutoessaApiService);
+	private readonly carsApi = inject(CarsApi);
 
 	getStats() {
 		return forkJoin({
-			cars: this.http.get<unknown>(`${API_BASE_URL}/api/Cars`).pipe(catchError(() => of([]))),
+			cars: this.carsApi.getCars().pipe(catchError(() => of([]))),
 			users: this.http.get<unknown>(`${API_BASE_URL}/api/admin/users`).pipe(catchError(() => of([]))),
 			bookings: this.http.get<unknown>(`${API_BASE_URL}/api/admin/bookingrequests`).pipe(catchError(() => of([]))),
 			messages: this.http.get<unknown>(`${API_BASE_URL}/api/admin/contact/messages`).pipe(catchError(() => of([])))
 		}).pipe(
 			map(({ cars, users, bookings, messages }) => {
-				const carsCount = Array.isArray(cars) ? cars.length : DASHBOARD_FALLBACK_STATS.totalCars;
+				const carsCount = cars.length;
 				const usersCount = Array.isArray(users) ? users.length : DASHBOARD_FALLBACK_STATS.totalUsers;
 				const bookingCount = Array.isArray(bookings) ? bookings.length : DASHBOARD_FALLBACK_STATS.openBookingRequests;
 				const messageCount = Array.isArray(messages) ? messages.length : DASHBOARD_FALLBACK_STATS.openContactMessages;
@@ -38,36 +42,99 @@ export class DashboardApi {
 	}
 
 	getLatestBookingRequests() {
-		return this.http.get<unknown>(`${API_BASE_URL}/api/admin/bookingrequests`).pipe(
+		return this.autoessaApi.adminGetBookingRequests().pipe(
 			map((payload) => {
-				if (!Array.isArray(payload)) {
-					return this.mockBookings();
-				}
-
-				return payload.slice(0, 3).map((item, index) => {
-					const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
-
-					const booking: BookingRequestSummary = {
-						id: asNumber(record['id'], index + 1),
-						customerName: asString(record['customerName'], 'Customer'),
-						phone: asString(record['phone'], '-'),
-						carTitle: asString(record['carTitle'], 'Selected car'),
-						status: asString(record['status'], 'New')
-					};
-
-					return booking;
-				});
+				const items = this.extractCollection(payload);
+				return items
+					.slice()
+					.sort((a, b) => this.compareByLatest(this.toRecord(a), this.toRecord(b)))
+					.slice(0, 2)
+					.map((item, index) => this.mapBookingSummary(this.toRecord(item), index + 1));
 			}),
-			catchError(() => of(this.mockBookings()))
+			catchError(() => of([] as BookingRequestSummary[]))
 		);
 	}
 
-	private mockBookings(): BookingRequestSummary[] {
-		return [
-			{ id: 1, customerName: 'Ahmed Ali', phone: '+20 101 000 0001', carTitle: 'Mercedes C200', status: 'New' },
-			{ id: 2, customerName: 'Mona Samir', phone: '+20 101 000 0002', carTitle: 'Toyota Corolla', status: 'Contacted' },
-			{ id: 3, customerName: 'Khaled Omar', phone: '+20 101 000 0003', carTitle: 'BMW X3', status: 'New' }
-		];
+	private mapBookingSummary(source: Record<string, unknown>, fallbackId: number): BookingRequestSummary {
+		const statusNumber = typeof source['status'] === 'number' ? source['status'] : -1;
+		return {
+			id: asString(source['id'], String(fallbackId)),
+			customerName: asString(source['fullName'], asString(source['customerName'], 'Customer')),
+			phone: asString(source['phoneNumber'], asString(source['phone'], '-')),
+			carTitle: this.extractBookingCarLabel(source),
+			status: this.mapStatusLabel(statusNumber, asString(source['status'], 'New'))
+		};
+	}
+
+	private extractBookingCarLabel(source: Record<string, unknown>): string {
+		const carRecord = this.toRecord(source['car']);
+		const nestedCarName =
+			asString(carRecord['name'], '') ||
+			`${asString(carRecord['brand'], '')} ${asString(carRecord['model'], '')}`.trim();
+		return (
+			asString(source['carName'], '') ||
+			asString(source['carTitle'], '') ||
+			asString(source['carModel'], '') ||
+			nestedCarName ||
+			'Selected car'
+		);
+	}
+
+	private mapStatusLabel(status: number, fallback: string): string {
+		if (status === 1) {
+			return 'Contacted';
+		}
+		if (status === 2) {
+			return 'Closed';
+		}
+		if (status === 0) {
+			return 'New';
+		}
+		return fallback;
+	}
+
+	private compareByLatest(a: Record<string, unknown>, b: Record<string, unknown>): number {
+		const dateA = this.extractTimestamp(a);
+		const dateB = this.extractTimestamp(b);
+		if (dateA !== dateB) {
+			return dateB - dateA;
+		}
+
+		const idA = asString(a['id'], '');
+		const idB = asString(b['id'], '');
+		return idB.localeCompare(idA);
+	}
+
+	private extractTimestamp(source: Record<string, unknown>): number {
+		const dateCandidate =
+			asString(source['createdAt'], '') ||
+			asString(source['createdOn'], '') ||
+			asString(source['requestDate'], '') ||
+			asString(source['startDate'], '');
+		const parsed = Date.parse(dateCandidate);
+		return Number.isNaN(parsed) ? 0 : parsed;
+	}
+
+	private extractCollection(payload: unknown): unknown[] {
+		if (Array.isArray(payload)) {
+			return payload;
+		}
+
+		if (typeof payload === 'object' && payload !== null) {
+			const source = payload as Record<string, unknown>;
+			const candidates = [source['items'], source['data'], source['value']];
+			for (const candidate of candidates) {
+				if (Array.isArray(candidate)) {
+					return candidate;
+				}
+			}
+		}
+
+		return [];
+	}
+
+	private toRecord(value: unknown): Record<string, unknown> {
+		return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
 	}
 }
 

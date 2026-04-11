@@ -6,7 +6,7 @@ export interface DashboardStats {
 }
 
 export interface BookingRequestSummary {
-	id: number;
+	id: string;
 	customerName: string;
 	phone: string;
 	carTitle: string;

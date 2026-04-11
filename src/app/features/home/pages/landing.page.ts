@@ -190,7 +190,7 @@ import { QuickSearchComponent } from '../ui/quick-search.component';
       <section id="featured" class="space-y-4">
         <div class="flex flex-wrap items-end justify-between gap-3">
           <h2 class="font-serif text-3xl">{{ copy().featuredCarsTitle }}</h2>
-    
+
         </div>
         <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           @for (car of filteredCars(); track car.id) {
@@ -505,17 +505,18 @@ export default class LandingPage {
 
   protected readonly filteredCars = computed(() => {
     const text = this.query().trim().toLowerCase();
-    const type = this.listingType();
+    const type = this.listingType().trim().toLowerCase();
     const hasFilters = text.length > 0 || type !== 'all';
 
     const matches = this.cars().filter((car) => {
-      const matchesText = `${car.brand} ${car.model}`.toLowerCase().includes(text);
+      const searchableText = `${car.name} ${car.brand} ${car.model} ${car.carType} ${car.listingType}`.toLowerCase();
+      const matchesText = searchableText.includes(text);
       const normalizedListingType = car.listingType.trim().toLowerCase();
       const matchesType =
         type === 'all' ||
-        normalizedListingType === type.toLowerCase() ||
-        (type === 'Sell' && normalizedListingType === 'sale') ||
-        (type === 'Sale' && normalizedListingType === 'sell');
+        normalizedListingType === type ||
+        (type === 'buy' && (normalizedListingType === 'sell' || normalizedListingType === 'sale')) ||
+        ((type === 'sell' || type === 'sale') && normalizedListingType === 'buy');
       return matchesText && matchesType;
     });
 
@@ -533,7 +534,7 @@ export default class LandingPage {
   }
 
   protected onSearch(value: { query: string; listingType: string }) {
-    this.query.set(value.query);
-    this.listingType.set(value.listingType);
+    this.query.set(value.query.trim());
+    this.listingType.set(value.listingType.trim());
   }
 }
