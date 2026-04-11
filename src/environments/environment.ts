@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: ''
+  apiBaseUrl: 'https://www.autoessabackend.somee.com'
 };

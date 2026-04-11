@@ -542,14 +542,20 @@ error: (error: unknown) => {
 
 this.isError.set(true);
 
-console.error(' API Error:', error);
+// Enhanced error logging
+console.error( 'API Error Response:', error);
+if (error instanceof Object && 'error' in error) {
+  console.error(' Backend Error Details:', (error as any).error);
+}
 
-this.status.set(
-extractApiErrorMessage(
-error,
-'Unable to submit request right now.'
-)
+const errorMsg = extractApiErrorMessage(
+  error,
+  'Unable to submit request right now.'
 );
+
+console.error(' Extracted Error Message:', errorMsg);
+
+this.status.set(errorMsg);
 
 }
 
