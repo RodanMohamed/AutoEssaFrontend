@@ -491,7 +491,8 @@ phoneNumber: value.phoneNumber.trim(),
 desiredBrand: value.desiredBrand.trim(),
 desiredModel: value.desiredModel.trim(),
 
-...(sessionUserId
+// Only include userId if it's a valid non-zero value
+...(sessionUserId && sessionUserId !== '0' && typeof sessionUserId === 'string' && sessionUserId.trim().length > 0
 ? { userId: sessionUserId }
 : {}),
 

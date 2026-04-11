@@ -126,8 +126,8 @@ export class AutoessaApiService {
       desiredModel: desiredModelTrimmed,
       DesiredModel: desiredModelTrimmed,
 
-      // Optional userId
-      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0
+      // Optional userId - only include if it's a valid non-zero value
+      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 && payload.userId.trim() !== '0'
         ? { userId: payload.userId.trim(), UserId: payload.userId.trim() }
         : {}),
 
