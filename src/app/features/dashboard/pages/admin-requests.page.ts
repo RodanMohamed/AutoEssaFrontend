@@ -233,6 +233,7 @@ export default class AdminRequestsPage {
   protected readonly bookingRequests = signal<AdminBookingRequest[]>([]);
   protected readonly carRequests = signal<AdminCarRequest[]>([]);
   protected readonly contactMessages = signal<AdminContactMessage[]>([]);
+  protected readonly carNamesById = signal<Record<string, string>>({});
   protected readonly message = signal('');
   protected readonly isError = signal(false);
   protected readonly copy = computed(() => (this.localeService.locale() === 'ar' ? AR_COPY : EN_COPY));
@@ -246,9 +247,44 @@ export default class AdminRequestsPage {
   }
 
   protected refreshAll() {
+    this.loadCarsCatalog();
     this.loadBookingRequests();
     this.loadCarRequests();
     this.loadContactMessages();
+  }
+
+  private loadCarsCatalog() {
+    this.api.getCars().subscribe({
+      next: (response) => {
+        const items = this.extractCollection(response);
+        const map: Record<string, string> = {};
+        for (const item of items) {
+          const source = this.toRecord(item);
+          const rawId = source['id'];
+          const id =
+            typeof rawId === 'string'
+              ? rawId
+              : typeof rawId === 'number'
+                ? String(rawId)
+                : '';
+
+          if (!id) {
+            continue;
+          }
+
+          const name = this.readString(
+            source,
+            'name',
+            `${this.readString(source, 'brand', '')} ${this.readString(source, 'model', '')}`.trim()
+          );
+          if (name) {
+            map[id] = name;
+          }
+        }
+
+        this.carNamesById.set(map);
+      }
+    });
   }
 
   protected updateBookingStatus(id: string, event: Event) {
@@ -323,11 +359,24 @@ export default class AdminRequestsPage {
     return items.map((item, index) => {
       const source = this.toRecord(item);
       const status = this.readNumber(source, 'status', 0);
+      const carRecord = this.toRecord(source['car']);
+      const rawCarId = source['carId'] ?? carRecord['id'];
+      const carId = typeof rawCarId === 'string' ? rawCarId : typeof rawCarId === 'number' ? String(rawCarId) : '';
+      const carNameFromCatalog = carId ? this.carNamesById()[carId] ?? '' : '';
+      const nestedCarName =
+        this.readString(carRecord, 'name', '') ||
+        `${this.readString(carRecord, 'brand', '')} ${this.readString(carRecord, 'model', '')}`.trim();
       return {
         id: this.readString(source, 'id', `booking-${index + 1}`),
         customerName: this.readString(source, 'fullName', this.readString(source, 'customerName', 'Unknown')),
         phoneNumber: this.readString(source, 'phoneNumber', this.readString(source, 'phone', '-')),
-        carLabel: this.readString(source, 'carName', this.readString(source, 'carTitle', 'N/A')),
+        carLabel:
+          this.readString(source, 'carName', '') ||
+          this.readString(source, 'carTitle', '') ||
+          this.readString(source, 'carModel', '') ||
+          nestedCarName ||
+          carNameFromCatalog ||
+          'N/A',
         status,
         statusLabel: this.statusLabel(status),
         startDate: this.readString(source, 'startDate', '-'),
@@ -343,11 +392,19 @@ export default class AdminRequestsPage {
       const status = this.readNumber(source, 'status', 0);
       const desiredBrand = this.readString(source, 'desiredBrand', '');
       const desiredModel = this.readString(source, 'desiredModel', '');
+      const rawCarId = source['carId'];
+      const carId = typeof rawCarId === 'string' ? rawCarId : typeof rawCarId === 'number' ? String(rawCarId) : '';
+      const carNameFromCatalog = carId ? this.carNamesById()[carId] ?? '' : '';
       return {
         id: this.readString(source, 'id', `lead-${index + 1}`),
         customerName: this.readString(source, 'fullName', this.readString(source, 'customerName', 'Unknown')),
         phoneNumber: this.readString(source, 'phoneNumber', this.readString(source, 'phone', '-')),
-        desiredCar: `${desiredBrand} ${desiredModel}`.trim() || this.readString(source, 'desiredCar', 'N/A'),
+        desiredCar:
+          `${desiredBrand} ${desiredModel}`.trim() ||
+          this.readString(source, 'desiredCar', '') ||
+          this.readString(source, 'carName', '') ||
+          carNameFromCatalog ||
+          'N/A',
         budget: this.readNumber(source, 'budget', 0),
         status,
         statusLabel: this.statusLabel(status)

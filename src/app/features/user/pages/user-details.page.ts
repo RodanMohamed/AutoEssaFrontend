@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 
 import { LocaleService } from '../../../core/services/locale.service';
+import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
 import { BookingRequestItem, CarRequestItem } from '../data-access/user.interface';
 import { UserService } from '../data-access/user.service';
 
@@ -95,9 +96,12 @@ import { UserService } from '../data-access/user.service';
 })
 export default class UserDetailsPage {
 	private readonly userService = inject(UserService);
+	private readonly api = inject(AutoessaApiService);
 
 	protected readonly bookingRequests = signal<BookingRequestItem[]>([]);
 	protected readonly carRequests = signal<CarRequestItem[]>([]);
+	protected readonly bookingCarIds = signal<string[]>([]);
+	protected readonly carNamesById = signal<Record<string, string>>({});
 	protected readonly copy = computed(() =>
 		this.localeService.locale() === 'ar'
 			? {
@@ -125,6 +129,7 @@ export default class UserDetailsPage {
 	private readonly localeService = inject(LocaleService);
 
 	constructor() {
+		this.loadCarsCatalog();
 		this.loadRequests();
 	}
 
@@ -132,9 +137,12 @@ export default class UserDetailsPage {
 		this.userService.getMyBookingRequests().subscribe({
 			next: (payload: unknown) => {
 				this.bookingRequests.set(this.userService.mapBookingRequests(payload));
+				this.bookingCarIds.set(this.extractBookingCarIds(payload));
+				this.applyBookingCarNames();
 			},
 			error: () => {
 				this.bookingRequests.set([]);
+				this.bookingCarIds.set([]);
 			}
 		});
 
@@ -146,5 +154,114 @@ export default class UserDetailsPage {
 				this.carRequests.set([]);
 			}
 		});
+	}
+
+	private loadCarsCatalog() {
+		this.api.getCars().subscribe({
+			next: (response) => {
+				const items = this.extractCollection(response);
+				const map: Record<string, string> = {};
+				for (const item of items) {
+					const source = this.toRecord(item);
+					const rawId = source['id'];
+					const id =
+						typeof rawId === 'string'
+							? rawId
+							: typeof rawId === 'number'
+								? String(rawId)
+								: '';
+					if (!id) {
+						continue;
+					}
+
+					const name = this.readString(
+						source,
+						'name',
+						`${this.readString(source, 'brand', '')} ${this.readString(source, 'model', '')}`.trim()
+					);
+					if (name) {
+						map[id] = name;
+					}
+				}
+
+				this.carNamesById.set(map);
+				this.applyBookingCarNames();
+			}
+		});
+	}
+
+	private applyBookingCarNames() {
+		const ids = this.bookingCarIds();
+		if (ids.length === 0) {
+			return;
+		}
+
+		this.bookingRequests.update((items) =>
+			items.map((item, index) => {
+				const title = item.carTitle.trim();
+				const isPlaceholder = title.length === 0 || title === 'Selected car' || title === 'N/A';
+				if (!isPlaceholder) {
+					return item;
+				}
+
+				const carId = ids[index];
+				if (!carId) {
+					return item;
+				}
+
+				const name = this.carNamesById()[carId];
+				if (!name) {
+					return item;
+				}
+
+				return {
+					...item,
+					carTitle: name
+				};
+			})
+		);
+	}
+
+	private extractBookingCarIds(payload: unknown): string[] {
+		const items = this.extractCollection(payload);
+		return items.map((item) => {
+			const source = this.toRecord(item);
+			const nestedCar = this.toRecord(source['car']);
+			const rawId = source['carId'] ?? nestedCar['id'];
+			if (typeof rawId === 'string') {
+				return rawId;
+			}
+			if (typeof rawId === 'number') {
+				return String(rawId);
+			}
+			return '';
+		});
+	}
+
+	private extractCollection(payload: unknown): unknown[] {
+		if (Array.isArray(payload)) {
+			return payload;
+		}
+
+		if (typeof payload === 'object' && payload !== null) {
+			const source = payload as Record<string, unknown>;
+			const candidates = [source['items'], source['data'], source['value'], source['results'], source['requests']];
+			for (const candidate of candidates) {
+				if (Array.isArray(candidate)) {
+					return candidate;
+				}
+			}
+		}
+
+		return [];
+	}
+
+	private toRecord(value: unknown): Record<string, unknown> {
+		return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+	}
+
+	private readString(source: Record<string, unknown>, key: string, fallback: string): string {
+		const value = source[key];
+		return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
 	}
 }
