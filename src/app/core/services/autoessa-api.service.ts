@@ -38,16 +38,12 @@ export class AutoessaApiService {
   createCarLeadRequest(payload: CreateCarRequestLeadPayload) {
     const endpoint = `${API_BASE_URL}/api/CarRequests`;
     const requestBody = this.toCreateCarRequestBody(payload);
+    const requestEnvelope = {
+      ...requestBody,
+      request: requestBody
+    };
 
-    return this.http.post(endpoint, requestBody).pipe(
-      catchError((error: unknown) => {
-        if (this.isRequestWrapperRequired(error)) {
-          return this.http.post(endpoint, { request: requestBody });
-        }
-
-        return throwError(() => error);
-      })
-    );
+    return this.http.post(endpoint, requestEnvelope);
   }
   getMyCarRequests() { return this.http.get(`${API_BASE_URL}/api/CarRequests/me`); }
   getMyFavorites() { return this.http.get(`${API_BASE_URL}/api/Favorites/me`); }
@@ -128,30 +124,4 @@ export class AutoessaApiService {
     };
   }
 
-  private isRequestWrapperRequired(error: unknown): boolean {
-    if (typeof error !== 'object' || error === null) {
-      return false;
-    }
-
-    const record = error as Record<string, unknown>;
-    const payload = record['error'];
-    if (typeof payload !== 'object' || payload === null) {
-      return false;
-    }
-
-    const errorRecord = payload as Record<string, unknown>;
-    const errors = errorRecord['errors'];
-    if (typeof errors !== 'object' || errors === null) {
-      return false;
-    }
-
-    const requestErrors = (errors as Record<string, unknown>)['request'];
-    if (!Array.isArray(requestErrors)) {
-      return false;
-    }
-
-    return requestErrors.some(
-      (message) => typeof message === 'string' && message.toLowerCase().includes('request field is required')
-    );
-  }
 }
