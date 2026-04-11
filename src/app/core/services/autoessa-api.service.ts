@@ -38,15 +38,14 @@ export class AutoessaApiService {
     const endpoint = `${API_BASE_URL}/api/CarRequests`;
     const requestBody = this.toCreateCarRequestBody(payload);
 
-    // Dual-envelope: send both top-level fields AND nested request wrapper
+    // Send ONLY the nested request wrapper (backend says "request field is required")
     const finalPayload = {
-      ...requestBody,
       request: requestBody
     };
 
     // DEBUG: Log the exact payload being sent
-    console.log(' API: Final payload for CarRequests:', JSON.stringify(finalPayload, null, 2));
-    console.log(' FullName value:', finalPayload.FullName || finalPayload.fullName);
+    console.log('🚀 API: Final payload for CarRequests:', JSON.stringify(finalPayload, null, 2));
+    console.log('🎯 FullName in request:', finalPayload.request.FullName || finalPayload.request.fullName);
 
     return this.http.post(endpoint, finalPayload);
   }
