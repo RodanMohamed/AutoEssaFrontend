@@ -196,9 +196,7 @@ export default class RequestCarPage {
       .createCarLeadRequest(payload)
       .subscribe({
         next: () => {
-          if (sessionUserId && sessionUserId.trim().length > 0) {
-            this.userService.rememberPendingCarRequest(sessionUserId, payload);
-          }
+          this.userService.rememberPendingCarRequest(sessionUserId, payload);
           this.status.set('Car request submitted successfully. It will appear in My Requests.');
           this.form.reset({
             fullName: '',

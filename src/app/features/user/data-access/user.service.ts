@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { map } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 
 import { AuthStore } from '../../auth/data-access/auth.store';
 import { CreateCarRequestLeadPayload } from '../../../core/interfaces/autoessa-endpoints.interface';
@@ -98,14 +98,20 @@ export class UserService {
 
 	getMyCarRequests() {
 		return this.api.getMyCarRequests().pipe(
-			map((payload) => this.mergePendingCarRequests(this.mapCarRequests(payload)))
+			map((payload) => this.mergePendingCarRequests(this.mapCarRequests(payload))),
+			catchError(() => of(this.mergePendingCarRequests([])))
 		);
 	}
 
-	rememberPendingCarRequest(userId: string, payload: CreateCarRequestLeadPayload): void {
+	rememberPendingCarRequest(userId: string | undefined, payload: CreateCarRequestLeadPayload): void {
+		const ownerId = userId?.trim() || this.authStore.session()?.user.id?.trim() || '';
+		if (!ownerId) {
+			return;
+		}
+
 		const current = this.readPendingCarRequests();
 		current.push({
-			ownerId: userId,
+			ownerId,
 			customerName: payload.fullName.trim(),
 			phoneNumber: payload.phoneNumber.trim(),
 			desiredCar: `${payload.desiredBrand} ${payload.desiredModel}`.trim(),
