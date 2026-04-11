@@ -38,7 +38,10 @@ export class AutoessaApiService {
     const endpoint = `${API_BASE_URL}/api/CarRequests`;
     const requestBody = this.toCreateCarRequestBody(payload);
 
-    return this.http.post(endpoint, { request: requestBody });
+    return this.http.post(endpoint, {
+      ...requestBody,
+      request: requestBody
+    });
   }
   getMyCarRequests() { return this.http.get(`${API_BASE_URL}/api/CarRequests/me`); }
   getMyFavorites() { return this.http.get(`${API_BASE_URL}/api/Favorites/me`); }
@@ -95,15 +98,25 @@ export class AutoessaApiService {
     const notes = typeof payload.notes === 'string' ? payload.notes.trim() : '';
 
     return {
-      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 ? { UserId: payload.userId.trim() } : {}),
+      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0
+        ? { userId: payload.userId.trim(), UserId: payload.userId.trim() }
+        : {}),
+      fullName: payload.fullName,
       FullName: payload.fullName,
+      phoneNumber: payload.phoneNumber,
       PhoneNumber: payload.phoneNumber,
+      desiredBrand: payload.desiredBrand,
       DesiredBrand: payload.desiredBrand,
+      desiredModel: payload.desiredModel,
       DesiredModel: payload.desiredModel,
-      ...(typeof payload.desiredYearFrom === 'number' ? { DesiredYearFrom: payload.desiredYearFrom } : {}),
-      ...(typeof payload.desiredYearTo === 'number' ? { DesiredYearTo: payload.desiredYearTo } : {}),
-      ...(typeof payload.budget === 'number' ? { Budget: payload.budget } : {}),
-      ...(notes.length > 0 ? { Notes: notes } : {})
+      ...(typeof payload.desiredYearFrom === 'number'
+        ? { desiredYearFrom: payload.desiredYearFrom, DesiredYearFrom: payload.desiredYearFrom }
+        : {}),
+      ...(typeof payload.desiredYearTo === 'number'
+        ? { desiredYearTo: payload.desiredYearTo, DesiredYearTo: payload.desiredYearTo }
+        : {}),
+      ...(typeof payload.budget === 'number' ? { budget: payload.budget, Budget: payload.budget } : {}),
+      ...(notes.length > 0 ? { notes, Notes: notes } : {})
     };
   }
 
