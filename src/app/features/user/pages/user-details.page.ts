@@ -97,11 +97,20 @@ import { UserService } from '../data-access/user.service';
 export default class UserDetailsPage {
 	private readonly userService = inject(UserService);
 	private readonly api = inject(AutoessaApiService);
+	private readonly localeService = inject(LocaleService);
 
 	protected readonly bookingRequests = signal<BookingRequestItem[]>([]);
-	protected readonly carRequests = signal<CarRequestItem[]>([]);
 	protected readonly bookingCarIds = signal<string[]>([]);
 	protected readonly carNamesById = signal<Record<string, string>>({});
+
+
+	private readonly apiCarRequests = signal<CarRequestItem[]>([]);
+
+	
+	protected readonly carRequests = computed(() =>
+		this.userService.mergeCarRequestsWithPending(this.apiCarRequests())
+	);
+
 	protected readonly copy = computed(() =>
 		this.localeService.locale() === 'ar'
 			? {
@@ -126,11 +135,8 @@ export default class UserDetailsPage {
 			}
 	);
 
-	private readonly localeService = inject(LocaleService);
-
 	constructor() {
 		this.loadCarsCatalog();
-		this.carRequests.set(this.userService.getPendingCarRequests());
 		this.loadRequests();
 	}
 
@@ -147,13 +153,10 @@ export default class UserDetailsPage {
 			}
 		});
 
+
 		this.userService.getMyCarRequests().subscribe({
-			next: (items) => {
-				this.carRequests.set(this.userService.mergeCarRequestsWithPending(items));
-			},
-			error: () => {
-				this.carRequests.set(this.userService.getPendingCarRequests());
-			}
+			next: (items) => this.apiCarRequests.set(items),
+			error: () => this.apiCarRequests.set([])
 		});
 	}
 
@@ -215,10 +218,7 @@ export default class UserDetailsPage {
 					return item;
 				}
 
-				return {
-					...item,
-					carTitle: name
-				};
+				return { ...item, carTitle: name };
 			})
 		);
 	}
@@ -229,12 +229,8 @@ export default class UserDetailsPage {
 			const source = this.toRecord(item);
 			const nestedCar = this.toRecord(source['car']);
 			const rawId = source['carId'] ?? nestedCar['id'];
-			if (typeof rawId === 'string') {
-				return rawId;
-			}
-			if (typeof rawId === 'number') {
-				return String(rawId);
-			}
+			if (typeof rawId === 'string') return rawId;
+			if (typeof rawId === 'number') return String(rawId);
 			return '';
 		});
 	}

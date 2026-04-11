@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { catchError, map, of } from 'rxjs';
 
 import { AuthStore } from '../../auth/data-access/auth.store';
@@ -27,6 +27,14 @@ interface PendingCarRequestRecord {
 export class UserService {
 	private readonly api = inject(AutoessaApiService);
 	private readonly authStore = inject(AuthStore);
+
+	//  Reactive signal — seeded from localStorage on startup
+	private readonly _pendingCarRequests = signal<PendingCarRequestRecord[]>(
+		this.readPendingCarRequests()
+	);
+
+	// Public readonly view of the signal
+	readonly pendingCarRequests = this._pendingCarRequests.asReadonly();
 
 	getProfile(userId: string, seed: UserProfile): UserProfile {
 		const profiles = this.readStoredProfiles();
@@ -100,13 +108,13 @@ export class UserService {
 
 	getMyCarRequests() {
 		return this.api.getMyCarRequests().pipe(
-			map((payload) => this.mergePendingCarRequests(this.mapCarRequests(payload))),
-			catchError(() => of(this.mergePendingCarRequests([])))
+			map((payload) => this.mapCarRequests(payload)),
+			catchError(() => of([]))
 		);
 	}
 
 	getPendingCarRequests(): CarRequestItem[] {
-		return this.mergePendingCarRequests([]);
+		return this.buildPendingCarItems(this._pendingCarRequests());
 	}
 
 	rememberPendingCarRequest(userId: string | undefined, payload: CreateCarRequestLeadPayload): void {
@@ -118,8 +126,7 @@ export class UserService {
 			return;
 		}
 
-		const current = this.readPendingCarRequests();
-		current.push({
+		const newRecord: PendingCarRequestRecord = {
 			ownerId,
 			ownerEmail,
 			ownerName,
@@ -129,8 +136,13 @@ export class UserService {
 			budget: typeof payload.budget === 'number' ? payload.budget : 0,
 			notes: typeof payload.notes === 'string' ? payload.notes.trim() : '',
 			createdAt: Date.now()
-		});
-		localStorage.setItem(PENDING_CAR_REQUESTS_STORAGE_KEY, JSON.stringify(current));
+		};
+
+		//  Update signal first so the UI reacts instantly
+		this._pendingCarRequests.update(items => [...items, newRecord]);
+
+		// Persist to localStorage
+		localStorage.setItem(PENDING_CAR_REQUESTS_STORAGE_KEY, JSON.stringify(this._pendingCarRequests()));
 	}
 
 	removeFavorite(carId: string) {
@@ -174,39 +186,9 @@ export class UserService {
 	}
 
 	mergeCarRequestsWithPending(remoteRequests: CarRequestItem[]): CarRequestItem[] {
-		return this.mergePendingCarRequests(remoteRequests);
-	}
+		const pendingItems = this.buildPendingCarItems(this._pendingCarRequests());
+		const merged: CarRequestItem[] = [...pendingItems];
 
-	private mergePendingCarRequests(remoteRequests: CarRequestItem[]): CarRequestItem[] {
-		const session = this.authStore.session();
-		const sessionId = session?.user.id;
-		const sessionEmail = session?.user.email?.trim().toLowerCase() || '';
-		const sessionName = session?.user.fullName?.trim().toLowerCase() || '';
-		const allPending = this.readPendingCarRequests();
-
-		let scopedPending = allPending
-			.filter(
-				(item) =>
-					(sessionId ? item.ownerId === sessionId : false) ||
-					(sessionEmail.length > 0 && item.ownerEmail === sessionEmail) ||
-					(sessionName.length > 0 && this.normalize(item.ownerName) === sessionName)
-			);
-
-		if (scopedPending.length === 0) {
-			scopedPending = allPending;
-		}
-
-		const pendingRequests: CarRequestItem[] = scopedPending
-			.map((item, index) => ({
-				id: `pending-${item.createdAt}-${index}`,
-				customerName: item.customerName,
-				phoneNumber: item.phoneNumber,
-				desiredCar: item.desiredCar,
-				budget: item.budget,
-				status: 'New'
-			}));
-
-		const merged: CarRequestItem[] = [...pendingRequests];
 		for (const request of remoteRequests) {
 			if (!merged.some((pending) => this.isSameCarRequest(pending, request))) {
 				merged.push(request);
@@ -214,6 +196,34 @@ export class UserService {
 		}
 
 		return merged;
+	}
+
+	//  Converts raw storage records → CarRequestItem[], scoped to current session
+	private buildPendingCarItems(allPending: PendingCarRequestRecord[]): CarRequestItem[] {
+		const session = this.authStore.session();
+		const sessionId = session?.user.id;
+		const sessionEmail = session?.user.email?.trim().toLowerCase() || '';
+		const sessionName = session?.user.fullName?.trim().toLowerCase() || '';
+
+		let scoped = allPending.filter(
+			(item) =>
+				(sessionId ? item.ownerId === sessionId : false) ||
+				(sessionEmail.length > 0 && item.ownerEmail === sessionEmail) ||
+				(sessionName.length > 0 && this.normalize(item.ownerName) === sessionName)
+		);
+
+		if (scoped.length === 0) {
+			scoped = allPending;
+		}
+
+		return scoped.map((item, index) => ({
+			id: `pending-${item.createdAt}-${index}`,
+			customerName: item.customerName,
+			phoneNumber: item.phoneNumber,
+			desiredCar: item.desiredCar,
+			budget: item.budget,
+			status: 'New'
+		}));
 	}
 
 	private isSameCarRequest(left: CarRequestItem, right: CarRequestItem): boolean {
@@ -334,4 +344,3 @@ export class UserService {
 		}
 	}
 }
-
