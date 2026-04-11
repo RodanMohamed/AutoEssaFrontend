@@ -481,6 +481,9 @@ const value = this.form.getRawValue();
 const sessionUserId =
 this.authStore.session()?.user.id;
 
+// DEBUG: Log form values before trimming
+console.log('📋 Form raw values:', value);
+
 const payload: CreateCarRequestLeadPayload = {
 
 fullName: value.fullName.trim(),
@@ -511,7 +514,8 @@ desiredModel: value.desiredModel.trim(),
 };
 
 // DEBUG (important)
-console.log('Payload sent:', payload);
+console.log(' Form Payload prepared:', JSON.stringify(payload, null, 2));
+console.log(' fullName value:', payload.fullName, '| length:', payload.fullName.length);
 
 this.api
 .createCarLeadRequest(payload)
@@ -537,6 +541,8 @@ this.form.reset();
 error: (error: unknown) => {
 
 this.isError.set(true);
+
+console.error(' API Error:', error);
 
 this.status.set(
 extractApiErrorMessage(

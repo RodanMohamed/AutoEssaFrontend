@@ -38,10 +38,16 @@ export class AutoessaApiService {
     const endpoint = `${API_BASE_URL}/api/CarRequests`;
     const requestBody = this.toCreateCarRequestBody(payload);
 
-    return this.http.post(endpoint, {
+    const finalPayload = {
       ...requestBody,
       request: requestBody
-    });
+    };
+
+    // DEBUG: Log the exact payload being sent
+    console.log(' API: Final payload for CarRequests:', JSON.stringify(finalPayload, null, 2));
+    console.log(' FullName value:', finalPayload.FullName || finalPayload.fullName);
+
+    return this.http.post(endpoint, finalPayload);
   }
   getMyCarRequests() { return this.http.get(`${API_BASE_URL}/api/CarRequests/me`); }
   getMyFavorites() { return this.http.get(`${API_BASE_URL}/api/Favorites/me`); }
@@ -95,28 +101,48 @@ export class AutoessaApiService {
   adminDeleteUser(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/users/${id}`); }
 
   private toCreateCarRequestBody(payload: CreateCarRequestLeadPayload) {
-    const notes = typeof payload.notes === 'string' ? payload.notes.trim() : '';
+    // Ensure all string fields are properly trimmed
+    const fullNameTrimmed = typeof payload.fullName === 'string' ? payload.fullName.trim() : '';
+    const phoneNumberTrimmed = typeof payload.phoneNumber === 'string' ? payload.phoneNumber.trim() : '';
+    const desiredBrandTrimmed = typeof payload.desiredBrand === 'string' ? payload.desiredBrand.trim() : '';
+    const desiredModelTrimmed = typeof payload.desiredModel === 'string' ? payload.desiredModel.trim() : '';
+    const notesTrimmed = typeof payload.notes === 'string' ? payload.notes.trim() : '';
+
+    // Safety check: ensure fullName is not empty
+    if (fullNameTrimmed.length === 0) {
+      console.error('❌ CRITICAL: fullName is empty after trimming!');
+      throw new Error('Full Name cannot be empty');
+    }
 
     return {
+      // Required fields - use both camelCase and PascalCase for maximum compatibility
+      fullName: fullNameTrimmed,
+      FullName: fullNameTrimmed,
+      phoneNumber: phoneNumberTrimmed,
+      PhoneNumber: phoneNumberTrimmed,
+      desiredBrand: desiredBrandTrimmed,
+      DesiredBrand: desiredBrandTrimmed,
+      desiredModel: desiredModelTrimmed,
+      DesiredModel: desiredModelTrimmed,
+
+      // Optional userId
       ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0
         ? { userId: payload.userId.trim(), UserId: payload.userId.trim() }
         : {}),
-      fullName: payload.fullName,
-      FullName: payload.fullName,
-      phoneNumber: payload.phoneNumber,
-      PhoneNumber: payload.phoneNumber,
-      desiredBrand: payload.desiredBrand,
-      DesiredBrand: payload.desiredBrand,
-      desiredModel: payload.desiredModel,
-      DesiredModel: payload.desiredModel,
+
+      // Optional year range
       ...(typeof payload.desiredYearFrom === 'number'
         ? { desiredYearFrom: payload.desiredYearFrom, DesiredYearFrom: payload.desiredYearFrom }
         : {}),
       ...(typeof payload.desiredYearTo === 'number'
         ? { desiredYearTo: payload.desiredYearTo, DesiredYearTo: payload.desiredYearTo }
         : {}),
+
+      // Optional budget
       ...(typeof payload.budget === 'number' ? { budget: payload.budget, Budget: payload.budget } : {}),
-      ...(notes.length > 0 ? { notes, Notes: notes } : {})
+
+      // Optional notes
+      ...(notesTrimmed.length > 0 ? { notes: notesTrimmed, Notes: notesTrimmed } : {})
     };
   }
 
