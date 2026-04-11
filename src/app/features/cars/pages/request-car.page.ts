@@ -8,7 +8,7 @@ import { UserService } from '../../user/data-access/user.service';
 import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
 
 const CURRENT_YEAR = new Date().getFullYear();
-const EGYPT_MOBILE_PHONE_REGEX = /^(?:\+20|0)?1[0125]\d{8}$/;
+const EGYPT_MOBILE_PHONE_REGEX = /^01[0125]\d{8}$/;
 
 const yearRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const group = control as FormGroup;
@@ -151,7 +151,7 @@ export default class RequestCarPage {
           budgetLabel: 'الميزانية (جنيه مصري)',
           notesLabel: 'ملاحظات',
           requiredError: 'هذا الحقل مطلوب.',
-          phoneError: 'أدخل رقم موبايل مصري صحيح (مثل 010xxxxxxxx أو +2010xxxxxxxx).',
+          phoneError: 'أدخل رقم موبايل مصري صحيح.',
           yearError: 'أدخل سنة صالحة وتأكد أن سنة البداية أقل من أو تساوي سنة النهاية.',
           budgetError: 'أدخل ميزانية صالحة.',
           notesError: 'الملاحظات يجب ألا تتجاوز 500 حرف.',
@@ -169,7 +169,7 @@ export default class RequestCarPage {
           budgetLabel: 'Budget (EGP)',
           notesLabel: 'Notes',
           requiredError: 'This field is required.',
-          phoneError: 'Enter a valid Egyptian mobile number (e.g. 010xxxxxxxx or +2010xxxxxxxx).',
+          phoneError: 'Enter a valid Egyptian mobile number.',
           yearError: 'Enter a valid year and ensure Year From is less than or equal to Year To.',
           budgetError: 'Enter a valid budget.',
           notesError: 'Notes must not exceed 500 characters.',

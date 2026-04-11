@@ -12,12 +12,7 @@ import { LocaleService } from '../../../core/services/locale.service';
 	template: `
 		<h2 class="auth-title mb-4 text-center text-2xl font-semibold">{{ copy().title }}</h2>
 		<app-auth-form mode="login" (submitted)="submit($event)" />
-		<div class="dev-preview mt-5 rounded-2xl p-4">
-			<p class="text-sm">Use this only for local UI testing.</p>
-			<button type="button" class="btn btn-sm mt-3 w-full" (click)="previewAdmin()">
-				Preview Admin Dashboard
-			</button>
-		</div>
+		
 		@if (status()) {
 			<p class="status-chip mt-4 text-sm" [class.status-success]="!isError()" [class.status-error]="isError()">{{ status() }}</p>
 		}

@@ -37,11 +37,12 @@ export class AutoessaApiService {
   getMyBookingRequests() { return this.http.get(`${API_BASE_URL}/api/BookingRequests/me`); }
   createCarLeadRequest(payload: CreateCarRequestLeadPayload) {
     const endpoint = `${API_BASE_URL}/api/CarRequests`;
+    const requestBody = this.toCreateCarRequestBody(payload);
 
-    return this.http.post(endpoint, payload).pipe(
+    return this.http.post(endpoint, requestBody).pipe(
       catchError((error: unknown) => {
         if (this.isRequestWrapperRequired(error)) {
-          return this.http.post(endpoint, { request: payload });
+          return this.http.post(endpoint, { request: requestBody });
         }
 
         return throwError(() => error);
@@ -98,6 +99,20 @@ export class AutoessaApiService {
   adminGetUsers() { return this.http.get(`${API_BASE_URL}/api/admin/users`); }
   adminBlockUser(id: string, payload: UpdateUserBlockPayload) { return this.http.patch(`${API_BASE_URL}/api/admin/users/${id}/block`, payload); }
   adminDeleteUser(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/users/${id}`); }
+
+  private toCreateCarRequestBody(payload: CreateCarRequestLeadPayload) {
+    return {
+      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 ? { UserId: payload.userId.trim() } : {}),
+      FullName: payload.fullName,
+      PhoneNumber: payload.phoneNumber,
+      DesiredBrand: payload.desiredBrand,
+      DesiredModel: payload.desiredModel,
+      ...(typeof payload.desiredYearFrom === 'number' ? { DesiredYearFrom: payload.desiredYearFrom } : {}),
+      ...(typeof payload.desiredYearTo === 'number' ? { DesiredYearTo: payload.desiredYearTo } : {}),
+      ...(typeof payload.budget === 'number' ? { Budget: payload.budget } : {}),
+      ...(typeof payload.notes === 'string' && payload.notes.trim().length > 0 ? { Notes: payload.notes.trim() } : {})
+    };
+  }
 
   private isRequestWrapperRequired(error: unknown): boolean {
     if (typeof error !== 'object' || error === null) {
