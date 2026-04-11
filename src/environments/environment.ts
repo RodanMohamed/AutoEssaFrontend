@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  // Production: use direct backend URL
-  apiBaseUrl: 'https://www.autoessabackend.somee.com'
+  // Use relative URL so Vercel proxy (vercel.json) routes to backend
+  apiBaseUrl: ''
 };
