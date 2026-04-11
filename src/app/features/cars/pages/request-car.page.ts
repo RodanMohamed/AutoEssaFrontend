@@ -4,6 +4,7 @@ import { AutoessaApiService } from '../../../core/services/autoessa-api.service'
 import { CreateCarRequestLeadPayload } from '../../../core/interfaces/autoessa-endpoints.interface';
 import { LocaleService } from '../../../core/services/locale.service';
 import { AuthStore } from '../../auth/data-access/auth.store';
+import { UserService } from '../../user/data-access/user.service';
 import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
 
 @Component({
@@ -110,6 +111,7 @@ export default class RequestCarPage {
   private readonly api = inject(AutoessaApiService);
   private readonly localeService = inject(LocaleService);
   private readonly authStore = inject(AuthStore);
+  private readonly userService = inject(UserService);
 
   protected readonly status = signal('');
   protected readonly isError = signal(false);
@@ -194,6 +196,9 @@ export default class RequestCarPage {
       .createCarLeadRequest(payload)
       .subscribe({
         next: () => {
+          if (sessionUserId && sessionUserId !== '0' && sessionUserId !== 'local-user') {
+            this.userService.rememberPendingCarRequest(sessionUserId, payload);
+          }
           this.status.set('Car request submitted successfully. It will appear in My Requests.');
           this.form.reset({
             fullName: '',

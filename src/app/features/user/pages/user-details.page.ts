@@ -147,8 +147,8 @@ export default class UserDetailsPage {
 		});
 
 		this.userService.getMyCarRequests().subscribe({
-			next: (payload: unknown) => {
-				this.carRequests.set(this.userService.mapCarRequests(payload));
+			next: (items) => {
+				this.carRequests.set(items);
 			},
 			error: () => {
 				this.carRequests.set([]);

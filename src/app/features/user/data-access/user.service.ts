@@ -1,15 +1,30 @@
 import { Injectable, inject } from '@angular/core';
+import { map } from 'rxjs';
 
+import { AuthStore } from '../../auth/data-access/auth.store';
+import { CreateCarRequestLeadPayload } from '../../../core/interfaces/autoessa-endpoints.interface';
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
 import { BookingRequestItem, CarRequestItem, FavoriteCarItem, UserProfile } from './user.interface';
 import { mapBookingRequest, mapCarRequest, mapFavorite } from '../utils/user.mappers';
 
 const USER_PROFILES_STORAGE_KEY = 'autoessa.user.profiles';
 const AUTH_REGISTERED_ACCOUNTS_KEY = 'autoessa.auth.accounts';
+const PENDING_CAR_REQUESTS_STORAGE_KEY = 'autoessa.user.pending-car-requests';
+
+interface PendingCarRequestRecord {
+	ownerId: string;
+	customerName: string;
+	phoneNumber: string;
+	desiredCar: string;
+	budget: number;
+	notes: string;
+	createdAt: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
 	private readonly api = inject(AutoessaApiService);
+	private readonly authStore = inject(AuthStore);
 
 	getProfile(userId: string, seed: UserProfile): UserProfile {
 		const profiles = this.readStoredProfiles();
@@ -82,7 +97,23 @@ export class UserService {
 	}
 
 	getMyCarRequests() {
-		return this.api.getMyCarRequests();
+		return this.api.getMyCarRequests().pipe(
+			map((payload) => this.mergePendingCarRequests(this.mapCarRequests(payload)))
+		);
+	}
+
+	rememberPendingCarRequest(userId: string, payload: CreateCarRequestLeadPayload): void {
+		const current = this.readPendingCarRequests();
+		current.push({
+			ownerId: userId,
+			customerName: payload.fullName.trim(),
+			phoneNumber: payload.phoneNumber.trim(),
+			desiredCar: `${payload.desiredBrand} ${payload.desiredModel}`.trim(),
+			budget: typeof payload.budget === 'number' ? payload.budget : 0,
+			notes: typeof payload.notes === 'string' ? payload.notes.trim() : '',
+			createdAt: Date.now()
+		});
+		localStorage.setItem(PENDING_CAR_REQUESTS_STORAGE_KEY, JSON.stringify(current));
 	}
 
 	removeFavorite(carId: string) {
@@ -123,6 +154,80 @@ export class UserService {
 			const record = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {};
 			return mapCarRequest(record, index + 1);
 		});
+	}
+
+	private mergePendingCarRequests(remoteRequests: CarRequestItem[]): CarRequestItem[] {
+		const sessionId = this.authStore.session()?.user.id;
+		if (!sessionId) {
+			return remoteRequests;
+		}
+
+		const pendingRequests: CarRequestItem[] = this.readPendingCarRequests()
+			.filter((item) => item.ownerId === sessionId)
+			.map((item, index) => ({
+				id: `pending-${item.createdAt}-${index}`,
+				customerName: item.customerName,
+				phoneNumber: item.phoneNumber,
+				desiredCar: item.desiredCar,
+				budget: item.budget,
+				status: 'New'
+			}));
+
+		const merged: CarRequestItem[] = [...pendingRequests];
+		for (const request of remoteRequests) {
+			if (!merged.some((pending) => this.isSameCarRequest(pending, request))) {
+				merged.push(request);
+			}
+		}
+
+		return merged;
+	}
+
+	private isSameCarRequest(left: CarRequestItem, right: CarRequestItem): boolean {
+		return (
+			this.normalize(left.customerName) === this.normalize(right.customerName) &&
+			this.normalize(left.phoneNumber) === this.normalize(right.phoneNumber) &&
+			this.normalize(left.desiredCar) === this.normalize(right.desiredCar) &&
+			left.budget === right.budget
+		);
+	}
+
+	private readPendingCarRequests(): PendingCarRequestRecord[] {
+		const raw = localStorage.getItem(PENDING_CAR_REQUESTS_STORAGE_KEY);
+		if (!raw) {
+			return [];
+		}
+
+		try {
+			const parsed = JSON.parse(raw) as unknown;
+			if (!Array.isArray(parsed)) {
+				return [];
+			}
+
+			return parsed.filter((item): item is PendingCarRequestRecord => this.isPendingCarRequestRecord(item));
+		} catch {
+			return [];
+		}
+	}
+
+	private isPendingCarRequestRecord(item: unknown): item is PendingCarRequestRecord {
+		if (typeof item !== 'object' || item === null) {
+			return false;
+		}
+
+		const record = item as Record<string, unknown>;
+		return (
+			typeof record['ownerId'] === 'string' &&
+			typeof record['customerName'] === 'string' &&
+			typeof record['phoneNumber'] === 'string' &&
+			typeof record['desiredCar'] === 'string' &&
+			typeof record['budget'] === 'number' &&
+			typeof record['createdAt'] === 'number'
+		);
+	}
+
+	private normalize(value: string): string {
+		return value.trim().toLowerCase();
 	}
 
 	private extractCollection(payload: unknown): unknown[] {
