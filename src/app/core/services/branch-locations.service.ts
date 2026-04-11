@@ -63,6 +63,28 @@ export class BranchLocationsService {
     this.setBranches(this.ensureOneActive(updated));
   }
 
+  syncActiveBranchDetails(address: string, mapsUrl: string) {
+    const normalizedAddress = address.trim();
+    const normalizedMapsUrl = mapsUrl.trim();
+    if (!normalizedAddress || !normalizedMapsUrl) {
+      return;
+    }
+
+    const active = this.getActiveBranch();
+    const updated = this.branches().map((item) =>
+      item.id === active.id
+        ? {
+            ...item,
+            address: normalizedAddress,
+            mapsUrl: normalizedMapsUrl,
+            isActive: true
+          }
+        : item
+    );
+
+    this.setBranches(this.ensureOneActive(updated));
+  }
+
   deleteBranch(id: string): boolean {
     const current = this.branches();
     if (current.length <= 1) {

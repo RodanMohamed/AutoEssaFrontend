@@ -208,9 +208,9 @@ const AR_COPY: typeof EN_COPY = {
                       </td>
                       <td>
                         <div class="flex flex-wrap gap-2">
-                          <button class="btn btn-xs" type="button" (click)="editBranch(branch)">{{ copy().edit }}</button>
+                          <button class="btn btn-xs w-14" type="button" (click)="editBranch(branch)">{{ copy().edit }}</button>
                           <button class="btn btn-xs btn-primary" type="button" (click)="activateBranch(branch.id)">{{ copy().setActive }}</button>
-                          <button class="btn btn-xs btn-error" type="button" (click)="deleteBranch(branch.id)">{{ copy().delete }}</button>
+                          <button class="btn btn-xs btn-error w-14" type="button" (click)="deleteBranch(branch.id)">{{ copy().delete }}</button>
                         </div>
                       </td>
                     </tr>
@@ -419,6 +419,8 @@ export default class AdminContentPage {
 
     this.api.adminUpdateContactInfo(this.contactForm.getRawValue()).subscribe({
       next: () => {
+        const value = this.contactForm.getRawValue();
+        this.branchService.syncActiveBranchDetails(value.address, value.googleMapsUrl);
         this.isSavingContact.set(false);
         this.message.set(this.copy().contactInformationSaved);
         this.isError.set(false);

@@ -145,7 +145,10 @@ export default class ContactPage {
   });
 
   constructor() {
-    this.contactApi.getContactInfo().subscribe((value) => this.contactInfo.set(value));
+    this.contactApi.getContactInfo().subscribe((value) => {
+      this.contactInfo.set(value);
+      this.branchService.syncActiveBranchDetails(value.address, value.googleMapsUrl);
+    });
   }
 
   protected chooseBranch(id: string) {
