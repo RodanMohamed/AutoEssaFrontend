@@ -14,6 +14,7 @@ const PENDING_CAR_REQUESTS_STORAGE_KEY = 'autoessa.user.pending-car-requests';
 interface PendingCarRequestRecord {
 	ownerId: string;
 	ownerEmail: string;
+	ownerName: string;
 	customerName: string;
 	phoneNumber: string;
 	desiredCar: string;
@@ -108,7 +109,8 @@ export class UserService {
 		const session = this.authStore.session();
 		const ownerId = userId?.trim() || session?.user.id?.trim() || '';
 		const ownerEmail = session?.user.email?.trim().toLowerCase() || '';
-		if (!ownerId) {
+		const ownerName = session?.user.fullName?.trim().toLowerCase() || '';
+		if (!ownerId && !ownerEmail && !ownerName) {
 			return;
 		}
 
@@ -116,6 +118,7 @@ export class UserService {
 		current.push({
 			ownerId,
 			ownerEmail,
+			ownerName,
 			customerName: payload.fullName.trim(),
 			phoneNumber: payload.phoneNumber.trim(),
 			desiredCar: `${payload.desiredBrand} ${payload.desiredModel}`.trim(),
@@ -170,12 +173,22 @@ export class UserService {
 		const session = this.authStore.session();
 		const sessionId = session?.user.id;
 		const sessionEmail = session?.user.email?.trim().toLowerCase() || '';
-		if (!sessionId) {
-			return remoteRequests;
+		const sessionName = session?.user.fullName?.trim().toLowerCase() || '';
+		const allPending = this.readPendingCarRequests();
+
+		let scopedPending = allPending
+			.filter(
+				(item) =>
+					(sessionId ? item.ownerId === sessionId : false) ||
+					(sessionEmail.length > 0 && item.ownerEmail === sessionEmail) ||
+					(sessionName.length > 0 && this.normalize(item.ownerName) === sessionName)
+			);
+
+		if (scopedPending.length === 0) {
+			scopedPending = allPending;
 		}
 
-		const pendingRequests: CarRequestItem[] = this.readPendingCarRequests()
-			.filter((item) => item.ownerId === sessionId || (sessionEmail.length > 0 && item.ownerEmail === sessionEmail))
+		const pendingRequests: CarRequestItem[] = scopedPending
 			.map((item, index) => ({
 				id: `pending-${item.createdAt}-${index}`,
 				customerName: item.customerName,
@@ -220,7 +233,8 @@ export class UserService {
 				.filter((item): item is PendingCarRequestRecord => this.isPendingCarRequestRecord(item))
 				.map((item) => ({
 					...item,
-					ownerEmail: typeof item.ownerEmail === 'string' ? item.ownerEmail : ''
+					ownerEmail: typeof item.ownerEmail === 'string' ? item.ownerEmail : '',
+					ownerName: typeof item.ownerName === 'string' ? item.ownerName : ''
 				}));
 		} catch {
 			return [];
@@ -234,9 +248,11 @@ export class UserService {
 
 		const record = item as Record<string, unknown>;
 		const ownerEmail = record['ownerEmail'];
+		const ownerName = record['ownerName'];
 		return (
 			typeof record['ownerId'] === 'string' &&
 			(typeof ownerEmail === 'string' || typeof ownerEmail === 'undefined') &&
+			(typeof ownerName === 'string' || typeof ownerName === 'undefined') &&
 			typeof record['customerName'] === 'string' &&
 			typeof record['phoneNumber'] === 'string' &&
 			typeof record['desiredCar'] === 'string' &&
