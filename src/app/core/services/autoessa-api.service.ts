@@ -114,36 +114,36 @@ export class AutoessaApiService {
       throw new Error('Full Name cannot be empty');
     }
 
-    return {
-      // Required fields - use both camelCase and PascalCase for maximum compatibility
+    // Build the request object with ONLY camelCase fields
+    const requestObj: any = {
+      // Required fields - ONLY camelCase
       fullName: fullNameTrimmed,
-      FullName: fullNameTrimmed,
       phoneNumber: phoneNumberTrimmed,
-      PhoneNumber: phoneNumberTrimmed,
       desiredBrand: desiredBrandTrimmed,
-      DesiredBrand: desiredBrandTrimmed,
       desiredModel: desiredModelTrimmed,
-      DesiredModel: desiredModelTrimmed,
-
-      // Optional userId - only include if it's a valid non-zero value
-      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 && payload.userId.trim() !== '0'
-        ? { userId: payload.userId.trim(), UserId: payload.userId.trim() }
-        : {}),
 
       // Optional year range
       ...(typeof payload.desiredYearFrom === 'number'
-        ? { desiredYearFrom: payload.desiredYearFrom, DesiredYearFrom: payload.desiredYearFrom }
+        ? { desiredYearFrom: payload.desiredYearFrom }
         : {}),
       ...(typeof payload.desiredYearTo === 'number'
-        ? { desiredYearTo: payload.desiredYearTo, DesiredYearTo: payload.desiredYearTo }
+        ? { desiredYearTo: payload.desiredYearTo }
         : {}),
 
       // Optional budget
-      ...(typeof payload.budget === 'number' ? { budget: payload.budget, Budget: payload.budget } : {}),
+      ...(typeof payload.budget === 'number' ? { budget: payload.budget } : {}),
 
       // Optional notes
-      ...(notesTrimmed.length > 0 ? { notes: notesTrimmed, Notes: notesTrimmed } : {})
+      ...(notesTrimmed.length > 0 ? { notes: notesTrimmed } : {}),
+
+      // Optional userId - only include if it's a valid non-zero value
+      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 && payload.userId.trim() !== '0'
+        ? { userId: payload.userId.trim() }
+        : {})
     };
+
+    console.log('🔧 Request body constructed:', JSON.stringify(requestObj, null, 2));
+    return requestObj;
   }
 
 }
