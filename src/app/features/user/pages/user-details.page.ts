@@ -106,14 +106,14 @@ export default class UserDetailsPage {
 		const currentUserId = this.authStore.session()?.user.id;
 		if (!currentUserId) return [];
 		const all = this._bookingRequests();
-		return all.filter(r => !r.userId || r.userId === currentUserId);
+		return all.filter(r => r.userId === currentUserId);
 	});
 
 	protected readonly carRequests = computed(() => {
 		const currentUserId = this.authStore.session()?.user.id;
 		if (!currentUserId) return [];
 		const all = this._carRequests();
-		return all.filter(r => !r.userId || r.userId === currentUserId);
+		return all.filter(r => r.userId === currentUserId);
 	});
 
 	protected readonly bookingCarIds = signal<string[]>([]);

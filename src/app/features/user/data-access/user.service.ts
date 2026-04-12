@@ -172,6 +172,7 @@ export class UserService {
 			.filter((item) => item.ownerId === sessionId)
 			.map((item, index) => ({
 				id: `pending-${item.createdAt}-${index}`,
+				userId: item.ownerId,
 				customerName: item.customerName,
 				phoneNumber: item.phoneNumber,
 				desiredCar: item.desiredCar,
