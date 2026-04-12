@@ -3,6 +3,9 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { merge } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { AuthService } from '../data-access/auth.service';
 import { AUTH_STRONG_PASSWORD_REGEX } from '../utils/auth.constants';
@@ -19,10 +22,10 @@ import { LocaleService } from '../../../core/services/locale.service';
       <mat-form-field appearance="outline" class="auth-field w-full">
         <mat-label>{{ copy().emailLabel }}</mat-label>
         <input matInput formControlName="email" type="email" />
-        @if (form.controls.email.hasError('required')) {
+        @if (emailErrors().required) {
           <mat-error>{{ copy().emailRequired }}</mat-error>
         }
-        @if (form.controls.email.hasError('email') || form.controls.email.hasError('pattern')) {
+        @if (emailErrors().email || emailErrors().pattern) {
           <mat-error>{{ copy().emailPattern }}</mat-error>
         }
       </mat-form-field>
@@ -30,10 +33,10 @@ import { LocaleService } from '../../../core/services/locale.service';
       <mat-form-field appearance="outline" class="auth-field w-full">
         <mat-label>{{ copy().newPasswordLabel }}</mat-label>
         <input matInput formControlName="newPassword" type="password" />
-        @if (form.controls.newPassword.hasError('required')) {
+        @if (passwordErrors().required) {
           <mat-error>{{ copy().newPasswordRequired }}</mat-error>
         }
-        @if (form.controls.newPassword.hasError('pattern')) {
+        @if (passwordErrors().pattern) {
           <mat-error>{{ copy().passwordPattern }}</mat-error>
         }
       </mat-form-field>
@@ -41,7 +44,7 @@ import { LocaleService } from '../../../core/services/locale.service';
       <mat-form-field appearance="outline" class="auth-field w-full">
         <mat-label>{{ copy().confirmPasswordLabel }}</mat-label>
         <input matInput formControlName="confirmPassword" type="password" />
-        @if (form.controls.confirmPassword.hasError('required')) {
+        @if (confirmErrors().required) {
           <mat-error>{{ copy().confirmPasswordRequired }}</mat-error>
         }
         @if (hasMismatch()) {
@@ -178,37 +181,80 @@ export default class ForgotPasswordPage {
     confirmPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] })
   });
 
-  protected readonly hasMismatch = computed(() => {
-    const confirm = this.form.controls.confirmPassword.value;
-    if (confirm.length === 0) {
-      return false;
-    }
+  /**
+   * Convert the form's value/status stream into a signal so that computed()
+   * functions that read form state will re-run whenever any field changes.
+   * Without this, computed() only re-runs when a *signal* dependency changes —
+   * FormControl values are RxJS/imperative and are invisible to Angular's
+   * signal graph.
+   */
+  private readonly formValue = toSignal(
+    merge(this.form.valueChanges, this.form.statusChanges).pipe(
+      map(() => this.form.getRawValue())
+    ),
+    { initialValue: this.form.getRawValue() }
+  );
 
-    return confirm !== this.form.controls.newPassword.value;
+  // Per-field error snapshots — derived from formValue so they stay reactive.
+  protected readonly emailErrors = computed(() => {
+    void this.formValue(); // track signal dependency
+    const ctrl = this.form.controls.email;
+    return {
+      required: ctrl.hasError('required'),
+      email: ctrl.hasError('email'),
+      pattern: ctrl.hasError('pattern'),
+    };
   });
 
-  protected readonly isSubmitDisabled = computed(() => this.form.invalid || this.hasMismatch());
+  protected readonly passwordErrors = computed(() => {
+    void this.formValue();
+    const ctrl = this.form.controls.newPassword;
+    return {
+      required: ctrl.hasError('required'),
+      pattern: ctrl.hasError('pattern'),
+    };
+  });
+
+  protected readonly confirmErrors = computed(() => {
+    void this.formValue();
+    const ctrl = this.form.controls.confirmPassword;
+    return {
+      required: ctrl.hasError('required'),
+    };
+  });
+
+  protected readonly hasMismatch = computed(() => {
+    const { confirmPassword, newPassword } = this.formValue();
+    if (confirmPassword.length === 0) return false;
+    return confirmPassword !== newPassword;
+  });
+
+  protected readonly isSubmitDisabled = computed(() => {
+    void this.formValue(); // track signal dependency
+    return this.form.invalid || this.hasMismatch();
+  });
 
   protected readonly validationMessage = computed(() => {
     const isArabic = this.localeService.locale() === 'ar';
-    const email = this.form.controls.email;
-    const password = this.form.controls.newPassword;
-    const confirm = this.form.controls.confirmPassword;
+    const { required: emailRequired, email: emailInvalid } = this.emailErrors();
+    const { required: pwRequired, pattern: pwPattern } = this.passwordErrors();
+    const { required: confirmRequired } = this.confirmErrors();
 
-    // Check which fields have issues
-    if (email.hasError('required')) {
+    if (emailRequired) {
       return isArabic ? 'البريد الإلكتروني مطلوب' : 'Email is required';
     }
-    if (email.hasError('email')) {
+    if (emailInvalid) {
       return isArabic ? 'البريد الإلكتروني غير صحيح. جرب: user@example.com' : 'Invalid email format. Try: user@example.com';
     }
-    if (password.hasError('required')) {
+    if (pwRequired) {
       return isArabic ? 'كلمة المرور الجديدة مطلوبة' : 'New password is required';
     }
-    if (password.hasError('pattern')) {
-      return isArabic ? 'يجب أن تكون كلمة المرور 8 أحرف على الأقل مع أحرف كبيرة وصغيرة وأرقام ورموز' : 'Password must be 8+ chars with uppercase, lowercase, number, and symbol';
+    if (pwPattern) {
+      return isArabic
+        ? 'يجب أن تكون كلمة المرور 8 أحرف على الأقل مع أحرف كبيرة وصغيرة وأرقام ورموز'
+        : 'Password must be 8+ chars with uppercase, lowercase, number, and symbol';
     }
-    if (confirm.hasError('required')) {
+    if (confirmRequired) {
       return isArabic ? 'تأكيد كلمة المرور مطلوب' : 'Please confirm your password';
     }
     if (this.hasMismatch()) {
@@ -216,6 +262,7 @@ export default class ForgotPasswordPage {
     }
     return '';
   });
+
   protected readonly copy = computed(() =>
     this.localeService.locale() === 'ar'
       ? {
@@ -252,16 +299,14 @@ export default class ForgotPasswordPage {
         }
   );
 
-  protected submit() {
-    if (this.isSubmitDisabled()) {
-      return;
-    }
+  protected submit(): void {
+    if (this.isSubmitDisabled()) return;
 
     this.status.set('');
     this.isError.set(false);
 
-    const value = this.form.getRawValue();
-    this.authService.resetPassword({ email: value.email, newPassword: value.newPassword }).subscribe({
+    const { email, newPassword } = this.form.getRawValue();
+    this.authService.resetPassword({ email, newPassword }).subscribe({
       next: () => {
         this.status.set('Password updated successfully. You can login now.');
         this.router.navigateByUrl('/auth/login');
