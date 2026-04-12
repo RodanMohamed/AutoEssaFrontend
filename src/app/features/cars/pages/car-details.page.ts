@@ -70,36 +70,46 @@ import { egyptianPhoneValidator, minYearValidator } from '../../../shared/valida
             <div class="card-body">
               <h2 class="card-title">{{ copy().bookingTitle }}</h2>
               <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="grid gap-3 md:grid-cols-2 items-start">
-                <label class="form-control md:col-span-2 flex items-end gap-2">
-                  <span class="label-text whitespace-nowrap">{{ copy().fullNameLabel }}</span>
-                  <input class="input input-bordered flex-1" formControlName="fullName" type="text" />
+                <label class="form-control md:col-span-2">
+                  <div class="flex items-end gap-2 mb-1">
+                    <span class="label-text whitespace-nowrap">{{ copy().fullNameLabel }}</span>
+                    <input class="input input-bordered flex-1" formControlName="fullName" type="text" />
+                  </div>
                   @if (isBookingControlInvalid('fullName')) {
                     <span class="form-error-text text-sm">{{ copy().requiredError }}</span>
                   }
                 </label>
-                <label class="form-control md:col-span-2 flex items-end gap-2">
-                  <span class="label-text whitespace-nowrap">{{ copy().phoneLabel }}</span>
-                  <input class="input input-bordered flex-1" formControlName="phoneNumber" type="text" />
+                <label class="form-control md:col-span-2">
+                  <div class="flex items-end gap-2 mb-1">
+                    <span class="label-text whitespace-nowrap">{{ copy().phoneLabel }}</span>
+                    <input class="input input-bordered flex-1" formControlName="phoneNumber" type="text" />
+                  </div>
                   @if (isBookingControlInvalid('phoneNumber')) {
                     <span class="form-error-text text-sm text-error">{{ getPhoneErrorMessage() }}</span>
                   }
                 </label>
-                <label class="form-control flex items-end gap-2">
-                  <span class="label-text whitespace-nowrap">{{ copy().startDateLabel }}</span>
-                  <input class="input input-bordered flex-1" formControlName="startDate" type="date" />
+                <label class="form-control">
+                  <div class="flex items-end gap-2 mb-1">
+                    <span class="label-text whitespace-nowrap">{{ copy().startDateLabel }}</span>
+                    <input class="input input-bordered flex-1" formControlName="startDate" type="date" />
+                  </div>
                   @if (bookingForm.get('startDate')?.invalid) {
                     @if (bookingForm.get('startDate')?.errors?.['yearTooSmall']) {
                       <span class="form-error-text text-sm text-error">{{ bookingForm.get('startDate')?.errors?.['yearTooSmall']?.['message'] }}</span>
                     }
                   }
                 </label>
-                <label class="form-control flex items-end gap-2">
-                  <span class="label-text whitespace-nowrap">{{ copy().endDateLabel }}</span>
-                  <input class="input input-bordered flex-1" formControlName="endDate" type="date" />
+                <label class="form-control">
+                  <div class="flex items-end gap-2">
+                    <span class="label-text whitespace-nowrap">{{ copy().endDateLabel }}</span>
+                    <input class="input input-bordered flex-1" formControlName="endDate" type="date" />
+                  </div>
                 </label>
-                <label class="form-control md:col-span-2 flex items-end gap-2">
-                  <span class="label-text whitespace-nowrap">{{ copy().messageLabel }}</span>
-                  <textarea class="textarea textarea-bordered flex-1 h-10" formControlName="message"></textarea>
+                <label class="form-control md:col-span-2">
+                  <div class="flex items-end gap-2 mb-1">
+                    <span class="label-text whitespace-nowrap">{{ copy().messageLabel }}</span>
+                    <textarea class="textarea textarea-bordered flex-1 h-10" formControlName="message"></textarea>
+                  </div>
                 </label>
                 <div class="md:col-span-2 flex gap-2">
                   <button class="btn btn-primary" type="submit" [disabled]="bookingForm.invalid">{{ copy().sendRequestButton }}</button>
