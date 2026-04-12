@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
 
 import { API_BASE_URL } from '../core.config';
 import {
@@ -34,7 +35,20 @@ export class AutoessaApiService {
     return this.http.get(`${API_BASE_URL}/api/BookingRequests/availability`, { params });
   }
   getMyBookingRequests() { return this.http.get(`${API_BASE_URL}/api/BookingRequests/me`); }
-  createCarLeadRequest(payload: CreateCarRequestLeadPayload) { return this.http.post(`${API_BASE_URL}/api/CarRequests`, payload); }
+  createCarLeadRequest(payload: CreateCarRequestLeadPayload) {
+    const endpoint = `${API_BASE_URL}/api/CarRequests`;
+    const requestBody = this.toCreateCarRequestBody(payload);
+
+    return this.http.post(endpoint, requestBody).pipe(
+      catchError((error: unknown) => {
+        if (this.isRequestWrapperRequired(error)) {
+          return this.http.post(endpoint, { request: requestBody });
+        }
+
+        return throwError(() => error);
+      })
+    );
+  }
   getMyCarRequests() { return this.http.get(`${API_BASE_URL}/api/CarRequests/me`); }
   getMyFavorites() { return this.http.get(`${API_BASE_URL}/api/Favorites/me`); }
   addFavorite(carId: string) { return this.http.post(`${API_BASE_URL}/api/Favorites/${carId}`, {}); }
@@ -85,4 +99,45 @@ export class AutoessaApiService {
   adminGetUsers() { return this.http.get(`${API_BASE_URL}/api/admin/users`); }
   adminBlockUser(id: string, payload: UpdateUserBlockPayload) { return this.http.patch(`${API_BASE_URL}/api/admin/users/${id}/block`, payload); }
   adminDeleteUser(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/users/${id}`); }
+
+  private toCreateCarRequestBody(payload: CreateCarRequestLeadPayload) {
+    return {
+      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 ? { UserId: payload.userId.trim() } : {}),
+      FullName: payload.fullName,
+      PhoneNumber: payload.phoneNumber,
+      DesiredBrand: payload.desiredBrand,
+      DesiredModel: payload.desiredModel,
+      ...(typeof payload.desiredYearFrom === 'number' ? { DesiredYearFrom: payload.desiredYearFrom } : {}),
+      ...(typeof payload.desiredYearTo === 'number' ? { DesiredYearTo: payload.desiredYearTo } : {}),
+      ...(typeof payload.budget === 'number' ? { Budget: payload.budget } : {}),
+      ...(typeof payload.notes === 'string' && payload.notes.trim().length > 0 ? { Notes: payload.notes.trim() } : {})
+    };
+  }
+
+  private isRequestWrapperRequired(error: unknown): boolean {
+    if (typeof error !== 'object' || error === null) {
+      return false;
+    }
+
+    const record = error as Record<string, unknown>;
+    const payload = record['error'];
+    if (typeof payload !== 'object' || payload === null) {
+      return false;
+    }
+
+    const errorRecord = payload as Record<string, unknown>;
+    const errors = errorRecord['errors'];
+    if (typeof errors !== 'object' || errors === null) {
+      return false;
+    }
+
+    const requestErrors = (errors as Record<string, unknown>)['request'];
+    if (!Array.isArray(requestErrors)) {
+      return false;
+    }
+
+    return requestErrors.some(
+      (message) => typeof message === 'string' && message.toLowerCase().includes('request field is required')
+    );
+  }
 }
