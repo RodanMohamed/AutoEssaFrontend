@@ -9,7 +9,6 @@ export interface FavoriteCarItem {
 
 export interface BookingRequestItem {
 	id: number;
-	userId?: string;
 	carTitle: string;
 	fromDate: string;
 	toDate: string;
@@ -18,7 +17,6 @@ export interface BookingRequestItem {
 
 export interface CarRequestItem {
 	id: number | string;
-	userId?: string;
 	customerName: string;
 	phoneNumber: string;
 	desiredCar: string;

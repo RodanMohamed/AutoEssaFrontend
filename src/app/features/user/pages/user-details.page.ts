@@ -4,7 +4,6 @@ import { RouterLink } from '@angular/router';
 
 import { LocaleService } from '../../../core/services/locale.service';
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
-import { AuthStore } from '../../auth/data-access/auth.store';
 import { BookingRequestItem, CarRequestItem } from '../data-access/user.interface';
 import { UserService } from '../data-access/user.service';
 
@@ -98,24 +97,9 @@ import { UserService } from '../data-access/user.service';
 export default class UserDetailsPage {
 	private readonly userService = inject(UserService);
 	private readonly api = inject(AutoessaApiService);
-	private readonly authStore = inject(AuthStore);
 
-	private readonly _bookingRequests = signal<BookingRequestItem[]>([]);
-	private readonly _carRequests = signal<CarRequestItem[]>([]);
-	protected readonly bookingRequests = computed(() => {
-		const currentUserId = this.authStore.session()?.user.id;
-		if (!currentUserId) return [];
-		const all = this._bookingRequests();
-		return all.filter(r => r.userId === currentUserId);
-	});
-
-	protected readonly carRequests = computed(() => {
-		const currentUserId = this.authStore.session()?.user.id;
-		if (!currentUserId) return [];
-		const all = this._carRequests();
-		return all.filter(r => r.userId === currentUserId);
-	});
-
+	protected readonly bookingRequests = signal<BookingRequestItem[]>([]);
+	protected readonly carRequests = signal<CarRequestItem[]>([]);
 	protected readonly bookingCarIds = signal<string[]>([]);
 	protected readonly carNamesById = signal<Record<string, string>>({});
 	protected readonly copy = computed(() =>
@@ -152,22 +136,22 @@ export default class UserDetailsPage {
 	private loadRequests() {
 		this.userService.getMyBookingRequests().subscribe({
 			next: (payload: unknown) => {
-				this._bookingRequests.set(this.userService.mapBookingRequests(payload));
+				this.bookingRequests.set(this.userService.mapBookingRequests(payload));
 				this.bookingCarIds.set(this.extractBookingCarIds(payload));
 				this.applyBookingCarNames();
 			},
 			error: () => {
-				this._bookingRequests.set([]);
+				this.bookingRequests.set([]);
 				this.bookingCarIds.set([]);
 			}
 		});
 
 		this.userService.getMyCarRequests().subscribe({
 			next: (items) => {
-				this._carRequests.set(items);
+				this.carRequests.set(items);
 			},
 			error: () => {
-				this._carRequests.set([]);
+				this.carRequests.set([]);
 			}
 		});
 	}
@@ -212,7 +196,7 @@ export default class UserDetailsPage {
 			return;
 		}
 
-		this._bookingRequests.update((items) =>
+		this.bookingRequests.update((items) =>
 			items.map((item, index) => {
 				const title = item.carTitle.trim();
 				const isPlaceholder = title.length === 0 || title === 'Selected car' || title === 'N/A';
