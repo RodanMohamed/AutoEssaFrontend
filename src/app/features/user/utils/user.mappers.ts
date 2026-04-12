@@ -82,8 +82,14 @@ export function mapBookingRequest(item: Record<string, unknown>, fallbackId: num
 		(typeof item['dropOffDate'] === 'string' ? item['dropOffDate'] : undefined) ??
 		undefined;
 
+	const userId = typeof item['userId'] === 'string' ? item['userId'] :
+		typeof item['customerId'] === 'string' ? item['customerId'] :
+		typeof item['ownerId'] === 'string' ? item['ownerId'] :
+		undefined;
+
 	return {
 		id,
+		userId,
 		carTitle,
 		fromDate: normalizeDate(fromDateRaw),
 		toDate: normalizeDate(toDateRaw),
@@ -106,12 +112,18 @@ export function mapCarRequest(item: Record<string, unknown>, fallbackId: number)
 				? Number(budgetCandidate) || 0
 				: 0;
 
+	const userId = typeof item['userId'] === 'string' ? item['userId'] :
+		typeof item['customerId'] === 'string' ? item['customerId'] :
+		typeof item['ownerId'] === 'string' ? item['ownerId'] :
+		undefined;
+
 	return {
 		id: typeof item['id'] === 'string' && item['id'].trim().length > 0
 			? item['id']
 			: typeof item['id'] === 'number'
 				? item['id']
 				: fallbackId,
+		userId,
 		customerName: typeof item['fullName'] === 'string' ? item['fullName'] : 'Unknown',
 		phoneNumber: typeof item['phoneNumber'] === 'string' ? item['phoneNumber'] : '-',
 		desiredCar: `${desiredBrand} ${desiredModel}`.trim() || `${preferredBrand} ${preferredModel}`.trim() || desiredCarValue || 'N/A',
