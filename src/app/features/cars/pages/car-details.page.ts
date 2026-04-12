@@ -111,9 +111,14 @@ import { egyptianPhoneValidator, minYearValidator } from '../../../shared/valida
                     <textarea class="textarea textarea-bordered flex-1 h-10" formControlName="message"></textarea>
                   </div>
                 </label>
-                <div class="md:col-span-2 flex gap-2">
-                  <button class="btn btn-primary" type="submit" [disabled]="bookingForm.invalid">{{ copy().sendRequestButton }}</button>
-                  <button class="btn btn-outline" type="button" (click)="checkAvailability()">{{ copy().availabilityButton }}</button>
+                <div class="md:col-span-2 flex flex-col gap-2">
+                  <div class="flex gap-2">
+                    <button class="btn btn-primary" type="submit" [disabled]="bookingForm.invalid">{{ copy().sendRequestButton }}</button>
+                    <button class="btn btn-outline" type="button" (click)="checkAvailability()">{{ copy().availabilityButton }}</button>
+                  </div>
+                  @if (actionStatus()) {
+                    <p class="text-sm font-medium" [class.text-success]="!isError()" [class.text-error]="isError()">{{ actionStatus() }}</p>
+                  }
                 </div>
               </form>
             </div>
@@ -396,7 +401,7 @@ export default class CarDetailsPage {
       .subscribe({
         next: () => {
           this.isError.set(false);
-          this.actionStatus.set('Booking request sent successfully.');
+          this.actionStatus.set('Your booking request is submitted successfully!');
           this.bookingForm.reset({ fullName: '', phoneNumber: '', message: '', startDate: null, endDate: null });
         },
         error: (error: unknown) => {
@@ -413,6 +418,9 @@ export default class CarDetailsPage {
     if (!carId) {
       return;
     }
+
+    this.actionStatus.set('');
+    this.isError.set(false);
 
     const value = this.bookingForm.getRawValue();
     this.api.getBookingAvailability(carId, value.startDate ?? undefined, value.endDate ?? undefined).subscribe({
