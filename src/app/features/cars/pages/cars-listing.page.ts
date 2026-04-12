@@ -26,7 +26,7 @@ import { Car } from '../data-access/cars.interface';
             <select class="select select-bordered flex-1" formControlName="listingType">
               <option value="all">{{ copy().allOption }}</option>
               <option value="Rent">{{ copy().rentOption }}</option>
-              <option value="Sell">{{ copy().buyOption }}</option>
+              <option value="Buy">{{ copy().buyOption }}</option>
             </select>
           </label>
 
@@ -159,20 +159,31 @@ export default class CarsListingPage {
     const form = this.filtersForm.getRawValue();
 
     let filtered = this.cars().filter((car) => {
-      const matchesType = form.listingType === 'all' || car.listingType === form.listingType;
-      const matchesFuel = form.fuelType === 'all' || car.fuelType === form.fuelType;
-      const matchesSearch = form.searchTerm.trim().length === 0 ||
-        `${car.brand} ${car.model} ${car.name}`.toLowerCase().includes(form.searchTerm.toLowerCase());
-      const matchesCarType = form.carType.trim().length === 0 ||
-        car.carType.toLowerCase().includes(form.carType.toLowerCase());
+      const searchTerm = form.searchTerm.trim().toLowerCase();
+      const searchableText = `${car.brand} ${car.model} ${car.name}`.toLowerCase();
+      const matchesSearch = searchTerm.length === 0 || searchableText.includes(searchTerm);
+
+      const fuelType = form.fuelType.trim().toLowerCase();
+      const carFuelType = car.fuelType.trim().toLowerCase();
+      const matchesFuel = fuelType === 'all' || carFuelType === fuelType;
+
+      const listingTypeFilter = form.listingType.trim().toLowerCase();
+      const carListingType = car.listingType.trim().toLowerCase();
+      const matchesListingType =
+        listingTypeFilter === 'all' ||
+        carListingType === listingTypeFilter ||
+        (listingTypeFilter === 'sell' && (carListingType === 'buy' || carListingType === 'sell')) ||
+        (listingTypeFilter === 'buy' && (carListingType === 'sell' || carListingType === 'buy')) ||
+        (listingTypeFilter === 'rent' && carListingType === 'rent');
+
+      const carType = form.carType.trim().toLowerCase();
+      const carCarType = car.carType.trim().toLowerCase();
+      const matchesCarType = carType.length === 0 || carCarType.includes(carType);
+
       const matchesMinPrice = form.minPrice === null || car.price >= form.minPrice;
       const matchesMaxPrice = form.maxPrice === null || car.price <= form.maxPrice;
 
-      return matchesType && matchesFuel && matchesSearch && matchesCarType && matchesMinPrice && matchesMaxPrice;
-    });
-
-    // Apply sorting
-    if (form.sortBy === 'priceAsc') {
+      return matchesSearch && matchesFuel && matchesListingType && matchesCarType && matchesMinPrice && matchesMaxPrice;
       filtered.sort((a, b) => a.price - b.price);
     } else if (form.sortBy === 'priceDesc') {
       filtered.sort((a, b) => b.price - a.price);
