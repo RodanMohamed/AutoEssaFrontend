@@ -69,37 +69,37 @@ import { egyptianPhoneValidator, minYearValidator } from '../../../shared/valida
           <article class="card border border-base-300 bg-base-100 shadow">
             <div class="card-body">
               <h2 class="card-title">{{ copy().bookingTitle }}</h2>
-              <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="grid gap-3 md:grid-cols-2">
-                <label class="form-control md:col-span-2">
-                  <span class="label-text">{{ copy().fullNameLabel }}</span>
-                  <input class="input input-bordered ml-2" formControlName="fullName" type="text" />
+              <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="grid gap-3 md:grid-cols-2 items-start">
+                <label class="form-control md:col-span-2 flex items-end gap-2">
+                  <span class="label-text whitespace-nowrap">{{ copy().fullNameLabel }}</span>
+                  <input class="input input-bordered flex-1" formControlName="fullName" type="text" />
                   @if (isBookingControlInvalid('fullName')) {
                     <span class="form-error-text text-sm">{{ copy().requiredError }}</span>
                   }
                 </label>
-                <label class="form-control md:col-span-2">
-                  <span class="label-text">{{ copy().phoneLabel }}</span>
-                  <input class="input input-bordered ml-2" formControlName="phoneNumber" type="text" />
+                <label class="form-control md:col-span-2 flex items-end gap-2">
+                  <span class="label-text whitespace-nowrap">{{ copy().phoneLabel }}</span>
+                  <input class="input input-bordered flex-1" formControlName="phoneNumber" type="text" />
                   @if (isBookingControlInvalid('phoneNumber')) {
                     <span class="form-error-text text-sm text-error">{{ getPhoneErrorMessage() }}</span>
                   }
                 </label>
-                <label class="form-control">
-                  <span class="label-text">{{ copy().startDateLabel }}</span>
-                  <input class="input input-bordered ml-2" formControlName="startDate" type="date" />
+                <label class="form-control flex items-end gap-2">
+                  <span class="label-text whitespace-nowrap">{{ copy().startDateLabel }}</span>
+                  <input class="input input-bordered flex-1" formControlName="startDate" type="date" />
                   @if (bookingForm.get('startDate')?.invalid) {
                     @if (bookingForm.get('startDate')?.errors?.['yearTooSmall']) {
                       <span class="form-error-text text-sm text-error">{{ bookingForm.get('startDate')?.errors?.['yearTooSmall']?.['message'] }}</span>
                     }
                   }
                 </label>
-                <label class="form-control">
-                  <span class="label-text">{{ copy().endDateLabel }}</span>
-                  <input class="input input-bordered ml-2" formControlName="endDate" type="date" />
+                <label class="form-control flex items-end gap-2">
+                  <span class="label-text whitespace-nowrap">{{ copy().endDateLabel }}</span>
+                  <input class="input input-bordered flex-1" formControlName="endDate" type="date" />
                 </label>
-                <label class="form-control md:col-span-2">
-                  <span class="label-text">{{ copy().messageLabel }}</span>
-                  <textarea class="textarea textarea-bordered mr-2" formControlName="message" rows="3"></textarea>
+                <label class="form-control md:col-span-2 flex items-end gap-2">
+                  <span class="label-text whitespace-nowrap">{{ copy().messageLabel }}</span>
+                  <textarea class="textarea textarea-bordered flex-1 h-10" formControlName="message"></textarea>
                 </label>
                 <div class="md:col-span-2 flex gap-2">
                   <button class="btn btn-primary" type="submit" [disabled]="bookingForm.invalid">{{ copy().sendRequestButton }}</button>
@@ -507,7 +507,7 @@ export default class CarDetailsPage {
       return this.copy().requiredError;
     }
     if (phoneControl.errors?.['invalidEgyptianPhone']) {
-      return 'Please enter a valid Egyptian phone number starting with 010, 012, 011, or 015';
+      return 'Please enter a valid Egyptian phone number';
     }
     return '';
   }
