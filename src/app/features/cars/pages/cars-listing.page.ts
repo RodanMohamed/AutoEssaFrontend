@@ -216,21 +216,19 @@ export default class CarsListingPage {
     this.isError.set(false);
 
     const filters = this.filtersForm.getRawValue();
-    const hasActiveFilters =
+    const hasDataFilters =
       filters.searchTerm.trim().length > 0 ||
       filters.listingType !== 'all' ||
       filters.fuelType !== 'all' ||
-      filters.sortBy !== 'default' ||
       filters.carType.trim().length > 0 ||
       typeof filters.minPrice === 'number' ||
       typeof filters.maxPrice === 'number';
 
-    const request$ = hasActiveFilters
+    const request$ = hasDataFilters
       ? this.carsApi.getCars({
           searchTerm: filters.searchTerm,
           listingType: filters.listingType,
           fuelType: filters.fuelType,
-          sortBy: filters.sortBy,
           carType: filters.carType,
           minPrice: filters.minPrice ?? undefined,
           maxPrice: filters.maxPrice ?? undefined,
