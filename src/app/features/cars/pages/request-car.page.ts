@@ -215,7 +215,7 @@ export default class RequestCarPage {
       .subscribe({
         next: () => {
           this.userService.rememberPendingCarRequest(sessionUserId, payload);
-          this.status.set('Car request submitted successfully. It will appear in My Requests.');
+          this.status.set('Car request submitted successfully. It will appear in Your account in Requests.');
           this.form.reset({
             fullName: '',
             phoneNumber: '',
