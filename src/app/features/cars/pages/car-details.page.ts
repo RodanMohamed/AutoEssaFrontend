@@ -11,6 +11,7 @@ import { LocaleService } from '../../../core/services/locale.service';
 import { AuthStore } from '../../auth/data-access/auth.store';
 import { FormBuilder } from '@angular/forms';
 import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
+import { egyptianPhoneValidator, minYearValidator } from '../../../shared/validators/custom.validators';
 
 @Component({
   selector: 'app-car-details-page',
@@ -80,12 +81,17 @@ import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
                   <span class="label-text">{{ copy().phoneLabel }}</span>
                   <input class="input input-bordered ml-2" formControlName="phoneNumber" type="text" />
                   @if (isBookingControlInvalid('phoneNumber')) {
-                    <span class="form-error-text text-sm">{{ copy().requiredError }}</span>
+                    <span class="form-error-text text-sm text-error">{{ getPhoneErrorMessage() }}</span>
                   }
                 </label>
                 <label class="form-control">
                   <span class="label-text">{{ copy().startDateLabel }}</span>
                   <input class="input input-bordered ml-2" formControlName="startDate" type="date" />
+                  @if (bookingForm.get('startDate')?.invalid && (bookingForm.get('startDate')?.touched || bookingForm.get('startDate')?.dirty)) {
+                    @if (bookingForm.get('startDate')?.errors?.['yearTooSmall']) {
+                      <span class="form-error-text text-sm text-error">{{ bookingForm.get('startDate')?.errors?.['yearTooSmall']?.['message'] }}</span>
+                    }
+                  }
                 </label>
                 <label class="form-control">
                   <span class="label-text">{{ copy().endDateLabel }}</span>
@@ -93,7 +99,7 @@ import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
                 </label>
                 <label class="form-control md:col-span-2">
                   <span class="label-text">{{ copy().messageLabel }}</span>
-                  <textarea class="textarea textarea-bordered ml-2" formControlName="message" rows="3"></textarea>
+                  <textarea class="textarea textarea-bordered mr-2" formControlName="message" rows="3"></textarea>
                 </label>
                 <div class="md:col-span-2 flex gap-2">
                   <button class="btn btn-primary" type="submit" [disabled]="bookingForm.invalid">{{ copy().sendRequestButton }}</button>
@@ -281,9 +287,9 @@ export default class CarDetailsPage {
 
   protected readonly bookingForm = new FormGroup({
     fullName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    phoneNumber: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    phoneNumber: new FormControl('', { nonNullable: true, validators: [Validators.required, egyptianPhoneValidator()] }),
     message: new FormControl('', { nonNullable: true }),
-    startDate: new FormControl<string | null>(null),
+    startDate: new FormControl<string | null>(null, [minYearValidator()]),
     endDate: new FormControl<string | null>(null)
   });
 
@@ -491,6 +497,19 @@ export default class CarDetailsPage {
   protected isBookingControlInvalid(controlName: 'fullName' | 'phoneNumber') {
     const control = this.bookingForm.controls[controlName];
     return control.invalid && (control.touched || control.dirty);
+  }
+
+  protected getPhoneErrorMessage(): string {
+    const phoneControl = this.bookingForm.get('phoneNumber');
+    if (!phoneControl) return '';
+    
+    if (phoneControl.errors?.['required']) {
+      return this.copy().requiredError;
+    }
+    if (phoneControl.errors?.['invalidEgyptianPhone']) {
+      return 'Please enter a valid Egyptian phone number starting with 010, 012, 011, or 015';
+    }
+    return '';
   }
 
   private loadFavoriteState(carId: string) {
