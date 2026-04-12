@@ -49,6 +49,10 @@ import { LocaleService } from '../../../core/services/locale.service';
         }
       </mat-form-field>
 
+      @if (isSubmitDisabled()) {
+        <p class="validation-alert text-sm">{{ validationMessage() }}</p>
+      }
+
       <button mat-flat-button color="primary" class="auth-submit w-full" type="submit" [disabled]="isSubmitDisabled()">
         {{ copy().submitButton }}
       </button>
@@ -147,6 +151,16 @@ import { LocaleService } from '../../../core/services/locale.service';
       opacity: 0.58;
       box-shadow: none;
     }
+
+    .validation-alert {
+      background: #fef3e2;
+      color: #92672f;
+      border-left: 3px solid #d4a574;
+      padding: 0.65rem;
+      border-radius: 0.5rem;
+      margin-top: -0.25rem;
+      margin-bottom: 0.5rem;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -174,11 +188,32 @@ export default class ForgotPasswordPage {
   });
 
   protected readonly isSubmitDisabled = computed(() => this.form.invalid || this.hasMismatch());
+
+  protected readonly validationMessage = computed(() => {
+    const isArabic = this.localeService.locale() === 'ar';
+    const email = this.form.controls.email;
+    const password = this.form.controls.newPassword;
+    const confirm = this.form.controls.confirmPassword;
+
+    if (email.invalid) {
+      return isArabic ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address';
+    }
+    if (password.invalid) {
+      return isArabic ? 'يجب أن تكون كلمة المرور 8 أحرف على الأقل مع أحرف كبيرة وصغيرة وأرقام ورموز' : 'Password must be at least 8 chars with upper, lower, number, and symbol';
+    }
+    if (confirm.invalid) {
+      return isArabic ? 'يرجى تأكيد كلمة المرور' : 'Please confirm your password';
+    }
+    if (this.hasMismatch()) {
+      return isArabic ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match';
+    }
+    return isArabic ? 'يرجى إكمال كل الحقول' : 'Please complete all fields';
+  });
   protected readonly copy = computed(() =>
     this.localeService.locale() === 'ar'
       ? {
           title: 'إعادة تعيين كلمة المرور',
-          description: 'أدخل بريدك الإلكتروني وأنشئ كلمة مرور جديدة قوية.',
+          description: 'أدخل البريد الإلكتروني المرتبط بحسابك الذي تريد تغيير كلمة المرور له، ثم أنشئ كلمة مرور جديدة قوية.',
           emailLabel: 'البريد الإلكتروني',
           emailRequired: 'البريد الإلكتروني مطلوب.',
           emailPattern: 'يرجى إدخال صيغة بريد إلكتروني صحيحة.',
@@ -194,7 +229,7 @@ export default class ForgotPasswordPage {
         }
       : {
           title: 'Reset Password',
-          description: 'Enter your email and create a new strong password.',
+          description: 'Enter the email associated with your account that you want to reset the password for, then create a new strong password.',
           emailLabel: 'Email',
           emailRequired: 'Email is required.',
           emailPattern: 'Please enter a valid email format.',
