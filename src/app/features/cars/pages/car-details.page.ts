@@ -137,61 +137,83 @@ import { egyptianPhoneValidator, minYearValidator } from '../../../shared/valida
 
                 <form [formGroup]="editForm" (ngSubmit)="saveCarChanges()" class="grid gap-3 md:grid-cols-2">
                   <label class="form-control">
-                    <span class="label-text">Brand</span>
-                    <input class="input input-bordered ml-2" formControlName="brand" type="text" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Brand</span>
+                      <input class="input input-bordered flex-1" formControlName="brand" type="text" />
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Model</span>
-                    <input class="input input-bordered ml-2" formControlName="model" type="text" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Model</span>
+                      <input class="input input-bordered flex-1" formControlName="model" type="text" />
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Name</span>
-                    <input class="input input-bordered ml-2" formControlName="name" type="text" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Name</span>
+                      <input class="input input-bordered flex-1" formControlName="name" type="text" />
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Year</span>
-                    <input class="input input-bordered ml-2" formControlName="year" type="number" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Year</span>
+                      <input class="input input-bordered flex-1" formControlName="year" type="number" />
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Price</span>
-                    <input class="input input-bordered ml-2" formControlName="price" type="number" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Price</span>
+                      <input class="input input-bordered flex-1" formControlName="price" type="number" />
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Mileage</span>
-                    <input class="input input-bordered ml-2" formControlName="mileage" type="number" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Mileage</span>
+                      <input class="input input-bordered flex-1" formControlName="mileage" type="number" />
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Car Type</span>
-                    <input class="input input-bordered ml-2" formControlName="carType" type="text" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Car Type</span>
+                      <input class="input input-bordered flex-1" formControlName="carType" type="text" />
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Listing Type</span>
-                    <select class="select select-bordered ml-2" formControlName="listingType">
-                      <option value="Rent">Rent</option>
-                      <option value="Buy">Buy</option>
-                    </select>
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Listing Type</span>
+                      <select class="select select-bordered flex-1" formControlName="listingType">
+                        <option value="Rent">Rent</option>
+                        <option value="Buy">Buy</option>
+                      </select>
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Fuel Type</span>
-                    <input class="input input-bordered ml-2" formControlName="fuelType" type="text" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Fuel Type</span>
+                      <input class="input input-bordered flex-1" formControlName="fuelType" type="text" />
+                    </div>
                   </label>
 
                   <label class="form-control">
-                    <span class="label-text">Transmission</span>
-                    <input class="input input-bordered ml-2" formControlName="transmissionType" type="text" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Transmission</span>
+                      <input class="input input-bordered flex-1" formControlName="transmissionType" type="text" />
+                    </div>
                   </label>
 
                   <label class="form-control md:col-span-2">
-                    <span class="label-text">Location</span>
-                    <input class="input input-bordered ml-2" formControlName="location" type="text" />
+                    <div class="flex items-end gap-2">
+                      <span class="label-text min-w-24">Location</span>
+                      <input class="input input-bordered flex-1" formControlName="location" type="text" />
+                    </div>
                   </label>
 
                   <label class="form-control md:col-span-2">
