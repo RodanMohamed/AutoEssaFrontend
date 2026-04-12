@@ -159,8 +159,8 @@ export default class CarsListingPage {
     const form = this.filtersForm.getRawValue();
 
     let filtered = this.cars().filter((car) => {
-      const matchesType = form.listingType === 'all' || car.listingType === form.listingType;
-      const matchesFuel = form.fuelType === 'all' || car.fuelType === form.fuelType;
+      const matchesType = form.listingType === 'all' || car.listingType.toLowerCase().trim() === form.listingType.toLowerCase().trim();
+      const matchesFuel = form.fuelType === 'all' || car.fuelType.toLowerCase().trim() === form.fuelType.toLowerCase().trim();
       const matchesSearch = form.searchTerm.trim().length === 0 ||
         `${car.brand} ${car.model} ${car.name}`.toLowerCase().includes(form.searchTerm.toLowerCase());
       const matchesCarType = form.carType.trim().length === 0 ||
