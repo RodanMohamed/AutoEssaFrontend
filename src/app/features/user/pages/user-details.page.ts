@@ -103,20 +103,20 @@ export default class UserDetailsPage {
 	protected readonly carRequests = signal<CarRequestItem[]>([]);
 	protected readonly bookingCarIds = signal<string[]>([]);
 	protected readonly carNamesById = signal<Record<string, string>>({});
-	
+
 	private readonly authStore = inject(AuthStore);
 
 	protected readonly filteredCarRequests = computed(() => {
 		const currentUserId = this.authStore.session()?.user.id;
 		const allRequests = this.carRequests();
-		
+
 		if (!currentUserId) {
 			return [];
 		}
 
 		// Filter to show only current user's requests
-		return allRequests.filter(request => 
-			!request.userId || request.userId === currentUserId
+		return allRequests.filter(request =>
+			request.userId === currentUserId
 		);
 	});
 

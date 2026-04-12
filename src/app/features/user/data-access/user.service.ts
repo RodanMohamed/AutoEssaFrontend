@@ -98,7 +98,18 @@ export class UserService {
 
 	getMyCarRequests() {
 		return this.api.getMyCarRequests().pipe(
-			map((payload) => this.mergePendingCarRequests(this.mapCarRequests(payload))),
+			map((payload) => {
+				const currentUserId = this.authStore.session()?.user.id || '';
+				const mapped = this.mapCarRequests(payload);
+				
+				// Ensure all requests have userId set to current user since they come from /me endpoint
+				const withUserId = mapped.map(request => ({
+					...request,
+					userId: request.userId || currentUserId
+				}));
+				
+				return this.mergePendingCarRequests(withUserId);
+			}),
 			catchError(() => of(this.mergePendingCarRequests([])))
 		);
 	}
