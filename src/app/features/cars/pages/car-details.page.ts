@@ -87,7 +87,7 @@ import { egyptianPhoneValidator, minYearValidator } from '../../../shared/valida
                 <label class="form-control">
                   <span class="label-text">{{ copy().startDateLabel }}</span>
                   <input class="input input-bordered ml-2" formControlName="startDate" type="date" />
-                  @if (bookingForm.get('startDate')?.invalid && (bookingForm.get('startDate')?.touched || bookingForm.get('startDate')?.dirty)) {
+                  @if (bookingForm.get('startDate')?.invalid) {
                     @if (bookingForm.get('startDate')?.errors?.['yearTooSmall']) {
                       <span class="form-error-text text-sm text-error">{{ bookingForm.get('startDate')?.errors?.['yearTooSmall']?.['message'] }}</span>
                     }
@@ -496,13 +496,13 @@ export default class CarDetailsPage {
 
   protected isBookingControlInvalid(controlName: 'fullName' | 'phoneNumber') {
     const control = this.bookingForm.controls[controlName];
-    return control.invalid && (control.touched || control.dirty);
+    return control.invalid;
   }
 
   protected getPhoneErrorMessage(): string {
     const phoneControl = this.bookingForm.get('phoneNumber');
     if (!phoneControl) return '';
-    
+
     if (phoneControl.errors?.['required']) {
       return this.copy().requiredError;
     }
