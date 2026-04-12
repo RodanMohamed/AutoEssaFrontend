@@ -184,6 +184,10 @@ export default class CarsListingPage {
       const matchesMaxPrice = form.maxPrice === null || car.price <= form.maxPrice;
 
       return matchesSearch && matchesFuel && matchesListingType && matchesCarType && matchesMinPrice && matchesMaxPrice;
+    });
+
+    // Apply sorting
+    if (form.sortBy === 'priceAsc') {
       filtered.sort((a, b) => a.price - b.price);
     } else if (form.sortBy === 'priceDesc') {
       filtered.sort((a, b) => b.price - a.price);
@@ -200,13 +204,14 @@ export default class CarsListingPage {
       this.cars.set(resolvedCars);
       this.status.set(`${resolvedCars.length} cars loaded.`);
       return;
+      
     }
 
     this.loadCars();
   }
 
   protected applyFilters() {
-    this.loadCars();
+    // Filters are applied automatically via the computed filteredCars function
   }
 
   protected resetFilters() {
@@ -219,36 +224,14 @@ export default class CarsListingPage {
       minPrice: null,
       maxPrice: null
     });
-    this.loadCars();
   }
 
   private loadCars() {
     this.status.set('');
     this.isError.set(false);
 
-    const filters = this.filtersForm.getRawValue();
-    const hasDataFilters =
-      filters.searchTerm.trim().length > 0 ||
-      filters.listingType !== 'all' ||
-      filters.fuelType !== 'all' ||
-      filters.carType.trim().length > 0 ||
-      typeof filters.minPrice === 'number' ||
-      typeof filters.maxPrice === 'number';
-
-    const request$ = hasDataFilters
-      ? this.carsApi.getCars({
-          searchTerm: filters.searchTerm,
-          listingType: filters.listingType,
-          fuelType: filters.fuelType,
-          carType: filters.carType,
-          minPrice: filters.minPrice ?? undefined,
-          maxPrice: filters.maxPrice ?? undefined,
-          pageNumber: 1,
-          pageSize: 24
-        })
-      : this.carsApi.getCars();
-
-    request$.subscribe({
+    // Load all cars once, filtering is done client-side
+    this.carsApi.getCars().subscribe({
         next: (cars) => {
           this.cars.set(cars);
           this.status.set(`${cars.length} cars loaded.`);
