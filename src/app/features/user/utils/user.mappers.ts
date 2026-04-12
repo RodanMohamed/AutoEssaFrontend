@@ -112,6 +112,7 @@ export function mapCarRequest(item: Record<string, unknown>, fallbackId: number)
 			: typeof item['id'] === 'number'
 				? item['id']
 				: fallbackId,
+		userId: typeof item['userId'] === 'string' ? item['userId'] : typeof item['ownerId'] === 'string' ? item['ownerId'] : undefined,
 		customerName: typeof item['fullName'] === 'string' ? item['fullName'] : 'Unknown',
 		phoneNumber: typeof item['phoneNumber'] === 'string' ? item['phoneNumber'] : '-',
 		desiredCar: `${desiredBrand} ${desiredModel}`.trim() || `${preferredBrand} ${preferredModel}`.trim() || desiredCarValue || 'N/A',

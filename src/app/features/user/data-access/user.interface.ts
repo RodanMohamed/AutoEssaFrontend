@@ -17,6 +17,7 @@ export interface BookingRequestItem {
 
 export interface CarRequestItem {
 	id: number | string;
+	userId?: string;
 	customerName: string;
 	phoneNumber: string;
 	desiredCar: string;

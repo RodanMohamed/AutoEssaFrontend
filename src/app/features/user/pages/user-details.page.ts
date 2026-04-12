@@ -6,6 +6,7 @@ import { LocaleService } from '../../../core/services/locale.service';
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
 import { BookingRequestItem, CarRequestItem } from '../data-access/user.interface';
 import { UserService } from '../data-access/user.service';
+import { AuthStore } from '../../auth/data-access/auth.store';
 
 @Component({
 	selector: 'app-user-details-page',
@@ -60,8 +61,8 @@ import { UserService } from '../data-access/user.service';
 			<article class="card border border-base-300 bg-base-100 shadow">
 				<div class="card-body gap-4">
 					<div class="flex items-center justify-between gap-3">
-						<h2 class="card-title">{{ copy().carRequestsTitle }} ({{ carRequests().length }})</h2>
-						<span class="badge badge-outline">{{ carRequests().length }} {{ copy().carRequestsLabel }}</span>
+						<h2 class="card-title">{{ copy().carRequestsTitle }} ({{ filteredCarRequests().length }})</h2>
+						<span class="badge badge-outline">{{ filteredCarRequests().length }} {{ copy().carRequestsLabel }}</span>
 					</div>
 					<div class="overflow-x-auto">
 					<table class="table table-zebra">
@@ -73,14 +74,14 @@ import { UserService } from '../data-access/user.service';
 							</tr>
 						</thead>
 						<tbody>
-							@for (request of carRequests(); track request.id) {
+							@for (request of filteredCarRequests(); track request.id) {
 								<tr>
 									<td>{{ request.desiredCar }}</td>
 									<td>{{ request.budget | number }} EGP</td>
 									<td><span class="badge badge-outline">{{ request.status }}</span></td>
 								</tr>
 							}
-							@if (carRequests().length === 0) {
+							@if (filteredCarRequests().length === 0) {
 								<tr>
 									<td colspan="3" class="text-center text-sm text-base-content/70">No car requests found.</td>
 								</tr>
@@ -102,6 +103,23 @@ export default class UserDetailsPage {
 	protected readonly carRequests = signal<CarRequestItem[]>([]);
 	protected readonly bookingCarIds = signal<string[]>([]);
 	protected readonly carNamesById = signal<Record<string, string>>({});
+	
+	private readonly authStore = inject(AuthStore);
+
+	protected readonly filteredCarRequests = computed(() => {
+		const currentUserId = this.authStore.session()?.user.id;
+		const allRequests = this.carRequests();
+		
+		if (!currentUserId) {
+			return [];
+		}
+
+		// Filter to show only current user's requests
+		return allRequests.filter(request => 
+			!request.userId || request.userId === currentUserId
+		);
+	});
+
 	protected readonly copy = computed(() =>
 		this.localeService.locale() === 'ar'
 			? {
