@@ -157,11 +157,30 @@ export default class CarsListingPage {
 
   protected readonly filteredCars = computed(() => {
     const form = this.filtersForm.getRawValue();
-    return this.cars().filter((car) => {
+
+    let filtered = this.cars().filter((car) => {
       const matchesType = form.listingType === 'all' || car.listingType === form.listingType;
       const matchesFuel = form.fuelType === 'all' || car.fuelType === form.fuelType;
-      return matchesType && matchesFuel;
+      const matchesSearch = form.searchTerm.trim().length === 0 ||
+        `${car.brand} ${car.model} ${car.name}`.toLowerCase().includes(form.searchTerm.toLowerCase());
+      const matchesCarType = form.carType.trim().length === 0 ||
+        car.carType.toLowerCase().includes(form.carType.toLowerCase());
+      const matchesMinPrice = form.minPrice === null || car.price >= form.minPrice;
+      const matchesMaxPrice = form.maxPrice === null || car.price <= form.maxPrice;
+
+      return matchesType && matchesFuel && matchesSearch && matchesCarType && matchesMinPrice && matchesMaxPrice;
     });
+
+    // Apply sorting
+    if (form.sortBy === 'priceAsc') {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (form.sortBy === 'priceDesc') {
+      filtered.sort((a, b) => b.price - a.price);
+    } else if (form.sortBy === 'newest') {
+      filtered.sort((a, b) => b.year - a.year);
+    }
+
+    return filtered;
   });
 
   constructor() {
