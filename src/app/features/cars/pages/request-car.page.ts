@@ -6,6 +6,7 @@ import { LocaleService } from '../../../core/services/locale.service';
 import { AuthStore } from '../../auth/data-access/auth.store';
 import { UserService } from '../../user/data-access/user.service';
 import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
+import { egyptianPhoneValidator, minYearValidator } from '../../../shared/validators/custom.validators';
 
 @Component({
   selector: 'app-request-car-page',
@@ -32,7 +33,7 @@ import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
             <div class="flex-1">
               <input class="input input-bordered w-full" formControlName="phoneNumber" type="text" />
               @if (isInvalid('phoneNumber')) {
-                <p class="mt-1 text-xs text-error">{{ copy().requiredError }}</p>
+                <p class="mt-1 text-xs text-error">{{ getPhoneErrorMessage() }}</p>
               }
             </div>
           </label>
@@ -62,7 +63,11 @@ import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
             <div class="flex-1">
               <input class="input input-bordered w-full" formControlName="desiredYearFrom" type="number" min="1990" />
               @if (isInvalid('desiredYearFrom')) {
-                <p class="mt-1 text-xs text-error">{{ copy().yearError }}</p>
+                @if (form.get('desiredYearFrom')?.errors?.['min'] || form.get('desiredYearFrom')?.errors?.['yearTooSmall']) {
+                  <p class="mt-1 text-xs text-error">Year must be 1990 or later</p>
+                } @else {
+                  <p class="mt-1 text-xs text-error">{{ copy().yearError }}</p>
+                }
               }
             </div>
           </label>
@@ -97,7 +102,7 @@ import { extractApiErrorMessage } from '../../auth/utils/auth.helpers';
           </div>
 
           @if (status()) {
-            <p class="text-sm" [class.text-success]="!isError()" [class.text-error]="isError()">
+            <p class="text-sm font-medium" [class.text-success]="!isError()" [class.text-error]="isError()">
               {{ status() }}
             </p>
           }
@@ -153,7 +158,7 @@ export default class RequestCarPage {
 
   protected readonly form = new FormGroup({
     fullName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
-    phoneNumber: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(8)] }),
+    phoneNumber: new FormControl('', { nonNullable: true, validators: [Validators.required, egyptianPhoneValidator()] }),
     desiredBrand: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
     desiredModel: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
     desiredYearFrom: new FormControl<number | null>(null, [Validators.min(1990)]),
@@ -164,7 +169,20 @@ export default class RequestCarPage {
 
   protected isInvalid(controlName: 'fullName' | 'phoneNumber' | 'desiredBrand' | 'desiredModel' | 'desiredYearFrom' | 'desiredYearTo' | 'budget') {
     const control = this.form.controls[controlName];
-    return control.touched && control.invalid;
+    return control.invalid;
+  }
+
+  protected getPhoneErrorMessage(): string {
+    const phoneControl = this.form.get('phoneNumber');
+    if (!phoneControl) return '';
+
+    if (phoneControl.errors?.['required']) {
+      return this.copy().requiredError;
+    }
+    if (phoneControl.errors?.['invalidEgyptianPhone']) {
+      return 'Phone must be a valid egyption number ';
+    }
+    return '';
   }
 
   protected submit() {
