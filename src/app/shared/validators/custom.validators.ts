@@ -2,7 +2,7 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 /**
  * Validator for Egyptian mobile numbers
- * Must start with 010, 012, 011, or 015 followed by 8 more digits
+ * Must start with 010, 012, 011, or 015 followed by 8 more digits (11 digits total)
  */
 export function egyptianPhoneValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -12,7 +12,7 @@ export function egyptianPhoneValidator(): ValidatorFn {
 
     const phoneValue = control.value.toString().trim();
 
-    // Check if phone number matches Egyptian pattern (10 digits starting with 010, 012, 011, or 015)
+    // Check if phone number matches Egyptian pattern (11 digits starting with 010, 012, 011, or 015)
     const egyptianPhonePattern = /^(010|012|011|015)\d{8}$/;
 
     if (!egyptianPhonePattern.test(phoneValue)) {
