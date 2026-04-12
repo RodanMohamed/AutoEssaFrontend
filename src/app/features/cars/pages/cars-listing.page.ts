@@ -159,7 +159,12 @@ export default class CarsListingPage {
     const form = this.filtersForm.getRawValue();
 
     let filtered = this.cars().filter((car) => {
-      const matchesType = form.listingType === 'all' || car.listingType.toLowerCase().trim() === form.listingType.toLowerCase().trim();
+      const carType = car.listingType.trim().toLowerCase();
+      const filterType = form.listingType === 'all' ? 'all' : form.listingType.trim().toLowerCase();
+
+      const matchesType = filterType === 'all' || carType === filterType ||
+        (filterType === 'buy' && (carType === 'sell' || carType === 'sale')) ||
+        ((filterType === 'sell' || filterType === 'sale') && carType === 'buy');
       const matchesFuel = form.fuelType === 'all' || car.fuelType.toLowerCase().trim() === form.fuelType.toLowerCase().trim();
       const matchesSearch = form.searchTerm.trim().length === 0 ||
         `${car.brand} ${car.model} ${car.name}`.toLowerCase().includes(form.searchTerm.toLowerCase());
@@ -216,9 +221,10 @@ export default class CarsListingPage {
     this.isError.set(false);
 
     const filters = this.filtersForm.getRawValue();
+    // Only use API filters for search term, fuel type, and price range
+    // Listing type is handled client-side due to buy/sell mapping
     const hasDataFilters =
       filters.searchTerm.trim().length > 0 ||
-      filters.listingType !== 'all' ||
       filters.fuelType !== 'all' ||
       filters.carType.trim().length > 0 ||
       typeof filters.minPrice === 'number' ||
@@ -227,7 +233,6 @@ export default class CarsListingPage {
     const request$ = hasDataFilters
       ? this.carsApi.getCars({
           searchTerm: filters.searchTerm,
-          listingType: filters.listingType,
           fuelType: filters.fuelType,
           carType: filters.carType,
           minPrice: filters.minPrice ?? undefined,
