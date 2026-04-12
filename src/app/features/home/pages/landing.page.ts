@@ -245,27 +245,83 @@ const AR_COPY: typeof EN_COPY = {
                   <p class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/55">{{ copy().curatedSelectionTitle }}</p>
                   <div class="mt-3 space-y-2">
                     <style>
-  @keyframes wave-flow {
-    0% { d: path("M0,10 Q20,0 40,10 Q60,20 80,10 Q100,0 120,10 Q140,20 160,10"); }
-    50% { d: path("M0,10 Q20,20 40,10 Q60,0 80,10 Q100,20 120,10 Q140,0 160,10"); }
-    100% { d: path("M0,10 Q20,0 40,10 Q60,20 80,10 Q100,0 120,10 Q140,20 160,10"); }
+  @keyframes curated-wave-flow-1 {
+    0% {
+      d: path("M0,12 Q20,5 40,12 Q60,18 80,12 Q100,6 120,12 Q140,18 160,12");
+      opacity: 0.8;
+    }
+    50% {
+      d: path("M0,8 Q20,12 40,8 Q60,4 80,8 Q100,14 120,8 Q140,2 160,8");
+      opacity: 1;
+    }
+    100% {
+      d: path("M0,12 Q20,5 40,12 Q60,18 80,12 Q100,6 120,12 Q140,18 160,12");
+      opacity: 0.8;
+    }
   }
-  @keyframes wave-move {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-80px); }
+
+  @keyframes curated-wave-flow-2 {
+    0% {
+      d: path("M0,8 Q20,14 40,8 Q60,2 80,8 Q100,15 120,8 Q140,1 160,8");
+      opacity: 0.5;
+      transform: translateX(0);
+    }
+    50% {
+      d: path("M0,14 Q20,8 40,14 Q60,20 80,14 Q100,8 120,14 Q140,20 160,14");
+      opacity: 0.7;
+      transform: translateX(-40px);
+    }
+    100% {
+      d: path("M0,8 Q20,14 40,8 Q60,2 80,8 Q100,15 120,8 Q140,1 160,8");
+      opacity: 0.5;
+      transform: translateX(0);
+    }
   }
+
+  @keyframes curated-wave-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
   .wave-path {
     fill: none;
-    stroke: #378ADD;
     stroke-width: 2;
     stroke-linecap: round;
-    animation: wave-move 1.5s linear infinite;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 2px rgba(55, 138, 221, 0.3));
+  }
+
+  .wave-path-primary {
+    stroke: #378ADD;
+    animation: curated-wave-flow-1 3.5s ease-in-out infinite;
+  }
+
+  .wave-path-secondary {
+    stroke: #378ADD;
+    opacity: 0.5;
+    animation: curated-wave-flow-2 4.2s ease-in-out infinite;
+  }
+
+  .curated-svg-container {
+    animation: curated-wave-float 2.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px rgba(55, 138, 221, 0.2));
   }
 </style>
 
-<svg width="160" height="20" viewBox="0 0 160 20" xmlns="http://www.w3.org/2000/svg" style="overflow: hidden; display: block;">
-  <path class="wave-path"
-    d="M-80,10 Q-60,2 -40,10 Q-20,18 0,10 Q20,2 40,10 Q60,18 80,10 Q100,2 120,10 Q140,18 160,10 Q180,2 200,10 Q220,18 240,10" />
+<svg width="160" height="20" viewBox="0 0 160 20" xmlns="http://www.w3.org/2000/svg" style="overflow: hidden; display: block;" class="curated-svg-container">
+  <defs>
+    <filter id="soft-glow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <path class="wave-path wave-path-primary"
+    d="M0,12 Q20,5 40,12 Q60,18 80,12 Q100,6 120,12 Q140,18 160,12" />
+  <path class="wave-path wave-path-secondary"
+    d="M0,8 Q20,14 40,8 Q60,2 80,8 Q100,15 120,8 Q140,1 160,8" />
 </svg>
                   </div>
                 </div>
