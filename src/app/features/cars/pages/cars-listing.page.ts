@@ -73,8 +73,8 @@ import { Car } from '../data-access/cars.interface';
         </div>
       </form>
 
-      @if (status()) {
-        <p class="text-sm" [class.text-success]="!isError()" [class.text-error]="isError()">{{ status() }}</p>
+      @if (statusMessage()) {
+        <p class="text-sm" [class.text-success]="!loadError()" [class.text-error]="loadError()">{{ statusMessage() }}</p>
       }
 
       <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -97,8 +97,11 @@ export default class CarsListingPage {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly cars = signal<Car[]>([]);
-  protected readonly status = signal('');
-  protected readonly isError = signal(false);
+  protected readonly loadError = signal(false);
+  protected readonly statusMessage = computed(() => {
+    const filtered = this.filteredCars();
+    return filtered.length > 0 ? `${filtered.length} cars found.` : 'No cars match your filters.';
+  });
   protected readonly copy = computed(() =>
     this.localeService.locale() === 'ar'
       ? {
@@ -192,7 +195,6 @@ export default class CarsListingPage {
     const resolvedCars = this.route.snapshot.data['cars'] as Car[] | undefined;
     if (resolvedCars && resolvedCars.length > 0) {
       this.cars.set(resolvedCars);
-      this.status.set(`${resolvedCars.length} cars loaded.`);
       return;
     }
 
@@ -217,8 +219,7 @@ export default class CarsListingPage {
   }
 
   private loadCars() {
-    this.status.set('');
-    this.isError.set(false);
+    this.loadError.set(false);
 
     const filters = this.filtersForm.getRawValue();
     // Only use API filters for search term, fuel type, and price range
@@ -245,11 +246,9 @@ export default class CarsListingPage {
     request$.subscribe({
         next: (cars) => {
           this.cars.set(cars);
-          this.status.set(`${cars.length} cars loaded.`);
         },
         error: () => {
-          this.isError.set(true);
-          this.status.set('Could not load cars right now.');
+          this.loadError.set(true);
         }
       });
   }
