@@ -35,6 +35,10 @@ const EN_COPY = {
   featureOneBody: 'Clear specs and pricing without noise.',
   featureTwoTitle: 'Communication',
   featureTwoBody: 'Fast WhatsApp and phone response.',
+  featureThreeTitle: 'Verification',
+  featureThreeBody: 'Every car verified for authentic specs and condition.',
+  featureFourTitle: 'Flexibility',
+  featureFourBody: 'Choose your terms: rent, lease, or buy with ease.',
   categoriesTitle: 'Categories',
   categoriesBody: 'Rent daily or monthly, or buy from curated listings.',
   categoryBadge: 'Browse',
@@ -80,6 +84,10 @@ const AR_COPY: typeof EN_COPY = {
   featureOneBody: 'مواصفات وأسعار واضحة بدون تعقيد.',
   featureTwoTitle: 'تواصل',
   featureTwoBody: 'استجابة سريعة عبر واتساب والهاتف.',
+  featureThreeTitle: 'التحقق',
+  featureThreeBody: 'كل سيارة موثقة للمواصفات والحالة الأصلية.',
+  featureFourTitle: 'المرونة',
+  featureFourBody: 'اختر شروطك: إيجار أو عقد أو شراء بسهولة.',
   categoriesTitle: 'الفئات',
   categoriesBody: 'استأجر يوميًا أو شهريًا، أو اشترِ من عروض مختارة.',
   categoryBadge: 'تصفح',
@@ -126,7 +134,7 @@ const AR_COPY: typeof EN_COPY = {
 
               <p class="max-w-2xl text-base-content/75 leading-7">{{ localizedHomeContent().whyChooseUsText }}</p>
 
-              <div class="grid gap-3 sm:grid-cols-2">
+              <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
                 <div class="feature-tile rounded-3xl border border-base-300 bg-base-200/55 p-4 md:p-5">
                   <div class="flex items-start gap-3">
                     <span class="feature-number">01</span>
@@ -142,6 +150,24 @@ const AR_COPY: typeof EN_COPY = {
                     <div>
                       <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().featureTwoTitle }}</p>
                       <p class="mt-2 font-medium leading-6">{{ copy().featureTwoBody }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="feature-tile hidden xl:flex rounded-3xl border border-base-300 bg-base-200/55 p-4 md:p-5">
+                  <div class="flex items-start gap-3">
+                    <span class="feature-number">03</span>
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().featureThreeTitle }}</p>
+                      <p class="mt-2 font-medium leading-6">{{ copy().featureThreeBody }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="feature-tile hidden xl:flex rounded-3xl border border-base-300 bg-base-200/55 p-4 md:p-5">
+                  <div class="flex items-start gap-3">
+                    <span class="feature-number">04</span>
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">{{ copy().featureFourTitle }}</p>
+                      <p class="mt-2 font-medium leading-6">{{ copy().featureFourBody }}</p>
                     </div>
                   </div>
                 </div>
