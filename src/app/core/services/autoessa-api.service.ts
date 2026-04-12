@@ -34,21 +34,7 @@ export class AutoessaApiService {
     return this.http.get(`${API_BASE_URL}/api/BookingRequests/availability`, { params });
   }
   getMyBookingRequests() { return this.http.get(`${API_BASE_URL}/api/BookingRequests/me`); }
-  createCarLeadRequest(payload: CreateCarRequestLeadPayload) {
-    const endpoint = `${API_BASE_URL}/api/CarRequests`;
-    const requestBody = this.toCreateCarRequestBody(payload);
-
-    // Send ONLY the nested request wrapper (backend says "request field is required")
-    const finalPayload = {
-      request: requestBody
-    };
-
-    // DEBUG: Log the exact payload being sent
-    console.log(' API: Final payload for CarRequests:', JSON.stringify(finalPayload, null, 2));
-    console.log(' FullName in request:', finalPayload.request.FullName || finalPayload.request.fullName);
-
-    return this.http.post(endpoint, finalPayload);
-  }
+  createCarLeadRequest(payload: CreateCarRequestLeadPayload) { return this.http.post(`${API_BASE_URL}/api/CarRequests`, payload); }
   getMyCarRequests() { return this.http.get(`${API_BASE_URL}/api/CarRequests/me`); }
   getMyFavorites() { return this.http.get(`${API_BASE_URL}/api/Favorites/me`); }
   addFavorite(carId: string) { return this.http.post(`${API_BASE_URL}/api/Favorites/${carId}`, {}); }
@@ -99,51 +85,4 @@ export class AutoessaApiService {
   adminGetUsers() { return this.http.get(`${API_BASE_URL}/api/admin/users`); }
   adminBlockUser(id: string, payload: UpdateUserBlockPayload) { return this.http.patch(`${API_BASE_URL}/api/admin/users/${id}/block`, payload); }
   adminDeleteUser(id: string) { return this.http.delete(`${API_BASE_URL}/api/admin/users/${id}`); }
-
-  private toCreateCarRequestBody(payload: CreateCarRequestLeadPayload) {
-    // Ensure all string fields are properly trimmed
-    const fullNameTrimmed = typeof payload.fullName === 'string' ? payload.fullName.trim() : '';
-    const phoneNumberTrimmed = typeof payload.phoneNumber === 'string' ? payload.phoneNumber.trim() : '';
-    const desiredBrandTrimmed = typeof payload.desiredBrand === 'string' ? payload.desiredBrand.trim() : '';
-    const desiredModelTrimmed = typeof payload.desiredModel === 'string' ? payload.desiredModel.trim() : '';
-    const notesTrimmed = typeof payload.notes === 'string' ? payload.notes.trim() : '';
-
-    // Safety check: ensure fullName is not empty
-    if (fullNameTrimmed.length === 0) {
-      console.error('❌ CRITICAL: fullName is empty after trimming!');
-      throw new Error('Full Name cannot be empty');
-    }
-
-    // Build the request object with ONLY camelCase fields
-    const requestObj: any = {
-      // Required fields - ONLY camelCase
-      fullName: fullNameTrimmed,
-      phoneNumber: phoneNumberTrimmed,
-      desiredBrand: desiredBrandTrimmed,
-      desiredModel: desiredModelTrimmed,
-
-      // Optional year range
-      ...(typeof payload.desiredYearFrom === 'number'
-        ? { desiredYearFrom: payload.desiredYearFrom }
-        : {}),
-      ...(typeof payload.desiredYearTo === 'number'
-        ? { desiredYearTo: payload.desiredYearTo }
-        : {}),
-
-      // Optional budget
-      ...(typeof payload.budget === 'number' ? { budget: payload.budget } : {}),
-
-      // Optional notes
-      ...(notesTrimmed.length > 0 ? { notes: notesTrimmed } : {}),
-
-      // Optional userId - only include if it's a valid non-zero value
-      ...(typeof payload.userId === 'string' && payload.userId.trim().length > 0 && payload.userId.trim() !== '0'
-        ? { userId: payload.userId.trim() }
-        : {})
-    };
-
-    console.log('🔧 Request body constructed:', JSON.stringify(requestObj, null, 2));
-    return requestObj;
-  }
-
 }
