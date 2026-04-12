@@ -49,7 +49,7 @@ import { LocaleService } from '../../../core/services/locale.service';
         }
       </mat-form-field>
 
-      @if (isSubmitDisabled()) {
+      @if ((form.touched || form.dirty) && isSubmitDisabled()) {
         <p class="validation-alert text-sm">{{ validationMessage() }}</p>
       }
 
