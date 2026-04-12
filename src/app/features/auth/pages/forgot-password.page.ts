@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 
 import { AuthService } from '../data-access/auth.service';
-import { AUTH_EMAIL_REGEX, AUTH_STRONG_PASSWORD_REGEX } from '../utils/auth.constants';
+import { AUTH_STRONG_PASSWORD_REGEX } from '../utils/auth.constants';
 import { LocaleService } from '../../../core/services/locale.service';
 
 @Component({
@@ -173,7 +173,7 @@ export default class ForgotPasswordPage {
   protected readonly isError = signal(false);
 
   protected readonly form = new FormGroup({
-    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email, Validators.pattern(AUTH_EMAIL_REGEX)] }),
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     newPassword: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(AUTH_STRONG_PASSWORD_REGEX)] }),
     confirmPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] })
   });
