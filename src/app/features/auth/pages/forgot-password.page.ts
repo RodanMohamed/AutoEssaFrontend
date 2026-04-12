@@ -195,19 +195,26 @@ export default class ForgotPasswordPage {
     const password = this.form.controls.newPassword;
     const confirm = this.form.controls.confirmPassword;
 
-    if (email.invalid) {
-      return isArabic ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address';
+    // Check which fields have issues
+    if (email.hasError('required')) {
+      return isArabic ? 'البريد الإلكتروني مطلوب' : 'Email is required';
     }
-    if (password.invalid) {
-      return isArabic ? 'يجب أن تكون كلمة المرور 8 أحرف على الأقل مع أحرف كبيرة وصغيرة وأرقام ورموز' : 'Password must be at least 8 chars with upper, lower, number, and symbol';
+    if (email.hasError('email')) {
+      return isArabic ? 'البريد الإلكتروني غير صحيح. جرب: user@example.com' : 'Invalid email format. Try: user@example.com';
     }
-    if (confirm.invalid) {
-      return isArabic ? 'يرجى تأكيد كلمة المرور' : 'Please confirm your password';
+    if (password.hasError('required')) {
+      return isArabic ? 'كلمة المرور الجديدة مطلوبة' : 'New password is required';
+    }
+    if (password.hasError('pattern')) {
+      return isArabic ? 'يجب أن تكون كلمة المرور 8 أحرف على الأقل مع أحرف كبيرة وصغيرة وأرقام ورموز' : 'Password must be 8+ chars with uppercase, lowercase, number, and symbol';
+    }
+    if (confirm.hasError('required')) {
+      return isArabic ? 'تأكيد كلمة المرور مطلوب' : 'Please confirm your password';
     }
     if (this.hasMismatch()) {
       return isArabic ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match';
     }
-    return isArabic ? 'يرجى إكمال كل الحقول' : 'Please complete all fields';
+    return '';
   });
   protected readonly copy = computed(() =>
     this.localeService.locale() === 'ar'
