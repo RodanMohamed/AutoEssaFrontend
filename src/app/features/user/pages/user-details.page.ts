@@ -4,9 +4,8 @@ import { RouterLink } from '@angular/router';
 
 import { LocaleService } from '../../../core/services/locale.service';
 import { AutoessaApiService } from '../../../core/services/autoessa-api.service';
-import { BookingRequestItem, CarRequestItem } from '../data-access/user.interface';
+import { BookingRequestItem } from '../data-access/user.interface';
 import { UserService } from '../data-access/user.service';
-import { AuthStore } from '../../auth/data-access/auth.store';
 
 @Component({
 	selector: 'app-user-details-page',
@@ -57,40 +56,6 @@ import { AuthStore } from '../../auth/data-access/auth.store';
 					</div>
 				</div>
 			</article>
-
-			<article class="card border border-base-300 bg-base-100 shadow">
-				<div class="card-body gap-4">
-					<div class="flex items-center justify-between gap-3">
-						<h2 class="card-title">{{ copy().carRequestsTitle }} ({{ filteredCarRequests().length }})</h2>
-						<span class="badge badge-outline">{{ filteredCarRequests().length }} {{ copy().carRequestsLabel }}</span>
-					</div>
-					<div class="overflow-x-auto">
-					<table class="table table-zebra">
-						<thead>
-							<tr>
-								<th>Requested Car</th>
-								<th>Budget</th>
-								<th>Status</th>
-							</tr>
-						</thead>
-						<tbody>
-							@for (request of filteredCarRequests(); track request.id) {
-								<tr>
-									<td>{{ request.desiredCar }}</td>
-									<td>{{ request.budget | number }} EGP</td>
-									<td><span class="badge badge-outline">{{ request.status }}</span></td>
-								</tr>
-							}
-							@if (filteredCarRequests().length === 0) {
-								<tr>
-									<td colspan="3" class="text-center text-sm text-base-content/70">No car requests found.</td>
-								</tr>
-							}
-						</tbody>
-					</table>
-					</div>
-				</div>
-			</article>
 		</section>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush
@@ -100,25 +65,8 @@ export default class UserDetailsPage {
 	private readonly api = inject(AutoessaApiService);
 
 	protected readonly bookingRequests = signal<BookingRequestItem[]>([]);
-	protected readonly carRequests = signal<CarRequestItem[]>([]);
 	protected readonly bookingCarIds = signal<string[]>([]);
 	protected readonly carNamesById = signal<Record<string, string>>({});
-
-	private readonly authStore = inject(AuthStore);
-
-	protected readonly filteredCarRequests = computed(() => {
-		const currentUserId = this.authStore.session()?.user.id;
-		const allRequests = this.carRequests();
-
-		if (!currentUserId) {
-			return [];
-		}
-
-		// Filter to show only current user's requests
-		return allRequests.filter(request =>
-			request.userId === currentUserId
-		);
-	});
 
 	protected readonly copy = computed(() =>
 		this.localeService.locale() === 'ar'
@@ -126,21 +74,17 @@ export default class UserDetailsPage {
 				title: 'طلباتي',
 				favoritesTab: 'المفضلة',
 				requestsTab: 'الطلبات',
-				description: 'تتبع طلبات الحجز وطلبات السيارات التي أرسلتها وحالة المتابعة الحالية.',
+				description: 'تتبع جميع طلبات الحجز الخاصة بك.',
 				bookingTitle: 'طلبات الحجز',
-				bookingBadge: 'الحجوزات',
-				carRequestsTitle: 'طلبات السيارات',
-				carRequestsLabel: 'طلب'
+				bookingBadge: 'الحجوزات'
 			}
 			: {
 				title: 'My Requests',
 				favoritesTab: 'Favorites',
 				requestsTab: 'Requests',
-				description: 'Track your submitted booking requests and car requests in one place.',
+				description: 'Track your submitted booking requests in one place.',
 				bookingTitle: 'Booking Requests',
-				bookingBadge: 'Bookings',
-				carRequestsTitle: 'Car Requests',
-				carRequestsLabel: 'requests'
+				bookingBadge: 'Bookings'
 			}
 	);
 
@@ -161,15 +105,6 @@ export default class UserDetailsPage {
 			error: () => {
 				this.bookingRequests.set([]);
 				this.bookingCarIds.set([]);
-			}
-		});
-
-		this.userService.getMyCarRequests().subscribe({
-			next: (items) => {
-				this.carRequests.set(items);
-			},
-			error: () => {
-				this.carRequests.set([]);
 			}
 		});
 	}
