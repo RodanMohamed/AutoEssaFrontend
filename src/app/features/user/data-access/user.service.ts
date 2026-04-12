@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { catchError, map, of } from 'rxjs';
 
 import { AuthStore } from '../../auth/data-access/auth.store';
@@ -13,8 +13,6 @@ const PENDING_CAR_REQUESTS_STORAGE_KEY = 'autoessa.user.pending-car-requests';
 
 interface PendingCarRequestRecord {
 	ownerId: string;
-	ownerEmail: string;
-	ownerName: string;
 	customerName: string;
 	phoneNumber: string;
 	desiredCar: string;
@@ -27,14 +25,6 @@ interface PendingCarRequestRecord {
 export class UserService {
 	private readonly api = inject(AutoessaApiService);
 	private readonly authStore = inject(AuthStore);
-
-	//  Reactive signal — seeded from localStorage on startup
-	private readonly _pendingCarRequests = signal<PendingCarRequestRecord[]>(
-		this.readPendingCarRequests()
-	);
-
-	// Public readonly view of the signal
-	readonly pendingCarRequests = this._pendingCarRequests.asReadonly();
 
 	getProfile(userId: string, seed: UserProfile): UserProfile {
 		const profiles = this.readStoredProfiles();
@@ -108,41 +98,28 @@ export class UserService {
 
 	getMyCarRequests() {
 		return this.api.getMyCarRequests().pipe(
-			map((payload) => this.mapCarRequests(payload)),
-			catchError(() => of([]))
+			map((payload) => this.mergePendingCarRequests(this.mapCarRequests(payload))),
+			catchError(() => of(this.mergePendingCarRequests([])))
 		);
 	}
 
-	getPendingCarRequests(): CarRequestItem[] {
-		return this.buildPendingCarItems(this._pendingCarRequests());
-	}
-
 	rememberPendingCarRequest(userId: string | undefined, payload: CreateCarRequestLeadPayload): void {
-		const session = this.authStore.session();
-		const ownerId = userId?.trim() || session?.user.id?.trim() || '';
-		const ownerEmail = session?.user.email?.trim().toLowerCase() || '';
-		const ownerName = session?.user.fullName?.trim().toLowerCase() || '';
-		if (!ownerId && !ownerEmail && !ownerName) {
+		const ownerId = userId?.trim() || this.authStore.session()?.user.id?.trim() || '';
+		if (!ownerId) {
 			return;
 		}
 
-		const newRecord: PendingCarRequestRecord = {
+		const current = this.readPendingCarRequests();
+		current.push({
 			ownerId,
-			ownerEmail,
-			ownerName,
 			customerName: payload.fullName.trim(),
 			phoneNumber: payload.phoneNumber.trim(),
 			desiredCar: `${payload.desiredBrand} ${payload.desiredModel}`.trim(),
 			budget: typeof payload.budget === 'number' ? payload.budget : 0,
 			notes: typeof payload.notes === 'string' ? payload.notes.trim() : '',
 			createdAt: Date.now()
-		};
-
-		//  Update signal first so the UI reacts instantly
-		this._pendingCarRequests.update(items => [...items, newRecord]);
-
-		// Persist to localStorage
-		localStorage.setItem(PENDING_CAR_REQUESTS_STORAGE_KEY, JSON.stringify(this._pendingCarRequests()));
+		});
+		localStorage.setItem(PENDING_CAR_REQUESTS_STORAGE_KEY, JSON.stringify(current));
 	}
 
 	removeFavorite(carId: string) {
@@ -185,10 +162,24 @@ export class UserService {
 		});
 	}
 
-	mergeCarRequestsWithPending(remoteRequests: CarRequestItem[]): CarRequestItem[] {
-		const pendingItems = this.buildPendingCarItems(this._pendingCarRequests());
-		const merged: CarRequestItem[] = [...pendingItems];
+	private mergePendingCarRequests(remoteRequests: CarRequestItem[]): CarRequestItem[] {
+		const sessionId = this.authStore.session()?.user.id;
+		if (!sessionId) {
+			return remoteRequests;
+		}
 
+		const pendingRequests: CarRequestItem[] = this.readPendingCarRequests()
+			.filter((item) => item.ownerId === sessionId)
+			.map((item, index) => ({
+				id: `pending-${item.createdAt}-${index}`,
+				customerName: item.customerName,
+				phoneNumber: item.phoneNumber,
+				desiredCar: item.desiredCar,
+				budget: item.budget,
+				status: 'New'
+			}));
+
+		const merged: CarRequestItem[] = [...pendingRequests];
 		for (const request of remoteRequests) {
 			if (!merged.some((pending) => this.isSameCarRequest(pending, request))) {
 				merged.push(request);
@@ -196,34 +187,6 @@ export class UserService {
 		}
 
 		return merged;
-	}
-
-	//  Converts raw storage records → CarRequestItem[], scoped to current session
-	private buildPendingCarItems(allPending: PendingCarRequestRecord[]): CarRequestItem[] {
-		const session = this.authStore.session();
-		const sessionId = session?.user.id;
-		const sessionEmail = session?.user.email?.trim().toLowerCase() || '';
-		const sessionName = session?.user.fullName?.trim().toLowerCase() || '';
-
-		let scoped = allPending.filter(
-			(item) =>
-				(sessionId ? item.ownerId === sessionId : false) ||
-				(sessionEmail.length > 0 && item.ownerEmail === sessionEmail) ||
-				(sessionName.length > 0 && this.normalize(item.ownerName) === sessionName)
-		);
-
-		if (scoped.length === 0) {
-			scoped = allPending;
-		}
-
-		return scoped.map((item, index) => ({
-			id: `pending-${item.createdAt}-${index}`,
-			customerName: item.customerName,
-			phoneNumber: item.phoneNumber,
-			desiredCar: item.desiredCar,
-			budget: item.budget,
-			status: 'New'
-		}));
 	}
 
 	private isSameCarRequest(left: CarRequestItem, right: CarRequestItem): boolean {
@@ -247,13 +210,7 @@ export class UserService {
 				return [];
 			}
 
-			return parsed
-				.filter((item): item is PendingCarRequestRecord => this.isPendingCarRequestRecord(item))
-				.map((item) => ({
-					...item,
-					ownerEmail: typeof item.ownerEmail === 'string' ? item.ownerEmail : '',
-					ownerName: typeof item.ownerName === 'string' ? item.ownerName : ''
-				}));
+			return parsed.filter((item): item is PendingCarRequestRecord => this.isPendingCarRequestRecord(item));
 		} catch {
 			return [];
 		}
@@ -265,12 +222,8 @@ export class UserService {
 		}
 
 		const record = item as Record<string, unknown>;
-		const ownerEmail = record['ownerEmail'];
-		const ownerName = record['ownerName'];
 		return (
 			typeof record['ownerId'] === 'string' &&
-			(typeof ownerEmail === 'string' || typeof ownerEmail === 'undefined') &&
-			(typeof ownerName === 'string' || typeof ownerName === 'undefined') &&
 			typeof record['customerName'] === 'string' &&
 			typeof record['phoneNumber'] === 'string' &&
 			typeof record['desiredCar'] === 'string' &&
@@ -344,3 +297,4 @@ export class UserService {
 		}
 	}
 }
+
