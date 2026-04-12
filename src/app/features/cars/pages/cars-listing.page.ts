@@ -26,7 +26,7 @@ import { Car } from '../data-access/cars.interface';
             <select class="select select-bordered flex-1" formControlName="listingType">
               <option value="all">{{ copy().allOption }}</option>
               <option value="Rent">{{ copy().rentOption }}</option>
-              <option value="Buy">{{ copy().buyOption }}</option>
+              <option value="Sell">{{ copy().buyOption }}</option>
             </select>
           </label>
 
